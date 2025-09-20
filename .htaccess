@@ -1,0 +1,35 @@
+# Protéger les dossiers sensibles
+<FilesMatch "\.(ini|log|sql)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Protéger le dossier config
+<IfModule mod_authz_core.c>
+    <Files "config/*">
+        Require all denied
+    </Files>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <Directory "config">
+        Order allow,deny
+        Deny from all
+    </Directory>
+</IfModule>
+
+# URLs propres (optionnel)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Définir l'encodage par défaut
+AddDefaultCharset UTF-8
+
+# Pour PHP
+php_value default_charset "UTF-8"

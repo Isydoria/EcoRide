@@ -1,0 +1,225 @@
+/* ========================================
+   FICHIER: css/home.css
+   STYLES SPÉCIFIQUES À LA PAGE D'ACCUEIL
+   ======================================== */
+
+/* ========== HERO SECTION ========== */
+.hero {
+    background: linear-gradient(135deg, var(--vert-principal) 0%, var(--vert-fonce) 100%);
+    padding: 8rem 2rem 4rem;
+    margin-top: 80px;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    color: var(--blanc);
+}
+
+.hero-title {
+    margin-bottom: 1rem;
+}
+
+.hero-description {
+    font-size: 18px;
+    color: var(--blanc);
+    margin-bottom: 3rem;
+    opacity: 0.95;
+}
+
+/* ========== FORMULAIRE DE RECHERCHE ========== */
+.search-form {
+    background-color: var(--blanc);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.search-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) minmax(120px, 150px);
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Bouton recherche jaune spécifique */
+.search-form .btn-primary {
+    background-color: var(--jaune-eco);
+    color: var(--gris-fonce);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.search-form .btn-primary:hover {
+    background-color: #F39C12;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+}
+
+/* Fix pour la couleur de la date */
+input[type="date"] {
+    color: var(--gris-moyen);
+}
+
+input[type="date"]:valid {
+    color: var(--gris-fonce);
+}
+
+/* Pour les très grands écrans */
+@media (min-width: 1025px) {
+    .search-wrapper {
+        grid-template-columns: repeat(3, 1fr) minmax(130px, 160px);
+    }
+    
+    .search-form .btn-primary {
+        width: 100%;
+        padding: 1rem 0.5rem;
+        font-size: 15px;
+    }
+}
+
+/* Pour éviter que le bouton sorte du cadre */
+@media (max-width: 1024px) and (min-width: 901px) {
+    .search-wrapper {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .search-form .btn-primary {
+        grid-column: 1 / -1;
+        width: auto;
+        padding: 1rem 4rem;
+        justify-self: center;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Responsive pour tablettes */
+@media (max-width: 900px) {
+    .search-form {
+        padding: 1.5rem;
+    }
+    
+    .search-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    /* Les 2 villes sur la première ligne */
+    .form-group:nth-child(1),
+    .form-group:nth-child(2) {
+        width: 100%;
+    }
+    
+    /* Date seule sur la 2ème ligne, centrée */
+    .form-group:nth-child(3) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: 60%;
+        max-width: 300px;
+    }
+    
+    /* Bouton seul sur la 3ème ligne, centré */
+    .search-form .btn-primary {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: auto;
+        padding: 1rem 4rem;
+    }
+}
+
+/* ========== SECTION À PROPOS ========== */
+.about {
+    padding: 4rem 2rem;
+    background: linear-gradient(to bottom, var(--blanc), var(--gris-tres-clair));
+}
+
+.section-title {
+    text-align: center;
+    color: var(--gris-fonce);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 3rem auto;
+}
+
+.feature-card {
+    background-color: var(--blanc);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: 1rem;
+}
+
+.feature-title {
+    color: var(--vert-principal);
+    margin-bottom: 0.5rem;
+}
+
+.feature-description {
+    color: var(--gris-moyen);
+    font-size: 14px;
+}
+
+/* ========== RESPONSIVE MOBILE ========== */
+@media (max-width: 768px) {
+    /* Hero mobile */
+    .hero {
+        padding: 6rem 1rem 3rem;
+    }
+
+    /* Formulaire mobile - tout en colonne */
+    .search-form {
+        padding: 1.5rem;
+    }
+    
+    .search-wrapper {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    /* Tous les champs prennent toute la largeur */
+    .search-form .form-group {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-self: stretch !important;
+    }
+    
+    .search-form .form-group input {
+        width: 100% !important;
+    }
+    
+    .search-form .btn-primary {
+        width: 100% !important;
+        grid-column: auto !important;
+        padding: 1rem 2rem !important;
+    }
+
+    /* Features mobile */
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+}

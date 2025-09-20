@@ -1,0 +1,385 @@
+/* ========================================
+   FICHIER: css/style.css
+   STYLES COMMUNS À TOUTES LES PAGES ECORIDE
+   ======================================== */
+
+/* ========== VARIABLES CSS ========== */
+:root {
+    /* Couleurs Primaires */
+    --vert-principal: #2ECC71;
+    --vert-fonce: #27AE60;
+    --vert-clair: #A9DFBF;
+    
+    /* Couleurs Secondaires */
+    --jaune-eco: #F1C40F;
+    --bleu-info: #3498DB;
+    
+    /* Couleurs Neutres */
+    --noir: #000000;
+    --gris-fonce: #2C3E50;
+    --gris-moyen: #7F8C8D;
+    --gris-clair: #BDC3C7;
+    --gris-tres-clair: #ECF0F1;
+    --blanc: #FFFFFF;
+    
+    /* Couleurs Sémantiques */
+    --succes: #2ECC71;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    
+    /* Typographie */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ========== RESET GÉNÉRAL ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--gris-fonce);
+    background-color: var(--blanc);
+}
+
+/* ========== TYPOGRAPHIE GÉNÉRALE ========== */
+h1 {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+h3 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* ========== NAVIGATION PRINCIPALE ========== */
+.navbar {
+    background-color: var(--blanc);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.nav-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--vert-principal);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--gris-fonce);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--vert-principal);
+}
+
+/* Bouton connexion dans la nav */
+.nav-menu li:last-child .nav-link {
+    background-color: transparent;
+    border: 2px solid var(--vert-principal);
+    color: var(--vert-principal);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-menu li:last-child .nav-link:hover {
+    background-color: var(--vert-principal);
+    color: var(--blanc);
+}
+
+/* Menu burger mobile */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.mobile-menu-btn span {
+    width: 25px;
+    height: 3px;
+    background-color: var(--gris-fonce);
+    margin: 3px 0;
+    transition: 0.3s;
+}
+
+/* ========== BOUTONS GLOBAUX ========== */
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--vert-principal);
+    color: var(--blanc);
+}
+
+.btn-primary:hover {
+    background-color: var(--vert-fonce);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+}
+
+/* ========== FORMULAIRES GLOBAUX ========== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--gris-fonce);
+    margin-bottom: 0.5rem;
+    font-size: 14px;
+}
+
+.form-input {
+    padding: 1rem;
+    border: 2px solid var(--gris-tres-clair);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: var(--font-family);
+    transition: border-color 0.3s ease;
+    color: var(--gris-fonce);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--vert-principal);
+}
+
+.form-input::placeholder {
+    color: var(--gris-moyen);
+}
+
+/* ========== FOOTER ========== */
+.footer {
+    background-color: var(--gris-fonce);
+    color: var(--blanc);
+    padding: 3rem 2rem 1rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin-bottom: 2rem;
+}
+
+.footer h4 {
+    color: var(--vert-principal);
+    margin-bottom: 1rem;
+    font-size: 18px;
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links a {
+    color: var(--gris-clair);
+    text-decoration: none;
+    line-height: 2;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--vert-principal);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: var(--gris-clair);
+}
+
+/* ========== UTILITIES ========== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.text-green {
+    color: var(--vert-clair);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ========== MESSAGES (pour auth aussi) ========== */
+.error-message {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: none;
+    font-size: 14px;
+}
+
+.error-message.show {
+    display: block;
+}
+
+.success-message {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--succes);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: none;
+    font-size: 14px;
+}
+
+.success-message.show {
+    display: block;
+}
+
+/* ========== RESPONSIVE MOBILE GLOBAL ========== */
+@media (max-width: 768px) {
+    /* Navigation mobile */
+    .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--blanc);
+        flex-direction: column;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    /* Typographie mobile */
+    h1 {
+        font-size: 32px;
+    }
+
+    h2 {
+        font-size: 28px;
+    }
+
+    h3 {
+        font-size: 20px;
+    }
+
+    /* Footer mobile */
+    .footer {
+        padding: 2rem 1rem 1rem;
+    }
+    
+    .footer h4 {
+        font-size: 16px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .footer p,
+    .footer-links a {
+        font-size: 14px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2rem;
+    }
+    
+    .footer-bottom {
+        padding-top: 1rem;
+        margin-top: 1rem;
+        font-size: 12px;
+    }
+}
+
+/* Responsive tablettes - Footer réduit */
+@media (max-width: 900px) {
+    .footer {
+        padding: 2.5rem 1.5rem 1rem;
+    }
+    
+    .footer-content {
+        gap: 2rem;
+    }
+    
+    .footer h4 {
+        font-size: 17px;
+    }
+}

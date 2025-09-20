@@ -1,0 +1,259 @@
+/* ========================================
+   FICHIER: css/auth.css
+   STYLES POUR PAGES CONNEXION ET INSCRIPTION
+   ======================================== */
+
+/* ========== BODY SPÉCIAL AUTH ========== */
+body.auth-page {
+    background: linear-gradient(135deg, var(--vert-principal) 0%, var(--vert-fonce) 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========== NAVIGATION SIMPLIFIÉE ========== */
+.navbar-simple {
+    background-color: var(--blanc);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 2rem;
+}
+
+.nav-wrapper-simple {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-link {
+    color: var(--gris-fonce);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--vert-principal);
+}
+
+/* ========== CONTENEUR AUTH ========== */
+.auth-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-card {
+    background-color: var(--blanc);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Pour la page inscription, carte légèrement plus large */
+.auth-card.signup {
+    max-width: 500px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gris-fonce);
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: var(--gris-moyen);
+    font-size: 16px;
+}
+
+/* ========== BONUS INSCRIPTION ========== */
+.bonus-info {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--vert-fonce);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.bonus-info span {
+    color: var(--vert-principal);
+    font-size: 18px;
+}
+
+/* ========== FORMULAIRE AUTH ========== */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-form .form-input {
+    background-color: rgba(46, 204, 113, 0.05);
+}
+
+.auth-form .form-input:focus {
+    background-color: rgba(46, 204, 113, 0.05);
+}
+
+/* Champ requis */
+.form-label .required {
+    color: var(--danger);
+}
+
+/* Mot de passe oublié */
+.forgot-password {
+    text-align: right;
+    margin-top: -0.5rem;
+}
+
+.forgot-password a {
+    color: var(--gris-moyen);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+    color: var(--vert-principal);
+}
+
+/* ========== INDICATEUR FORCE MOT DE PASSE ========== */
+.password-strength {
+    margin-top: 0.5rem;
+    height: 4px;
+    background-color: var(--gris-tres-clair);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    transition: all 0.3s ease;
+}
+
+.password-strength-bar.weak {
+    width: 33%;
+    background-color: var(--danger);
+}
+
+.password-strength-bar.medium {
+    width: 66%;
+    background-color: var(--warning);
+}
+
+.password-strength-bar.strong {
+    width: 100%;
+    background-color: var(--succes);
+}
+
+.password-hint {
+    font-size: 12px;
+    color: var(--gris-moyen);
+    margin-top: 0.5rem;
+}
+
+/* ========== CHECKBOX PERSONNALISÉE ========== */
+.checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--vert-principal);
+}
+
+.checkbox-group label {
+    font-size: 14px;
+    color: var(--gris-moyen);
+    cursor: pointer;
+}
+
+.checkbox-group label a {
+    color: var(--vert-principal);
+    text-decoration: none;
+}
+
+.checkbox-group label a:hover {
+    text-decoration: underline;
+}
+
+/* ========== BOUTONS AUTH ========== */
+.auth-form .btn-primary {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 16px;
+}
+
+.auth-form .btn-primary:disabled {
+    background-color: var(--gris-clair);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========== LIENS AUTH ========== */
+.auth-links {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gris-tres-clair);
+}
+
+.auth-links p {
+    color: var(--gris-moyen);
+    margin-bottom: 0.5rem;
+}
+
+.auth-links a {
+    color: var(--vert-principal);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-links a:hover {
+    color: var(--vert-fonce);
+    text-decoration: underline;
+}
+
+/* ========== RESPONSIVE MOBILE ========== */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .auth-title {
+        font-size: 24px;
+    }
+
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .bonus-info {
+        font-size: 14px;
+    }
+
+    .bonus-info span {
+        font-size: 16px;
+    }
+}
