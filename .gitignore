@@ -2,8 +2,8 @@
 .env
 
 # Uploads
-public/uploads/*
-!public/uploads/.gitkeep
+uploads/*
+!uploads/.gitkeep
 
 # Logs
 logs/*
@@ -31,3 +31,8 @@ Thumbs.db
 # Database
 *.sqlite
 *.db
+
+# Fichiers temporaires de développement
+debug_*.php
+test_*.php
+*_temp.php
