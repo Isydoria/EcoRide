@@ -20,12 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die(json_encode(['success' => false, 'message' => 'Méthode non autorisée']));
 }
 
-// Connexion directe à la base
+// Connexion Railway adaptative
 try {
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {

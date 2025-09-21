@@ -12,12 +12,17 @@ ini_set('display_errors', 1);
 // Démarrer la session pour vérifier si l'utilisateur est connecté
 session_start();
 
-// Connexion à la base de données
+// Connexion à la base de données Railway
 try {
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
