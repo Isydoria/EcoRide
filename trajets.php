@@ -47,8 +47,7 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                 <li><a href="comment-ca-marche.php" class="nav-link">Comment ça marche</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <?php if ($isLoggedIn): ?>
-                    <li><a href="creer-trajet.php" class="nav-link" style="background: #2ECC71; color: white; padding: 8px 15px; border-radius: 20px;">➕ Créer un trajet</a></li>
-                    <li><a href="user/dashboard.php" class="nav-link">Mon compte (<?php echo htmlspecialchars($userPseudo); ?>)</a></li>
+                    <li><a href="user/dashboard.php" class="nav-link">Mon espace (<?php echo htmlspecialchars($userPseudo); ?>)</a></li>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'administrateur'): ?>
                         <li><a href="admin/dashboard.php" class="nav-link" style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 20px;">🛠️ Admin</a></li>
                     <?php endif; ?>
