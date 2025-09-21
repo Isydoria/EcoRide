@@ -11,10 +11,16 @@ ini_set('display_errors', 0);
 
 // Connexion à la base de données
 try {
+    // Connexion Railway adaptative
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
@@ -72,7 +78,7 @@ try {
             COUNT(DISTINCT a.id_avis) as nb_avis
         FROM 
             trajets t
-            INNER JOIN utilisateurs u ON t.id_conducteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON t.id_conducteur = u.id_utilisateur
             INNER JOIN vehicules v ON t.id_vehicule = v.id_vehicule
             LEFT JOIN avis a ON u.id_utilisateur = a.id_destinataire AND a.statut = 'valide'
         WHERE 
@@ -116,7 +122,7 @@ try {
         $sqlAlt = "
             SELECT DISTINCT DATE(date_depart) as date_alternative
             FROM trajets t
-            INNER JOIN utilisateurs u ON t.id_conducteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON t.id_conducteur = u.id_utilisateur
             WHERE 
                 LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
                 AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)

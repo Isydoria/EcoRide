@@ -61,7 +61,7 @@ try {
     // Rechercher l'utilisateur
     $stmt = $pdo->prepare("
         SELECT id_utilisateur, pseudo, email, mot_de_passe, credits, role, actif
-        FROM utilisateurs 
+        FROM utilisateur 
         WHERE email = :email
         LIMIT 1
     ");

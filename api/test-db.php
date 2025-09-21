@@ -5,10 +5,16 @@
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // Connexion Railway adaptative
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
@@ -19,7 +25,7 @@ try {
     $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
     
     // Compter les utilisateurs
-    $userCount = $pdo->query("SELECT COUNT(*) FROM utilisateurs")->fetchColumn();
+    $userCount = $pdo->query("SELECT COUNT(*) FROM utilisateur")->fetchColumn();
     
     echo json_encode([
         'success' => true,

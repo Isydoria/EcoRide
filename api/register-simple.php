@@ -22,10 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Connexion directe à la base
 try {
+    // Connexion Railway adaptative
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
@@ -92,7 +98,7 @@ if (!empty($errors)) {
 
 try {
     // Vérifier si le pseudo existe déjà
-    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateurs WHERE pseudo = :pseudo");
+    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE pseudo = :pseudo");
     $stmt->execute(['pseudo' => $pseudo]);
     if ($stmt->fetch()) {
         ob_clean();
@@ -100,7 +106,7 @@ try {
     }
     
     // Vérifier si l'email existe déjà
-    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateurs WHERE email = :email");
+    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE email = :email");
     $stmt->execute(['email' => $email]);
     if ($stmt->fetch()) {
         ob_clean();
@@ -115,7 +121,7 @@ try {
     
     // Insérer le nouvel utilisateur
     $stmt = $pdo->prepare("
-        INSERT INTO utilisateurs (
+        INSERT INTO utilisateur (
             pseudo, email, mot_de_passe, credits, role, actif, date_inscription
         ) VALUES (
             :pseudo, :email, :password, :credits, 'utilisateur', 1, NOW()

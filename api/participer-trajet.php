@@ -26,10 +26,16 @@ $user_credits = $_SESSION['user_credits'] ?? 0;
 
 // Connexion à la base de données
 try {
+    // Connexion Railway adaptative
+    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
+    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
+    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
+    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=ecoride_db;charset=utf8mb4',
-        'root',
-        ''
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
@@ -159,7 +165,7 @@ try {
     
     // 4. Vérifier que l'utilisateur a assez de crédits
     // D'abord, récupérer les crédits actuels depuis la base
-    $sqlCredits = "SELECT credits FROM utilisateurs WHERE id_utilisateur = :user_id";
+    $sqlCredits = "SELECT credits FROM utilisateur WHERE id_utilisateur = :user_id";
     $stmtCredits = $pdo->prepare($sqlCredits);
     $stmtCredits->execute(['user_id' => $user_id]);
     $credits_actuels = $stmtCredits->fetchColumn();
@@ -216,8 +222,8 @@ try {
     
     // 7. Débiter les crédits de l'utilisateur
     $sqlUpdateCredits = "
-        UPDATE utilisateurs 
-        SET credits = credits - :cout_total 
+        UPDATE utilisateur
+        SET credits = credits - :cout_total
         WHERE id_utilisateur = :user_id
     ";
     
