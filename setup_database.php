@@ -4,13 +4,20 @@
  * À supprimer après utilisation
  */
 
-// Configuration Railway (utilise les variables d'environnement)
-if (isset($_ENV['MYSQL_HOST'])) {
-    $host = $_ENV['MYSQL_HOST'];
-    $dbname = $_ENV['MYSQL_DATABASE'];
-    $username = $_ENV['MYSQL_USER'];
-    $password = $_ENV['MYSQL_PASSWORD'];
-} else {
+// Configuration Railway (essai multiple méthodes)
+$host = $_ENV['MYSQL_HOST'] ?? getenv('MYSQL_HOST') ?? null;
+$dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? null;
+$username = $_ENV['MYSQL_USER'] ?? getenv('MYSQL_USER') ?? null;
+$password = $_ENV['MYSQL_PASSWORD'] ?? getenv('MYSQL_PASSWORD') ?? null;
+
+// Debug variables
+echo "<h2>🔍 Debug Variables Railway</h2>";
+echo "<p>Host: " . ($host ? "✅ Trouvé" : "❌ Non trouvé") . "</p>";
+echo "<p>Database: " . ($dbname ? "✅ Trouvé" : "❌ Non trouvé") . "</p>";
+echo "<p>User: " . ($username ? "✅ Trouvé" : "❌ Non trouvé") . "</p>";
+echo "<p>Password: " . ($password ? "✅ Trouvé" : "❌ Non trouvé") . "</p>";
+
+if (!$host || !$dbname || !$username || !$password) {
     die('❌ Variables d\'environnement Railway non trouvées');
 }
 
