@@ -17,15 +17,27 @@ define('CONFIG_PATH', ROOT_PATH . '/config');
 define('INCLUDES_PATH', ROOT_PATH . '/includes');
 define('UPLOADS_PATH', ROOT_PATH . '/uploads');
 
-// URL de base (à adapter selon votre configuration)
+// URL de base (adaptatif local/Railway)
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$folder = '/ecoride'; // Adapter selon votre structure
+$folder = (strpos($host, 'railway.app') !== false) ? '' : '/ecoride'; // Railway = racine
 define('BASE_URL', $protocol . $host . $folder);
 
-// Inclure les fichiers de configuration
-require_once CONFIG_PATH . '/database.php';
-require_once CONFIG_PATH . '/functions.php';
+// Inclure les fichiers de configuration (chemins adaptatifs)
+$database_path = __DIR__ . '/database.php';
+$functions_path = __DIR__ . '/functions.php';
+
+if (file_exists($database_path)) {
+    require_once $database_path;
+} else {
+    require_once CONFIG_PATH . '/database.php';
+}
+
+if (file_exists($functions_path)) {
+    require_once $functions_path;
+} else {
+    require_once CONFIG_PATH . '/functions.php';
+}
 
 // Démarrer la session sécurisée
 startSecureSession();
