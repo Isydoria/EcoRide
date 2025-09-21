@@ -23,21 +23,9 @@ $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $folder = (strpos($host, 'railway.app') !== false) ? '' : '/ecoride'; // Railway = racine
 define('BASE_URL', $protocol . $host . $folder);
 
-// Inclure les fichiers de configuration (chemins adaptatifs)
-$database_path = __DIR__ . '/database.php';
-$functions_path = __DIR__ . '/functions.php';
-
-if (file_exists($database_path)) {
-    require_once $database_path;
-} else {
-    require_once CONFIG_PATH . '/database.php';
-}
-
-if (file_exists($functions_path)) {
-    require_once $functions_path;
-} else {
-    require_once CONFIG_PATH . '/functions.php';
-}
+// Inclure les fichiers de configuration (chemin direct)
+require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/functions.php';
 
 // Démarrer la session sécurisée
 startSecureSession();
