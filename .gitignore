@@ -1,6 +1,5 @@
 # Configuration
 .env
-config/database.php
 
 # Uploads
 public/uploads/*
