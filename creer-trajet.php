@@ -152,7 +152,7 @@ try {
         </div>
     </nav>
 
-    <main class="main-content">
+    <main class="main-content" style="padding-top: 80px;">
         <div class="create-trip-container">
             <h1>🚗 Créer un nouveau trajet</h1>
 
