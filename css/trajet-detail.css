@@ -48,6 +48,67 @@
     100% { transform: rotate(360deg); }
 }
 
+/* ========== BANNIÈRE FLOTTANTE ========== */
+.floating-banner {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--vert-principal);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-width: 350px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.banner-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-close:hover {
+    opacity: 0.8;
+}
+
+.floating-banner.closing {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
 /* ========== GRILLE PRINCIPALE ========== */
 .detail-grid {
     display: grid;
@@ -414,23 +475,76 @@
     text-align: center;
 }
 
-.login-prompt {
+/* Section connexion requise */
+.login-required-box {
     text-align: center;
-    color: var(--gris-moyen);
+    padding: 1rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
+    border-radius: 8px;
     margin-bottom: 1rem;
 }
 
-.signup-prompt {
-    text-align: center;
-    font-size: 14px;
-    color: var(--gris-moyen);
-    margin-top: 1rem;
+.login-icon {
+    font-size: 48px;
+    margin-bottom: 1rem;
 }
 
-.signup-prompt a {
+.login-required-box h4 {
+    color: var(--gris-fonce);
+    margin-bottom: 0.5rem;
+}
+
+.login-prompt {
+    color: var(--gris-moyen);
+    font-size: 14px;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.signup-prompt {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gris-tres-clair);
+}
+
+.signup-prompt p {
+    margin-bottom: 0.5rem;
+    color: var(--gris-moyen);
+    font-size: 14px;
+}
+
+.btn-secondary {
+    background: transparent;
     color: var(--vert-principal);
+    border: 2px solid var(--vert-principal);
+    padding: 0.8rem 1.5rem;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     text-decoration: none;
-    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    background: var(--vert-principal);
+    color: white;
+}
+
+.bonus-info {
+    background: rgba(46, 204, 113, 0.1);
+    color: var(--vert-fonce);
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 0.5rem;
+}
+
+.bonus-info strong {
+    color: var(--vert-principal);
 }
 
 /* ========== MODAL ========== */
@@ -515,6 +629,12 @@
         position: relative;
         top: 0;
     }
+    
+    .floating-banner {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
 }
 
 @media (max-width: 768px) {
@@ -545,5 +665,10 @@
     .driver-stats {
         grid-template-columns: 1fr;
         gap: 0.5rem;
+    }
+    
+    .floating-banner {
+        top: 80px;
+        font-size: 14px;
     }
 }

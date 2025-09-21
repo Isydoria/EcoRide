@@ -39,6 +39,16 @@ $userRole = $_SESSION['user_role'] ?? '';
     <link rel="stylesheet" href="css/trajet-detail.css">
 </head>
 <body>
+    <?php if (!$isLoggedIn): ?>
+    <!-- Bannière flottante pour les non-connectés -->
+    <div id="floatingBanner" class="floating-banner">
+        <div class="banner-content">
+            <span>💡 Connectez-vous pour réserver ce trajet et bénéficier de toutes les fonctionnalités</span>
+            <button onclick="closeFloatingBanner()" class="banner-close">×</button>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-wrapper">
@@ -90,7 +100,7 @@ $userRole = $_SESSION['user_role'] ?? '';
                     <div class="main-column">
                         <!-- En-tête du trajet -->
                         <div class="trajet-header-detail">
-                            <div id="ecoIndicator" class="eco-indicator"></div>
+                            <div id="ecoIndicator" class="eco-indicator hidden"></div>
                             <h1 class="trajet-title">
                                 <span id="villeDepart">...</span> → <span id="villeArrivee">...</span>
                             </h1>
@@ -213,16 +223,23 @@ $userRole = $_SESSION['user_role'] ?? '';
                                 </p>
                             <?php else: ?>
                                 <!-- Utilisateur non connecté -->
-                                <p class="login-prompt">
-                                    Connectez-vous pour réserver ce trajet
-                                </p>
-                                <a href="connexion.php?redirect=trajet-detail.php?id=<?php echo $trajet_id; ?>" class="btn btn-primary btn-large">
-                                    Se connecter
-                                </a>
-                                <p class="signup-prompt">
-                                    Pas encore de compte ? 
-                                    <a href="inscription.php">Inscrivez-vous</a> et recevez 20 crédits !
-                                </p>
+                                <div class="login-required-box">
+                                    <div class="login-icon">🔒</div>
+                                    <h4>Connectez-vous pour réserver</h4>
+                                    <p class="login-prompt">
+                                        Pour réserver ce trajet et accéder à toutes les fonctionnalités, vous devez avoir un compte EcoRide.
+                                    </p>
+                                    <a href="connexion.php?redirect=trajet-detail.php?id=<?php echo $trajet_id; ?>" class="btn btn-primary btn-large">
+                                        Se connecter
+                                    </a>
+                                    <div class="signup-prompt">
+                                        <p>Pas encore de compte ?</p>
+                                        <a href="inscription.php" class="btn btn-secondary">
+                                            Créer un compte gratuitement
+                                        </a>
+                                        <p class="bonus-info">🎁 <strong>20 crédits offerts</strong> à l'inscription !</p>
+                                    </div>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>

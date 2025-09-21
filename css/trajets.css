@@ -218,22 +218,31 @@
 
 /* En-tête de la carte avec le badge écologique */
 .trajet-header {
-    padding: 1rem;
-    background: var(--gris-tres-clair);
+    padding: 2rem 1.5rem 1.5rem 1.5rem; /* Augmenté le padding-top de 1.5rem à 2rem */
+    background: linear-gradient(135deg, var(--vert-principal) 0%, var(--vert-fonce) 100%);
+    color: white;
     position: relative;
 }
 
+/* Badge écologique */
 .eco-badge {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: -12px;
+    right: 20px;
     background: var(--jaune-eco);
     color: var(--gris-fonce);
-    padding: 0.25rem 0.75rem;
+    padding: 0.4rem 1rem;
     border-radius: 20px;
-    font-size: 12px;
     font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: translateY(-50%); /* Faire remonter le badge */
 }
+
 
 /* Info conducteur */
 .driver-info {
@@ -241,6 +250,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
+    padding-top: 1.5rem; /* Augmenté pour éviter le chevauchement */
 }
 
 .driver-avatar {

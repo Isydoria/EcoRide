@@ -7,7 +7,7 @@
 // Configuration
 header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
 
 // Démarrer la session pour vérifier si l'utilisateur est connecté
 session_start();
@@ -23,9 +23,13 @@ try {
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
-        'message' => 'Erreur de connexion à la base de données'
+        'message' => 'Erreur DB: ' . $e->getMessage()
     ]));
 }
+
+// Log pour debug
+error_log("Method: " . $_SERVER['REQUEST_METHOD']);
+error_log("POST data: " . print_r($_POST, true));
 
 // Vérifier la méthode
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

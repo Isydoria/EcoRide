@@ -112,7 +112,8 @@ function displayTrajetDetails(trajet) {
     document.getElementById('placesDisponibles').textContent = trajet.places_disponibles;
     
     // Coût total (prix + commission de 2 crédits)
-    const coutTotal = parseInt(trajet.prix) + 2;
+    const prixNumeric = parseFloat(trajet.prix);
+    const coutTotal = prixNumeric + 2;
     document.getElementById('coutTotal').textContent = coutTotal;
     
     // Vérifier si l'utilisateur peut réserver
@@ -143,11 +144,11 @@ function displayPreferences(preferences) {
         const value = preferences[pref.key];
         if (value !== undefined) {
             const div = document.createElement('div');
-            div.className = `preference-item ${value ? 'yes' : 'no'}`;
+            div.className = `preference-item ${value == 1 ? 'yes' : 'no'}`;
             div.innerHTML = `
                 ${pref.label} 
-                ${value ? '✅' : '❌'} 
-                ${value ? pref.yes : pref.no}
+                ${value == 1 ? '✅' : '❌'} 
+                ${value == 1 ? pref.yes : pref.no}
             `;
             container.appendChild(div);
         }
@@ -230,8 +231,12 @@ function participerTrajet() {
     
     if (!trajetDetails) return;
     
+    // Calculer le coût total
+    const prixNumeric = parseFloat(trajetDetails.prix);
+    const coutTotal = prixNumeric + 2;
+    
     // Afficher le modal de confirmation
-    document.getElementById('modalCout').textContent = parseInt(trajetDetails.prix) + 2;
+    document.getElementById('modalCout').textContent = coutTotal;
     document.getElementById('modalTrajet').textContent = 
         trajetDetails.ville_depart + ' → ' + trajetDetails.ville_arrivee;
     document.getElementById('modalDate').textContent = 
@@ -243,6 +248,24 @@ function participerTrajet() {
 // Fonction pour fermer le modal
 function closeModal() {
     document.getElementById('confirmModal').style.display = 'none';
+}
+
+// Fonction pour fermer la bannière flottante
+function closeFloatingBanner() {
+    const banner = document.getElementById('floatingBanner');
+    if (banner) {
+        banner.classList.add('closing');
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 300);
+    }
+}
+
+// Fermer automatiquement la bannière après 10 secondes
+if (!isLoggedIn) {
+    setTimeout(() => {
+        closeFloatingBanner();
+    }, 10000);
 }
 
 // Fonction pour confirmer la réservation
@@ -333,11 +356,19 @@ function formatDate(dateString) {
 
 // Formater une heure
 function formatTime(timeString) {
-    return timeString.substring(0, 5);
+    if (!timeString) return '';
+    // Si c'est déjà au format HH:MM, on le retourne tel quel
+    if (timeString.includes(':')) {
+        return timeString.substring(0, 5);
+    }
+    // Sinon on essaie de le formater
+    return timeString;
 }
 
 // Calculer la durée entre deux heures
 function calculateDuration(heureDepart, heureArrivee) {
+    if (!heureDepart || !heureArrivee) return 'Non défini';
+    
     const [h1, m1] = heureDepart.split(':').map(Number);
     const [h2, m2] = heureArrivee.split(':').map(Number);
     
