@@ -24,7 +24,7 @@ require_once 'config/init.php';
                 <span>🚗🌱 EcoRide</span>
             </a>
             
-            <button class="mobile-menu-btn" onclick="toggleMenu()">
+            <button class="mobile-menu-btn">
                 <span></span>
                 <span></span>
                 <span></span>

@@ -120,7 +120,7 @@ try {
     $alternatives = [];
     if (count($trajets) === 0) {
         $sqlAlt = "
-            SELECT DISTINCT DATE(date_depart) as date_alternative
+            SELECT DISTINCT DATE(t.date_depart) as date_alternative
             FROM covoiturage t
             INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
             WHERE
@@ -130,7 +130,7 @@ try {
                 AND t.statut = 'planifie'
                 AND u.statut = 'actif'
                 AND DATE(t.date_depart) > CURDATE()
-            ORDER BY date_depart ASC
+            ORDER BY DATE(t.date_depart) ASC
             LIMIT 5
         ";
         

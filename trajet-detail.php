@@ -56,7 +56,7 @@ $userRole = $_SESSION['user_role'] ?? '';
                 <span>🚗🌱 EcoRide</span>
             </a>
             
-            <button class="mobile-menu-btn" onclick="toggleMenu()">
+            <button class="mobile-menu-btn">
                 <span></span>
                 <span></span>
                 <span></span>
