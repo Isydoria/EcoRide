@@ -16,7 +16,7 @@ echo "</pre>";
 
 echo "<h3>Variables getenv():</h3>";
 echo "<pre>";
-$mysql_vars = ['MYSQL_HOST', 'MYSQL_DATABASE', 'MYSQL_USER', 'MYSQL_PASSWORD', 'MYSQL_PORT'];
+$mysql_vars = ['MYSQLHOST', 'MYSQL_DATABASE', 'MYSQLUSER', 'MYSQLPASSWORD', 'MYSQLPORT'];
 foreach ($mysql_vars as $var) {
     $value = getenv($var);
     echo "$var = " . ($value ? (strlen($value) > 20 ? substr($value, 0, 20) . '...' : $value) : 'NULL') . "\n";
@@ -30,10 +30,10 @@ echo "MySQL variables count: " . count(array_filter(array_keys($_ENV), function(
 echo "</pre>";
 
 // Test connexion directe
-$host = $_ENV['MYSQL_HOST'] ?? getenv('MYSQL_HOST') ?? null;
+$host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? null;
 $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? null;
-$username = $_ENV['MYSQL_USER'] ?? getenv('MYSQL_USER') ?? null;
-$password = $_ENV['MYSQL_PASSWORD'] ?? getenv('MYSQL_PASSWORD') ?? null;
+$username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? null;
+$password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? null;
 
 if ($host && $dbname && $username && $password) {
     echo "<h3>🔌 Test de connexion MySQL:</h3>";

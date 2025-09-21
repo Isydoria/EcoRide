@@ -4,11 +4,11 @@
  * À supprimer après utilisation
  */
 
-// Configuration Railway (essai multiple méthodes)
-$host = $_ENV['MYSQL_HOST'] ?? getenv('MYSQL_HOST') ?? null;
+// Configuration Railway (utilise les vraies variables Railway)
+$host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? null;
 $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? null;
-$username = $_ENV['MYSQL_USER'] ?? getenv('MYSQL_USER') ?? null;
-$password = $_ENV['MYSQL_PASSWORD'] ?? getenv('MYSQL_PASSWORD') ?? null;
+$username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? null;
+$password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? null;
 
 // Debug variables
 echo "<h2>🔍 Debug Variables Railway</h2>";
