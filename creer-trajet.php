@@ -130,7 +130,27 @@ try {
     </style>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
+    <!-- Navigation incluse directement -->
+    <nav class="navbar">
+        <div class="nav-wrapper">
+            <a href="index.php" class="logo">
+                <span>🚗🌱 EcoRide</span>
+            </a>
+
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.php" class="nav-link">Accueil</a></li>
+                <li><a href="trajets.php" class="nav-link">Trajets</a></li>
+                <li><a href="user/dashboard.php" class="nav-link">Mon espace</a></li>
+                <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
+            </ul>
+        </div>
+    </nav>
 
     <main class="main-content">
         <div class="create-trip-container">
@@ -289,5 +309,7 @@ try {
             });
         });
     </script>
+
+    <script src="js/main.js"></script>
 </body>
 </html>

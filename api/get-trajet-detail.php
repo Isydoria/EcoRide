@@ -60,44 +60,44 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 try {
     // Requête principale pour récupérer les détails du trajet
     $sql = "
-        SELECT 
-            t.id_trajet,
-            t.id_conducteur,
+        SELECT
+            t.covoiturage_id as id_trajet,
+            t.conducteur_id as id_conducteur,
             t.ville_depart,
             t.ville_arrivee,
             t.date_depart,
-            t.heure_depart,
-            t.heure_arrivee,
+            t.date_depart as heure_depart,
+            t.date_arrivee as heure_arrivee,
             t.places_disponibles,
-            t.prix,
+            t.prix_par_place as prix,
             t.statut,
-            -- Adresses détaillées (si disponibles dans votre base)
+            -- Adresses détaillées
             t.ville_depart as adresse_depart,
             t.ville_arrivee as adresse_arrivee,
             -- Info du conducteur
             u.pseudo as conducteur_pseudo,
             u.photo as conducteur_photo,
-            u.date_inscription as membre_depuis,
+            u.created_at as membre_depuis,
             -- Info du véhicule
             v.marque,
             v.modele,
-            v.type_carburant,
+            v.energie as type_carburant,
             v.couleur,
-            v.nombre_places as nombre_places_vehicule,
+            v.places as nombre_places_vehicule,
             -- Note moyenne du conducteur
             COALESCE(AVG(av.note), 0) as note_moyenne,
-            COUNT(DISTINCT av.id_avis) as nb_avis,
+            COUNT(DISTINCT av.avis_id) as nb_avis,
             -- Nombre total de trajets du conducteur
-            (SELECT COUNT(*) FROM trajets WHERE id_conducteur = u.id_utilisateur) as total_trajets
-        FROM 
-            trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
-            INNER JOIN vehicules v ON t.id_vehicule = v.id_vehicule
+            (SELECT COUNT(*) FROM covoiturage WHERE conducteur_id = u.utilisateur_id) as total_trajets
+        FROM
+            covoiturage t
+            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+            INNER JOIN voiture v ON t.voiture_id = v.voiture_id
             LEFT JOIN avis av ON u.utilisateur_id = av.destinataire_id AND av.statut = 'valide'
-        WHERE 
-            t.id_trajet = :trajet_id
-        GROUP BY 
-            t.id_trajet
+        WHERE
+            t.covoiturage_id = :trajet_id
+        GROUP BY
+            t.covoiturage_id
     ";
     
     $stmt = $pdo->prepare($sql);
@@ -160,10 +160,10 @@ try {
     // Si l'utilisateur est connecté, vérifier s'il a déjà réservé ce trajet
     if ($user_id) {
         $sqlReservation = "
-            SELECT id_reservation 
-            FROM reservations 
-            WHERE id_trajet = :trajet_id 
-            AND id_passager = :user_id
+            SELECT participation_id
+            FROM participation
+            WHERE covoiturage_id = :trajet_id
+            AND passager_id = :user_id
             AND statut IN ('reserve', 'confirme')
         ";
         

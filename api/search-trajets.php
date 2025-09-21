@@ -55,15 +55,15 @@ try {
     // Requête pour chercher les trajets
     // On joint plusieurs tables pour avoir toutes les infos nécessaires
     $sql = "
-        SELECT 
-            t.id_trajet,
+        SELECT
+            t.covoiturage_id as id_trajet,
             t.ville_depart,
             t.ville_arrivee,
             t.date_depart,
-            t.heure_depart,
-            t.heure_arrivee,
+            t.date_depart as heure_depart,
+            t.date_arrivee as heure_arrivee,
             t.places_disponibles,
-            t.prix,
+            t.prix_par_place as prix,
             t.statut,
             -- Info du conducteur
             u.pseudo as conducteur_pseudo,
@@ -71,27 +71,27 @@ try {
             -- Info du véhicule
             v.marque,
             v.modele,
-            v.type_carburant,
+            v.energie as type_carburant,
             v.couleur,
             -- Note moyenne du conducteur (calculée depuis les avis)
             COALESCE(AVG(a.note), 0) as note_moyenne,
-            COUNT(DISTINCT a.id_avis) as nb_avis
-        FROM 
-            trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
-            INNER JOIN vehicules v ON t.id_vehicule = v.id_vehicule
-            LEFT JOIN avis a ON u.id_utilisateur = a.id_destinataire AND a.statut = 'valide'
-        WHERE 
+            COUNT(DISTINCT a.avis_id) as nb_avis
+        FROM
+            covoiturage t
+            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+            INNER JOIN voiture v ON t.voiture_id = v.voiture_id
+            LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
+        WHERE
             LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
             AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
             AND DATE(t.date_depart) = :date_depart
             AND t.places_disponibles > 0
             AND t.statut = 'planifie'
-            AND u.actif = 1
-        GROUP BY 
-            t.id_trajet
-        ORDER BY 
-            t.heure_depart ASC
+            AND u.statut = 'actif'
+        GROUP BY
+            t.covoiturage_id
+        ORDER BY
+            t.date_depart ASC
     ";
     
     // Préparer et exécuter la requête
@@ -121,14 +121,14 @@ try {
     if (count($trajets) === 0) {
         $sqlAlt = "
             SELECT DISTINCT DATE(date_depart) as date_alternative
-            FROM trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
-            WHERE 
+            FROM covoiturage t
+            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+            WHERE
                 LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
                 AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
                 AND t.places_disponibles > 0
                 AND t.statut = 'planifie'
-                AND u.actif = 1
+                AND u.statut = 'actif'
                 AND DATE(t.date_depart) > CURDATE()
             ORDER BY date_depart ASC
             LIMIT 5
