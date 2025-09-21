@@ -98,7 +98,7 @@ if (!empty($errors)) {
 
 try {
     // Vérifier si le pseudo existe déjà
-    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE pseudo = :pseudo");
+    $stmt = $pdo->prepare("SELECT utilisateur_id FROM utilisateur WHERE pseudo = :pseudo");
     $stmt->execute(['pseudo' => $pseudo]);
     if ($stmt->fetch()) {
         ob_clean();
@@ -106,7 +106,7 @@ try {
     }
     
     // Vérifier si l'email existe déjà
-    $stmt = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE email = :email");
+    $stmt = $pdo->prepare("SELECT utilisateur_id FROM utilisateur WHERE email = :email");
     $stmt->execute(['email' => $email]);
     if ($stmt->fetch()) {
         ob_clean();
@@ -122,9 +122,9 @@ try {
     // Insérer le nouvel utilisateur
     $stmt = $pdo->prepare("
         INSERT INTO utilisateur (
-            pseudo, email, mot_de_passe, credits, role, actif, date_inscription
+            pseudo, email, password, credit, role, statut, created_at
         ) VALUES (
-            :pseudo, :email, :password, :credits, 'utilisateur', 1, NOW()
+            :pseudo, :email, :password, :credit, 'utilisateur', 'actif', NOW()
         )
     ");
     
@@ -132,7 +132,7 @@ try {
         'pseudo' => $pseudo,
         'email' => $email,
         'password' => $hashedPassword,
-        'credits' => 20 // Crédits de bienvenue
+        'credit' => 20 // Crédits de bienvenue
     ]);
     
     if (!$result) {

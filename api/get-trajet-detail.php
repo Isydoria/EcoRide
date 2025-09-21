@@ -91,9 +91,9 @@ try {
             (SELECT COUNT(*) FROM trajets WHERE id_conducteur = u.id_utilisateur) as total_trajets
         FROM 
             trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
             INNER JOIN vehicules v ON t.id_vehicule = v.id_vehicule
-            LEFT JOIN avis av ON u.id_utilisateur = av.id_destinataire AND av.statut = 'valide'
+            LEFT JOIN avis av ON u.utilisateur_id = av.destinataire_id AND av.statut = 'valide'
         WHERE 
             t.id_trajet = :trajet_id
         GROUP BY 
@@ -141,7 +141,7 @@ try {
             u.pseudo as auteur
         FROM 
             avis a
-            INNER JOIN utilisateur u ON a.id_auteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON a.auteur_id = u.utilisateur_id
         WHERE 
             a.id_destinataire = :conducteur_id
             AND a.statut = 'valide'

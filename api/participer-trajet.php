@@ -165,7 +165,7 @@ try {
     
     // 4. Vérifier que l'utilisateur a assez de crédits
     // D'abord, récupérer les crédits actuels depuis la base
-    $sqlCredits = "SELECT credits FROM utilisateur WHERE id_utilisateur = :user_id";
+    $sqlCredits = "SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id";
     $stmtCredits = $pdo->prepare($sqlCredits);
     $stmtCredits->execute(['user_id' => $user_id]);
     $credits_actuels = $stmtCredits->fetchColumn();
@@ -223,8 +223,8 @@ try {
     // 7. Débiter les crédits de l'utilisateur
     $sqlUpdateCredits = "
         UPDATE utilisateur
-        SET credits = credits - :cout_total
-        WHERE id_utilisateur = :user_id
+        SET credit = credit - :cout_total
+        WHERE utilisateur_id = :user_id
     ";
     
     $stmtUpdateCredits = $pdo->prepare($sqlUpdateCredits);

@@ -60,7 +60,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 try {
     // Rechercher l'utilisateur
     $stmt = $pdo->prepare("
-        SELECT id_utilisateur, pseudo, email, mot_de_passe, credits, role, actif
+        SELECT utilisateur_id, pseudo, email, password, credit, role, statut
         FROM utilisateur 
         WHERE email = :email
         LIMIT 1
@@ -75,21 +75,21 @@ try {
         die(json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect']));
     }
     
-    if (!password_verify($password, $user['mot_de_passe'])) {
+    if (!password_verify($password, $user['password'])) {
         ob_clean();
         die(json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect']));
     }
     
-    if (!$user['actif']) {
+    if ($user['statut'] !== 'actif') {
         ob_clean();
         die(json_encode(['success' => false, 'message' => 'Votre compte a été désactivé']));
     }
     
     // Connexion réussie - Créer les sessions
-    $_SESSION['user_id'] = $user['id_utilisateur'];
+    $_SESSION['user_id'] = $user['utilisateur_id'];
     $_SESSION['user_pseudo'] = $user['pseudo'];
     $_SESSION['user_email'] = $user['email'];
-    $_SESSION['user_credits'] = $user['credits'];
+    $_SESSION['user_credits'] = $user['credit'];
     $_SESSION['user_role'] = $user['role'];
     
     // Régénérer l'ID de session pour la sécurité

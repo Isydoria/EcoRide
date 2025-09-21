@@ -78,7 +78,7 @@ try {
             COUNT(DISTINCT a.id_avis) as nb_avis
         FROM 
             trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
             INNER JOIN vehicules v ON t.id_vehicule = v.id_vehicule
             LEFT JOIN avis a ON u.id_utilisateur = a.id_destinataire AND a.statut = 'valide'
         WHERE 
@@ -122,7 +122,7 @@ try {
         $sqlAlt = "
             SELECT DISTINCT DATE(date_depart) as date_alternative
             FROM trajets t
-            INNER JOIN utilisateur u ON t.id_conducteur = u.id_utilisateur
+            INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
             WHERE 
                 LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
                 AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
