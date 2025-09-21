@@ -233,6 +233,27 @@ try {
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="footer" style="background: #2c3e50; color: white; padding: 40px 0; margin-top: 50px;">
+        <div style="max-width: 800px; margin: 0 auto; padding: 0 20px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #2ECC71; margin-bottom: 15px;">🚗🌱 EcoRide</h4>
+                <p style="color: #bdc3c7;">Créez vos trajets facilement et contribuez à un transport plus écologique</p>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; flex-wrap: wrap;">
+                <a href="index.php" style="color: #bdc3c7; text-decoration: none;">Accueil</a>
+                <a href="trajets.php" style="color: #bdc3c7; text-decoration: none;">Rechercher des trajets</a>
+                <a href="user/dashboard.php" style="color: #bdc3c7; text-decoration: none;">Mon espace</a>
+                <a href="contact.php" style="color: #bdc3c7; text-decoration: none;">Contact</a>
+            </div>
+
+            <div style="border-top: 1px solid #34495e; padding-top: 20px;">
+                <p style="color: #bdc3c7; margin: 0;">© 2025 EcoRide - Plateforme de covoiturage écologique</p>
+            </div>
+        </div>
+    </footer>
+
     <script>
         document.getElementById('createTripForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -257,7 +278,7 @@ try {
             .then(data => {
                 if (data.success) {
                     alert('✅ ' + data.message);
-                    window.location.href = 'user/dashboard.php#mes-trajets';
+                    window.location.href = 'user/dashboard.php?section=my-trips';
                 } else {
                     alert('❌ ' + data.message);
                 }

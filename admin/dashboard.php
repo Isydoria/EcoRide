@@ -146,6 +146,43 @@ try {
         <?php endif; ?>
     </div>
 
+    <!-- Footer Admin -->
+    <footer style="background: #34495e; color: white; padding: 30px 0; margin-top: 50px;">
+        <div class="admin-container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 20px;">
+                <div>
+                    <h4 style="color: #e74c3c; margin-bottom: 15px;">🛠️ Administration EcoRide</h4>
+                    <p style="color: #bdc3c7;">Interface d'administration pour la gestion de la plateforme de covoiturage.</p>
+                </div>
+
+                <div>
+                    <h4 style="color: white; margin-bottom: 15px;">Actions rapides</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="dashboard.php" style="color: #bdc3c7; text-decoration: none;">📊 Statistiques</a></li>
+                        <li style="margin-bottom: 8px;"><a href="../user/dashboard.php" style="color: #bdc3c7; text-decoration: none;">👤 Mode utilisateur</a></li>
+                        <li style="margin-bottom: 8px;"><a href="../index.php" style="color: #bdc3c7; text-decoration: none;">🏠 Accueil site</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 style="color: white; margin-bottom: 15px;">Support technique</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><span style="color: #bdc3c7;">📧 admin@ecoride.fr</span></li>
+                        <li style="margin-bottom: 8px;"><a href="https://github.com/Isydoria/EcoRide" style="color: #bdc3c7; text-decoration: none;" target="_blank">🔗 GitHub</a></li>
+                        <li style="margin-bottom: 8px;"><span style="color: #bdc3c7;">🚀 Railway</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #2c3e50; padding-top: 20px; text-align: center;">
+                <p style="color: #bdc3c7; margin: 0;">
+                    © 2025 EcoRide - Interface d'administration |
+                    Connecté en tant que : <strong><?= htmlspecialchars($_SESSION['user_pseudo']) ?></strong>
+                </p>
+            </div>
+        </div>
+    </footer>
+
     <script>
         function toggleUserStatus(pseudo) {
             if (confirm('Voulez-vous vraiment modifier le statut de cet utilisateur ?')) {

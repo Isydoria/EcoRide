@@ -588,6 +588,57 @@ $active_section = $_GET['section'] ?? 'overview';
         </div>
     </div>
 
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: #2c3e50; color: white; padding: 40px 0; margin-top: 50px;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 30px;">
+                <div>
+                    <h4 style="color: #2ECC71; margin-bottom: 15px;">🚗🌱 EcoRide</h4>
+                    <p style="color: #bdc3c7; line-height: 1.6;">La plateforme de covoiturage écologique qui révolutionne vos déplacements tout en préservant l'environnement.</p>
+                </div>
+
+                <div>
+                    <h4 style="color: white; margin-bottom: 15px;">Navigation</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="../index.php" style="color: #bdc3c7; text-decoration: none;">Accueil</a></li>
+                        <li style="margin-bottom: 8px;"><a href="../trajets.php" style="color: #bdc3c7; text-decoration: none;">Rechercher des trajets</a></li>
+                        <li style="margin-bottom: 8px;"><a href="../creer-trajet.php" style="color: #bdc3c7; text-decoration: none;">Créer un trajet</a></li>
+                        <li style="margin-bottom: 8px;"><a href="../contact.php" style="color: #bdc3c7; text-decoration: none;">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 style="color: white; margin-bottom: 15px;">Mon compte</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="?section=overview" style="color: #bdc3c7; text-decoration: none;">Vue d'ensemble</a></li>
+                        <li style="margin-bottom: 8px;"><a href="?section=my-trips" style="color: #bdc3c7; text-decoration: none;">Mes trajets</a></li>
+                        <li style="margin-bottom: 8px;"><a href="?section=vehicles" style="color: #bdc3c7; text-decoration: none;">Mes véhicules</a></li>
+                        <li style="margin-bottom: 8px;"><a href="?section=profile" style="color: #bdc3c7; text-decoration: none;">Mon profil</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 style="color: white; margin-bottom: 15px;">Support</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="../comment-ca-marche.php" style="color: #bdc3c7; text-decoration: none;">Comment ça marche</a></li>
+                        <li style="margin-bottom: 8px;"><a href="mailto:contact@ecoride.fr" style="color: #bdc3c7; text-decoration: none;">contact@ecoride.fr</a></li>
+                        <li style="margin-bottom: 8px;"><span style="color: #bdc3c7;">Mentions légales</span></li>
+                        <li style="margin-bottom: 8px;"><span style="color: #bdc3c7;">Politique de confidentialité</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #34495e; padding-top: 20px; text-align: center;">
+                <p style="color: #bdc3c7; margin: 0;">
+                    © 2025 EcoRide - Plateforme de covoiturage écologique |
+                    Développé pour l'évaluation RNCP Développeur Web et Web Mobile
+                </p>
+            </div>
+        </div>
+    </footer>
+
     <script>
         // Gestion du formulaire d'ajout de véhicule
         document.getElementById('addVehicleForm')?.addEventListener('submit', function(e) {
