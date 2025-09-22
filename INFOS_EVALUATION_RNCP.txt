@@ -12,7 +12,7 @@ Login administrateur : admin
 Mot de passe administrateur : Ec0R1de!
 Email admin : admin@ecoride.fr
 
-⚠️ MANQUE ENCORE : Lien outil gestion de projet (Kanban à créer)
+✅ Lien outil gestion de projet : https://trello.com/b/8TWmLXzH
 
 🎯 USER STORIES CRITIQUES TERMINÉES :
 ===================================
@@ -131,7 +131,7 @@ Créer trajet : https://ecoride-production-2631.up.railway.app/creer-trajet.php
 📈 PROGRESSION ÉVALUATION RNCP :
 ===============================
 
-✅ Éléments obligatoires : 80% (manque Kanban)
+✅ Éléments obligatoires : 100% ✅ COMPLET
 ✅ Fonctionnalités critiques : 70%
 ✅ Cycle utilisateur complet : 100%
 ❌ Documentation technique : 0%

@@ -10,8 +10,8 @@ require_once 'config/database.php';
 try {
     echo "<h2>🚗 EcoRide - Initialisation des trajets de démonstration</h2>\n";
 
-    // Connexion à la base
-    $db = Database::getInstance()->getConnection();
+    // Connexion à la base avec la fonction helper
+    $db = db();
 
     // Nettoyer les anciens trajets de test
     echo "<p>🧹 Nettoyage des anciens trajets...</p>\n";

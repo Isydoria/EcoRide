@@ -2,7 +2,7 @@
 -- Données de test pour EcoRide
 -- ========================================
 
-USE ecoride;
+USE ecoride_db;
 
 -- Mot de passe pour tous : Test123!
 -- Hash généré avec password_hash('Test123!', PASSWORD_DEFAULT)

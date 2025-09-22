@@ -2,9 +2,9 @@
 -- Base de données EcoRide - SCHEMA COMPLET
 -- ========================================
 
-DROP DATABASE IF EXISTS ecoride;
-CREATE DATABASE ecoride CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE ecoride;
+DROP DATABASE IF EXISTS ecoride_db;
+CREATE DATABASE ecoride_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ecoride_db;
 
 -- Table configuration
 CREATE TABLE configuration (

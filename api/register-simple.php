@@ -143,19 +143,18 @@ try {
     
     // Créer les préférences par défaut pour l'utilisateur
     $stmt = $pdo->prepare("
-        INSERT INTO preferences_conducteur (
-            id_utilisateur, accepte_conducteur, accepte_fumeur, accepte_animaux, 
-            accepte_musique, accepte_discussion
+        INSERT INTO parametre (
+            utilisateur_id, fumeur, animaux, musique, discussion
         ) VALUES (
-            :user_id, FALSE, FALSE, FALSE, TRUE, TRUE
+            :user_id, FALSE, FALSE, TRUE, TRUE
         )
     ");
     $stmt->execute(['user_id' => $userId]);
     
-    // Enregistrer la transaction dans la table transactions
+    // Enregistrer la transaction dans la table transaction_credit
     $stmt = $pdo->prepare("
-        INSERT INTO transactions (
-            id_utilisateur, montant, type_transaction, description, type_reference
+        INSERT INTO transaction_credit (
+            utilisateur_id, montant, type, description, reference_type
         ) VALUES (
             :user_id, 20, 'credit', 'Bonus d\'inscription', 'bonus'
         )
