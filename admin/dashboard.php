@@ -7,19 +7,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrateur')
     exit;
 }
 
-// Configuration Railway
-$host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
-$dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
-$username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
-$password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+require_once '../config/database.php';
 
 try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $username,
-        $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $pdo = db();
 
     // Statistiques générales
     $stats = [];
@@ -45,6 +36,22 @@ try {
     $stmt->execute();
     $recent_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Derniers trajets créés
+    $stmt = $pdo->prepare("
+        SELECT c.*, u.pseudo as conducteur, v.marque, v.modele
+        FROM covoiturage c
+        LEFT JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+        ORDER BY c.created_at DESC
+        LIMIT 10
+    ");
+    $stmt->execute();
+    $recent_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Nombre de réservations
+    $stmt = $pdo->query("SELECT COUNT(*) FROM participation");
+    $stats['total_bookings'] = $stmt->fetchColumn();
+
 } catch (Exception $e) {
     $error = "Erreur de connexion : " . $e->getMessage();
 }
@@ -57,6 +64,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration - EcoRide</title>
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
@@ -106,8 +114,8 @@ try {
                     <div class="stat-label">Crédits totaux</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number"><?= $trip_stats['planifie'] ?? 0 ?></div>
-                    <div class="stat-label">Trajets planifiés</div>
+                    <div class="stat-number"><?= $stats['total_bookings'] ?></div>
+                    <div class="stat-label">Réservations totales</div>
                 </div>
             </div>
 
@@ -137,6 +145,51 @@ try {
                             <button onclick="toggleUserStatus('<?= $user['pseudo'] ?>')">
                                 <?= $user['statut'] === 'actif' ? 'Suspendre' : 'Activer' ?>
                             </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 40px 0;">
+                <div>
+                    <h2>📊 Répartition des trajets</h2>
+                    <canvas id="tripsChart" width="400" height="200"></canvas>
+                </div>
+                <div>
+                    <h2>📈 Évolution des inscriptions</h2>
+                    <canvas id="usersChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <h2>🚗 Derniers trajets créés</h2>
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Trajet</th>
+                        <th>Conducteur</th>
+                        <th>Véhicule</th>
+                        <th>Date départ</th>
+                        <th>Prix</th>
+                        <th>Places</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($recent_trips as $trip): ?>
+                    <tr>
+                        <td>
+                            <strong><?= htmlspecialchars($trip['ville_depart']) ?> → <?= htmlspecialchars($trip['ville_arrivee']) ?></strong>
+                        </td>
+                        <td><?= htmlspecialchars($trip['conducteur']) ?></td>
+                        <td><?= htmlspecialchars(($trip['marque'] ?? 'N/A') . ' ' . ($trip['modele'] ?? '')) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($trip['date_depart'])) ?></td>
+                        <td><?= number_format($trip['prix_par_place'], 2) ?>€</td>
+                        <td><?= $trip['places_disponibles'] ?></td>
+                        <td>
+                            <span class="status-badge status-<?= $trip['statut'] ?>">
+                                <?= ucfirst($trip['statut']) ?>
+                            </span>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -190,6 +243,68 @@ try {
                 alert('Fonctionnalité en cours de développement');
             }
         }
+
+        // Graphiques avec Chart.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Graphique des trajets
+            const tripsCtx = document.getElementById('tripsChart');
+            if (tripsCtx) {
+                new Chart(tripsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Planifiés', 'En cours', 'Terminés', 'Annulés'],
+                        datasets: [{
+                            data: [
+                                <?= $trip_stats['planifie'] ?? 0 ?>,
+                                <?= $trip_stats['en_cours'] ?? 0 ?>,
+                                <?= $trip_stats['termine'] ?? 0 ?>,
+                                <?= $trip_stats['annule'] ?? 0 ?>
+                            ],
+                            backgroundColor: [
+                                '#3498db',
+                                '#f39c12',
+                                '#2ecc71',
+                                '#e74c3c'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Graphique des utilisateurs (exemple avec données statiques)
+            const usersCtx = document.getElementById('usersChart');
+            if (usersCtx) {
+                new Chart(usersCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                        datasets: [{
+                            label: 'Nouvelles inscriptions',
+                            data: [5, 8, 12, 15, 22, <?= $stats['total_users'] ?>],
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

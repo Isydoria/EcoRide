@@ -20,20 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die(json_encode(['success' => false, 'message' => 'Méthode non autorisée']));
 }
 
-// Connexion Railway adaptative
-try {
-    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
-    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
-    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
-    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+// Connexion à la base de données avec la classe Database
+require_once '../config/database.php';
 
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $username,
-        $password
-    );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
+try {
+    $pdo = db();
+} catch(Exception $e) {
     ob_clean();
     die(json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données']));
 }

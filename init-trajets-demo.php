@@ -10,6 +10,13 @@ require_once 'config/database.php';
 try {
     echo "<h2>🚗 EcoRide - Initialisation des trajets de démonstration</h2>\n";
 
+    // Debug pour voir les variables de connexion
+    echo "<p><strong>Debug connexion :</strong></p>";
+    echo "<p>Host: " . ($_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost') . "</p>";
+    echo "<p>DB: " . ($_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db') . "</p>";
+    echo "<p>User: " . ($_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root') . "</p>";
+    echo "<p>Pwd: " . (empty($_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD')) ? 'VIDE' : 'DÉFINI') . "</p>";
+
     // Connexion à la base avec la fonction helper
     $db = db();
 

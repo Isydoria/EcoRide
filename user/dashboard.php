@@ -7,23 +7,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Configuration Railway
-$host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
-$dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
-$username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
-$password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+require_once '../config/database.php';
 
 $user_id = $_SESSION['user_id'];
 $error = null;
 $success = null;
 
 try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $username,
-        $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $pdo = db();
 
     // Récupérer les infos utilisateur actualisées
     $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE utilisateur_id = :user_id");

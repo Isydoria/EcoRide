@@ -9,21 +9,12 @@ header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-// Connexion à la base de données
-try {
-    // Connexion Railway adaptative
-    $host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
-    $dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
-    $username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
-    $password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
+// Connexion à la base de données avec la classe Database
+require_once '../config/database.php';
 
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $username,
-        $password
-    );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
+try {
+    $pdo = db();
+} catch(Exception $e) {
     die(json_encode([
         'success' => false,
         'message' => 'Erreur de connexion à la base de données'

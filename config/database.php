@@ -20,6 +20,15 @@ class Database {
         $this->username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
         $this->password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
 
+        // Debug local
+        if (empty($this->host) || empty($this->dbname) || empty($this->username)) {
+            // Forcer les valeurs locales WAMP
+            $this->host = 'localhost';
+            $this->dbname = 'ecoride_db';
+            $this->username = 'root';
+            $this->password = '';
+        }
+
         // Debug pour Railway
         if ($_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST')) {
             error_log("Railway DB Config: Host=" . $this->host . ", DB=" . $this->dbname);
