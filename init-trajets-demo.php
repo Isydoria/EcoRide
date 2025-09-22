@@ -13,6 +13,12 @@ try {
     // Connexion à la base avec la fonction helper
     $db = db();
 
+    // Vérifier quels utilisateurs existent
+    $users = $db->query("SELECT utilisateur_id, pseudo, role FROM utilisateur WHERE role = 'utilisateur' LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+    if (count($users) < 3) {
+        die("<p style='color: red;'>❌ Erreur : Il faut au moins 3 utilisateurs dans la base. Exécutez d'abord le script seed.sql</p>");
+    }
+
     // Nettoyer les anciens trajets de test
     echo "<p>🧹 Nettoyage des anciens trajets...</p>\n";
     $db->exec("DELETE FROM participation WHERE covoiturage_id BETWEEN 1 AND 10");
@@ -21,38 +27,41 @@ try {
     // Créer des trajets avec dates relatives (toujours valides)
     echo "<p>🚀 Création de nouveaux trajets...</p>\n";
 
+    // Utiliser les vrais IDs d'utilisateurs de la base
+    $user_ids = array_column($users, 'utilisateur_id');
+
     $trajets = [
         [
             'id' => 1,
-            'conducteur' => 4, 'voiture' => 1,
+            'conducteur' => $user_ids[0] ?? 1, 'voiture' => 1,
             'depart' => 'Paris', 'arrivee' => 'Lyon',
             'jour' => 1, 'heure' => '09:00', 'duree' => 150, // +1 jour, 9h00, 2h30
             'places' => 3, 'prix' => 25.00
         ],
         [
             'id' => 2,
-            'conducteur' => 5, 'voiture' => 2,
+            'conducteur' => $user_ids[1] ?? 1, 'voiture' => 1,
             'depart' => 'Lyon', 'arrivee' => 'Marseille',
             'jour' => 1, 'heure' => '14:00', 'duree' => 195, // +1 jour, 14h00, 3h15
             'places' => 2, 'prix' => 20.00
         ],
         [
             'id' => 3,
-            'conducteur' => 6, 'voiture' => 3,
+            'conducteur' => $user_ids[2] ?? 1, 'voiture' => 1,
             'depart' => 'Bordeaux', 'arrivee' => 'Toulouse',
             'jour' => 2, 'heure' => '10:00', 'duree' => 150, // +2 jours, 10h00, 2h30
             'places' => 3, 'prix' => 15.00
         ],
         [
             'id' => 4,
-            'conducteur' => 4, 'voiture' => 4,
+            'conducteur' => $user_ids[0] ?? 1, 'voiture' => 1,
             'depart' => 'Paris', 'arrivee' => 'Orleans',
             'jour' => 3, 'heure' => '16:00', 'duree' => 90, // +3 jours, 16h00, 1h30
             'places' => 3, 'prix' => 10.00
         ],
         [
             'id' => 5,
-            'conducteur' => 5, 'voiture' => 5,
+            'conducteur' => $user_ids[1] ?? 1, 'voiture' => 1,
             'depart' => 'Lyon', 'arrivee' => 'Grenoble',
             'jour' => 4, 'heure' => '15:00', 'duree' => 75, // +4 jours, 15h00, 1h15
             'places' => 2, 'prix' => 8.00
