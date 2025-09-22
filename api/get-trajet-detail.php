@@ -113,16 +113,16 @@ try {
     
     // Récupérer les préférences du conducteur
     $sqlPref = "
-        SELECT 
-            accepte_fumeur,
-            accepte_animaux,
-            accepte_musique,
-            accepte_discussion,
-            preferences_autres
-        FROM 
-            preferences_conducteur
-        WHERE 
-            id_utilisateur = :conducteur_id
+        SELECT
+            fumeur as accepte_fumeur,
+            animaux as accepte_animaux,
+            musique as accepte_musique,
+            discussion as accepte_discussion,
+            preferences_custom as preferences_autres
+        FROM
+            parametre
+        WHERE
+            utilisateur_id = :conducteur_id
     ";
     
     $stmtPref = $pdo->prepare($sqlPref);
@@ -134,19 +134,19 @@ try {
     
     // Récupérer les avis validés sur le conducteur
     $sqlAvis = "
-        SELECT 
+        SELECT
             a.note,
             a.commentaire,
-            a.date_creation,
+            a.created_at as date_creation,
             u.pseudo as auteur
-        FROM 
+        FROM
             avis a
             INNER JOIN utilisateur u ON a.auteur_id = u.utilisateur_id
-        WHERE 
-            a.id_destinataire = :conducteur_id
+        WHERE
+            a.destinataire_id = :conducteur_id
             AND a.statut = 'valide'
-        ORDER BY 
-            a.date_creation DESC
+        ORDER BY
+            a.created_at DESC
         LIMIT 10
     ";
     

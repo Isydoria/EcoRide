@@ -91,10 +91,41 @@ mysql -u root -p ecoride_db < database/seed.sql
 
 ## 👤 Comptes de Test
 
+**Administrateur :**
+- **Email** : `admin@ecoride.fr`
+- **Mot de passe** : `Ec0R1de!`
+- **Accès admin** : https://ecoride-production-2631.up.railway.app/admin/dashboard.php
+
 **Utilisateurs :**
-- **Conducteur** : `jean.dupont` / `motdepasse123`
-- **Passager** : `marie.martin` / `motdepasse123`
+- **Utilisateur demo** : `demo@ecoride.fr` / `demo123` (50 crédits)
+- **Conducteur** : `jean.dupont@email.com` / `motdepasse123`
+- **Passager** : `marie.martin@email.com` / `motdepasse123`
 - **Nouveau** : Créer un compte (20 crédits offerts)
+
+## 🎯 Instructions pour le Correcteur
+
+**⚠️ Important** : Pour tester les fonctionnalités de recherche et réservation de trajets :
+
+### 1️⃣ Initialiser les trajets de démonstration
+```
+Accédez à : https://ecoride-production-2631.up.railway.app/init-trajets-demo.php
+OU en local : http://localhost/ecoride/init-trajets-demo.php
+```
+
+Ce script crée automatiquement 5 trajets avec des **dates relatives** (demain, après-demain...) qui fonctionneront quelle que soit la date d'évaluation.
+
+### 2️⃣ Trajets créés automatiquement
+- **Paris → Lyon** (demain 9h00) - Véhicule électrique Tesla
+- **Lyon → Marseille** (demain 14h00) - Véhicule électrique Renault
+- **Bordeaux → Toulouse** (dans 2 jours 10h00) - Véhicule électrique VW
+- **Paris → Orleans** (dans 3 jours 16h00) - Véhicule hybride Toyota
+- **Lyon → Grenoble** (dans 4 jours 15h00) - Véhicule essence Renault
+
+### 3️⃣ Tests recommandés
+1. **Recherche** : `Lyon` → `Marseille` (date de demain)
+2. **Détail trajet** : Cliquer sur "Voir détail" d'un trajet
+3. **Réservation** : Se connecter et réserver une place
+4. **Interface admin** : Connexion avec `admin@ecoride.fr` / `Ec0R1de!`
 
 ## 🎯 User Stories Implémentées
 
