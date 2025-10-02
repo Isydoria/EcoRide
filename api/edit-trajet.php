@@ -6,7 +6,7 @@ session_start();
 if (!isset($_SESSION['user_id'])) {
     die(json_encode([
         'success' => false,
-        'message' => 'Vous devez être connecté pour créer un trajet'
+        'message' => 'Vous devez être connecté pour modifier un trajet'
     ]));
 }
 
@@ -31,6 +31,7 @@ try {
 
 // Récupérer et valider les données
 $user_id = $_SESSION['user_id'];
+$trip_id = intval($_POST['trip_id'] ?? 0);
 $ville_depart = trim($_POST['ville_depart'] ?? '');
 $ville_arrivee = trim($_POST['ville_arrivee'] ?? '');
 $date_depart = $_POST['date_depart'] ?? '';
@@ -40,10 +41,13 @@ $heure_arrivee = $_POST['heure_arrivee'] ?? '';
 $voiture_id = intval($_POST['voiture_id'] ?? 0);
 $places_disponibles = intval($_POST['places_disponibles'] ?? 0);
 $prix_par_place = floatval($_POST['prix_par_place'] ?? 0);
-$commentaire = trim($_POST['commentaire'] ?? '');
 
 // Validations
 $errors = [];
+
+if ($trip_id <= 0) {
+    $errors[] = 'ID de trajet invalide';
+}
 
 if (empty($ville_depart)) {
     $errors[] = 'La ville de départ est obligatoire';
@@ -87,7 +91,7 @@ if ($places_disponibles <= 0 || $places_disponibles > 4) {
 }
 
 if ($prix_par_place <= 0 || $prix_par_place > 100) {
-    $errors[] = 'Le prix par place doit être entre 0.50€ et 100€';
+    $errors[] = 'Le prix par place doit être entre 0.50 et 100 crédits';
 }
 
 // Si des erreurs existent, les retourner
@@ -99,6 +103,43 @@ if (!empty($errors)) {
 }
 
 try {
+    // Vérifier que le trajet appartient bien à l'utilisateur et peut être modifié
+    $stmt = $pdo->prepare("
+        SELECT c.*, COUNT(p.participation_id) as participants
+        FROM covoiturage c
+        LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut = 'confirme'
+        WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
+        GROUP BY c.covoiturage_id
+    ");
+    $stmt->execute([
+        'trip_id' => $trip_id,
+        'user_id' => $user_id
+    ]);
+
+    $trip = $stmt->fetch();
+    if (!$trip) {
+        die(json_encode([
+            'success' => false,
+            'message' => 'Trajet non trouvé ou non autorisé'
+        ]));
+    }
+
+    // Vérifier que le trajet peut être modifié (statut "planifie")
+    if ($trip['statut'] !== 'planifie') {
+        die(json_encode([
+            'success' => false,
+            'message' => 'Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé'
+        ]));
+    }
+
+    // Si des passagers ont déjà réservé, vérifier que les places ne sont pas réduites
+    if ($trip['participants'] > 0 && $places_disponibles < $trip['places_disponibles']) {
+        die(json_encode([
+            'success' => false,
+            'message' => 'Vous ne pouvez pas réduire le nombre de places car ' . $trip['participants'] . ' passager(s) ont déjà réservé'
+        ]));
+    }
+
     // Vérifier que le véhicule appartient bien à l'utilisateur
     $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
     $stmt->execute([
@@ -122,46 +163,36 @@ try {
         ]));
     }
 
-    // Calculer l'heure d'arrivée estimée (ajouter 2 heures par défaut)
-    $datetime_arrivee = date('Y-m-d H:i:s', strtotime($datetime_depart . ' +2 hours'));
-
     // Commencer une transaction
     $pdo->beginTransaction();
 
-    // Insérer le nouveau trajet
+    // Mettre à jour le trajet
     $stmt = $pdo->prepare("
-        INSERT INTO covoiturage (
-            conducteur_id, voiture_id, ville_depart, ville_arrivee,
-            date_depart, date_arrivee, places_disponibles, prix_par_place,
-            statut, created_at
-        ) VALUES (
-            :conducteur_id, :voiture_id, :ville_depart, :ville_arrivee,
-            :date_depart, :date_arrivee, :places_disponibles, :prix_par_place,
-            'planifie', NOW()
-        )
+        UPDATE covoiturage SET
+            voiture_id = :voiture_id,
+            ville_depart = :ville_depart,
+            ville_arrivee = :ville_arrivee,
+            date_depart = :date_depart,
+            date_arrivee = :date_arrivee,
+            places_disponibles = :places_disponibles,
+            prix_par_place = :prix_par_place
+        WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
     ");
 
     $result = $stmt->execute([
-        'conducteur_id' => $user_id,
         'voiture_id' => $voiture_id,
         'ville_depart' => $ville_depart,
         'ville_arrivee' => $ville_arrivee,
         'date_depart' => $datetime_depart,
         'date_arrivee' => $datetime_arrivee,
         'places_disponibles' => $places_disponibles,
-        'prix_par_place' => $prix_par_place
+        'prix_par_place' => $prix_par_place,
+        'trip_id' => $trip_id,
+        'user_id' => $user_id
     ]);
 
     if (!$result) {
-        throw new Exception('Erreur lors de la création du trajet');
-    }
-
-    $trajet_id = $pdo->lastInsertId();
-
-    // Si un commentaire a été ajouté, l'enregistrer dans une table dédiée
-    if (!empty($commentaire)) {
-        // Pour l'instant on peut l'ignorer car la table commentaires n'existe pas encore
-        // On pourrait l'ajouter plus tard
+        throw new Exception('Erreur lors de la modification du trajet');
     }
 
     // Valider la transaction
@@ -170,8 +201,8 @@ try {
     // Retourner le succès
     echo json_encode([
         'success' => true,
-        'message' => 'Trajet créé avec succès ! Il est maintenant visible par les autres utilisateurs.',
-        'trajet_id' => $trajet_id
+        'message' => 'Trajet modifié avec succès ! Les modifications sont maintenant visibles.',
+        'trip_id' => $trip_id
     ]);
 
 } catch (Exception $e) {
@@ -181,11 +212,11 @@ try {
     }
 
     // Log l'erreur pour debug
-    error_log('Erreur création trajet: ' . $e->getMessage());
+    error_log('Erreur modification trajet: ' . $e->getMessage());
 
     echo json_encode([
         'success' => false,
-        'message' => 'Erreur lors de la création du trajet. Veuillez réessayer.'
+        'message' => 'Erreur lors de la modification du trajet: ' . $e->getMessage()
     ]);
 }
 ?>

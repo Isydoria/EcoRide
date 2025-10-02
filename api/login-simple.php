@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Connexion à la base de données avec la classe Database
-require_once '../config/database.php';
+require_once '../config/init.php';
 
 try {
     $pdo = db();

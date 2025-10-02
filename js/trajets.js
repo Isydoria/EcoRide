@@ -117,7 +117,10 @@ function createTrajetCard(trajet) {
     const stars = createStarRating(trajet.note_moyenne || 0);
     
     // Calculer la durée en heures et minutes
-    const duree = calculateDuration(trajet.heure_depart, trajet.heure_arrivee);
+    // Calculer durée à partir des dates complètes au lieu des heures séparées
+    const duree = trajet.date_arrivee && trajet.date_depart
+        ? calculateDurationFromDates(trajet.date_depart, trajet.date_arrivee)
+        : 'À définir';
     
     // Créer l'initiale du conducteur
     const initial = trajet.conducteur_pseudo ? trajet.conducteur_pseudo[0].toUpperCase() : '?';
@@ -169,7 +172,7 @@ function createTrajetCard(trajet) {
             <div class="trajet-footer">
                 <div>
                     <div class="trajet-price">
-                        ${trajet.prix}€
+                        ${trajet.prix} crédits
                         <small>/ place</small>
                     </div>
                     <div class="trajet-places">
@@ -187,53 +190,70 @@ function createTrajetCard(trajet) {
 // Fonction pour appliquer les filtres
 function applyFilters() {
     console.log('Application des filtres');
-    
+
     // Récupérer les valeurs des filtres
     currentFilters.ecologique = document.getElementById('filter-eco').checked;
     currentFilters.prix_max = document.getElementById('filter-prix').value || null;
     currentFilters.duree_max = document.getElementById('filter-duree').value || null;
     currentFilters.note_min = document.getElementById('filter-note').value || null;
-    
-    // Filtrer les résultats
-    let filteredResults = currentResults;
-    
-    // Filtre écologique
-    if (currentFilters.ecologique) {
-        filteredResults = filteredResults.filter(t => 
-            t.type_carburant === 'electrique' || 
-            t.type_carburant === 'hybride' ||
-            t.type_carburant === 'hydrogene'
-        );
-    }
-    
-    // Filtre prix max
-    if (currentFilters.prix_max) {
-        filteredResults = filteredResults.filter(t => 
-            parseFloat(t.prix) <= parseFloat(currentFilters.prix_max)
-        );
-    }
-    
-    // Filtre durée max (en heures)
-    if (currentFilters.duree_max) {
-        filteredResults = filteredResults.filter(t => {
-            const dureeMinutes = calculateDurationInMinutes(t.heure_depart, t.heure_arrivee);
-            const dureeHeures = dureeMinutes / 60;
-            return dureeHeures <= parseFloat(currentFilters.duree_max);
+
+    // Refaire la recherche avec les filtres (US4 - côté serveur)
+    const villeDepart = document.getElementById('ville_depart').value;
+    const villeArrivee = document.getElementById('ville_arrivee').value;
+    const dateDepart = document.getElementById('date_depart').value;
+
+    if (villeDepart && villeArrivee && dateDepart) {
+        // Afficher le message de filtrage
+        showMessage('loading', '🔄 Application des filtres...');
+
+        // Créer les données à envoyer avec les filtres
+        const formData = new FormData();
+        formData.append('ville_depart', villeDepart);
+        formData.append('ville_arrivee', villeArrivee);
+        formData.append('date_depart', dateDepart);
+
+        // Ajouter les filtres
+        if (currentFilters.ecologique) {
+            formData.append('ecologique', 'true');
+        }
+        if (currentFilters.prix_max) {
+            formData.append('prix_max', currentFilters.prix_max);
+        }
+        if (currentFilters.duree_max) {
+            formData.append('duree_max', currentFilters.duree_max);
+        }
+        if (currentFilters.note_min) {
+            formData.append('note_min', currentFilters.note_min);
+        }
+
+        // Envoyer la requête au serveur avec filtres
+        fetch('api/search-trajets.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Résultats filtrés reçus:', data);
+
+            if (data.success) {
+                currentResults = data.trajets;
+                displayResults(data.trajets);
+
+                // Message selon le nombre de résultats
+                if (data.trajets.length > 0) {
+                    showMessage('success', `✅ ${data.trajets.length} trajet(s) trouvé(s) après filtrage`);
+                } else {
+                    showMessage('info', '🔍 Aucun trajet ne correspond aux filtres sélectionnés. Essayez de les modifier.');
+                }
+            } else {
+                showMessage('error', '❌ ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showMessage('error', '❌ Une erreur est survenue lors du filtrage.');
         });
     }
-    
-    // Filtre note minimum
-    if (currentFilters.note_min) {
-        filteredResults = filteredResults.filter(t => 
-            (t.note_moyenne || 0) >= parseFloat(currentFilters.note_min)
-        );
-    }
-    
-    // Afficher les résultats filtrés
-    displayResults(filteredResults);
-    
-    // Mettre à jour le message
-    showMessage('success', `✅ ${filteredResults.length} trajet(s) après filtrage`);
 }
 
 // Fonction pour afficher un message
@@ -293,8 +313,19 @@ function createStarRating(rating) {
 
 // Formater une date
 function formatDate(dateString) {
+    if (!dateString) return 'Date inconnue';
+
     const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long' };
+
+    // Vérifier que la date est valide
+    if (isNaN(date.getTime())) return 'Date invalide';
+
+    const options = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    };
+
     return date.toLocaleDateString('fr-FR', options);
 }
 
@@ -319,9 +350,28 @@ function calculateDuration(heureDepart, heureArrivee) {
 function calculateDurationInMinutes(heureDepart, heureArrivee) {
     const [h1, m1] = heureDepart.split(':').map(Number);
     const [h2, m2] = heureArrivee.split(':').map(Number);
-    
+
     const minutes1 = h1 * 60 + m1;
     const minutes2 = h2 * 60 + m2;
-    
+
     return minutes2 - minutes1;
+}
+
+// Calculer durée entre deux dates complètes
+function calculateDurationFromDates(dateDepart, dateArrivee) {
+    const depart = new Date(dateDepart);
+    const arrivee = new Date(dateArrivee);
+
+    const diffMs = arrivee - depart;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMinutes < 0) return 'À définir';
+
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+
+    if (hours > 0) {
+        return `${hours}h${minutes > 0 ? minutes.toString().padStart(2, '0') : ''}`;
+    }
+    return `${minutes}min`;
 }

@@ -1,6 +1,40 @@
 <?php
 // index.php - Page d'accueil
 require_once 'config/init.php';
+
+// Récupérer les trajets disponibles récents
+$popular_trips = [];
+$error_message = '';
+
+try {
+    $pdo = db();
+
+    // Récupérer les trajets futurs disponibles (requête simplifiée compatible)
+    $stmt = $pdo->prepare("
+        SELECT c.*, u.pseudo as conducteur_pseudo,
+               0 as note_moyenne,
+               COALESCE(v.marque, 'Véhicule') as marque,
+               COALESCE(v.modele, 'non renseigné') as modele,
+               COALESCE(v.couleur, '') as couleur,
+               'essence' as type_carburant,
+               0 as reservations_count,
+               c.places_disponibles as places_libres
+        FROM covoiturage c
+        JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+        WHERE c.statut IN ('planifie', 'en_cours')
+        AND c.date_depart >= CURDATE()
+        AND c.places_disponibles > 0
+        ORDER BY c.date_depart ASC
+        LIMIT 6
+    ");
+
+    $stmt->execute();
+    $popular_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (Exception $e) {
+    $error_message = "Erreur lors du chargement des trajets : " . $e->getMessage();
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -54,29 +88,109 @@ require_once 'config/init.php';
             <h1>Voyagez <span class="text-green">écologique</span>, économisez <span class="text-green">ensemble</span></h1>
             <p class="hero-description">
                 <?php if (isLoggedIn()): ?>
-                    Bienvenue <?php echo htmlspecialchars($_SESSION['user_pseudo']); ?> !
+                    Bienvenue <?php echo htmlspecialchars($_SESSION['user_pseudo'] ?? 'Utilisateur'); ?> !
                 <?php else: ?>
                     Rejoignez la communauté du covoiturage 100% green
                 <?php endif; ?>
             </p>
-            
-            <form class="search-form" action="trajets.php" method="GET">
-                <div class="search-wrapper">
-                    <div class="form-group">
-                        <input type="text" id="departure" name="departure" placeholder="📍 Ville de départ" required class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <input type="text" id="arrival" name="arrival" placeholder="📍 Ville d'arrivée" required class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <input type="date" id="date" name="date" required class="form-input">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Rechercher</button>
+
+            <div class="cta-buttons">
+                <a href="trajets.php" class="btn btn-primary">🔍 Rechercher un trajet</a>
+                <?php if (isLoggedIn()): ?>
+                    <a href="creer-trajet.php" class="btn btn-secondary">➕ Créer un trajet</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Trajets Disponibles -->
+    <section class="popular-trips">
+        <div class="container">
+            <h2 class="section-title">🚗 Trajets disponibles</h2>
+            <p class="section-subtitle">Découvrez les prochains trajets proposés par la communauté</p>
+
+            <?php if (!empty($error_message)): ?>
+                <div class="error-message"><?= htmlspecialchars($error_message) ?></div>
+            <?php elseif (empty($popular_trips)): ?>
+                <div class="empty-state">
+                    <h3>Aucun trajet disponible pour le moment</h3>
+                    <p>Revenez bientôt pour découvrir de nouveaux trajets !</p>
+                    <a href="creer-trajet.php" class="btn btn-primary">Créer le premier trajet</a>
                 </div>
-            </form>
+            <?php else: ?>
+                <div class="trips-grid">
+                    <?php foreach ($popular_trips as $trip): ?>
+                        <div class="trip-card">
+                            <div class="trip-header">
+                                <div class="trip-route">
+                                    <span class="route-text">
+                                        <?= htmlspecialchars($trip['ville_depart']) ?> → <?= htmlspecialchars($trip['ville_arrivee']) ?>
+                                    </span>
+                                    <span class="status-badge">
+                                        <?= $trip['statut'] === 'planifie' ? '📅 Programmé' : '🚀 En cours' ?>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="trip-info">
+                                <div class="trip-datetime">
+                                    <span class="date">📅 <?= date('d/m/Y', strtotime($trip['date_depart'])) ?></span>
+                                    <span class="time">🕒 <?= date('H:i', strtotime($trip['date_depart'])) ?></span>
+                                </div>
+
+                                <div class="trip-details">
+                                    <div class="detail-item">
+                                        <span class="icon">👨‍✈️</span>
+                                        <span><?= htmlspecialchars($trip['conducteur_pseudo']) ?></span>
+                                        <?php if ($trip['note_moyenne'] > 0): ?>
+                                            <span class="rating">⭐ <?= number_format($trip['note_moyenne'], 1) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span class="icon">🚗</span>
+                                        <span><?= htmlspecialchars($trip['marque'] . ' ' . $trip['modele']) ?></span>
+                                        <?php if ($trip['type_carburant'] === 'electrique'): ?>
+                                            <span class="eco-badge">⚡</span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span class="icon">👥</span>
+                                        <span><?= $trip['places_libres'] ?> place(s) libre(s)</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span class="icon">💰</span>
+                                        <span><?= number_format($trip['prix_par_place'], 2) ?> crédits</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="trip-actions">
+                                <a href="trajet-detail.php?id=<?= $trip['covoiturage_id'] ?>" class="btn btn-outline">
+                                    👁️ Voir détails
+                                </a>
+                                <?php if (isLoggedIn()): ?>
+                                    <a href="trajet-detail.php?id=<?= $trip['covoiturage_id'] ?>#reserver" class="btn btn-primary">
+                                        🎫 Réserver
+                                    </a>
+                                <?php else: ?>
+                                    <a href="connexion.php" class="btn btn-primary">
+                                        🔐 Se connecter
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="view-all-section">
+                    <a href="trajets.php" class="btn btn-secondary btn-large">
+                        🔍 Voir tous les trajets disponibles
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 

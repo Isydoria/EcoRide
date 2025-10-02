@@ -223,3 +223,213 @@ input[type="date"]:valid {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========== CTA BUTTONS ========== */
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+/* ========== SECTION TRAJETS POPULAIRES ========== */
+.popular-trips {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.section-title {
+    text-align: center;
+    color: var(--vert-principal);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--gris-moyen);
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+}
+
+.trips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.trip-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.trip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.trip-header {
+    background: linear-gradient(135deg, var(--vert-principal), var(--vert-fonce));
+    padding: 1.5rem;
+    color: white;
+}
+
+.trip-route {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.status-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.trip-info {
+    padding: 1.5rem;
+}
+
+.trip-datetime {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.trip-datetime .date,
+.trip-datetime .time {
+    color: var(--gris-moyen);
+    font-weight: 500;
+}
+
+.trip-details {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--gris-fonce);
+    font-size: 0.95rem;
+}
+
+.detail-item .icon {
+    width: 20px;
+    text-align: center;
+}
+
+.rating {
+    color: #ffc107;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.eco-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+.trip-actions {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--vert-principal);
+    color: var(--vert-principal);
+    flex: 1;
+}
+
+.btn-outline:hover {
+    background: var(--vert-principal);
+    color: white;
+}
+
+.trip-actions .btn-primary {
+    flex: 1;
+}
+
+.view-all-section {
+    text-align: center;
+}
+
+.btn-large {
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gris-moyen);
+}
+
+.empty-state h3 {
+    color: var(--gris-fonce);
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* ========== RESPONSIVE TRAJETS ========== */
+@media (max-width: 768px) {
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .trips-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .trip-card {
+        margin: 0 1rem;
+    }
+
+    .trip-datetime {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .trip-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+}

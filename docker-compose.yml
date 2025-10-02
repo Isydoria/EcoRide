@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # 1. Serveur Web (PHP + Apache)
+  web:
+    build: .
+    container_name: ecoride-web
+    ports:
+      - "8080:80"  # Votre site sera sur http://localhost:8080
+    volumes:
+      - .:/var/www/html  # Lie votre dossier projet au container
+    environment:
+      - DOCKER_ENV=true  # Pour détecter qu'on est sous Docker
+    depends_on:
+      - mysql  # Démarre MySQL avant le serveur web
+
+  # 2. Base de données MySQL (SANS mot de passe pour root)
+  mysql:
+    image: mysql:8.0
+    container_name: ecoride-mysql
+    ports:
+      - "3307:3306"  # Port 3307 pour éviter conflit avec WampServer
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Permet un mot de passe vide
+      MYSQL_ROOT_PASSWORD: ""  # Pas de mot de passe
+      MYSQL_DATABASE: ecoride_db
+    volumes:
+      # Important : Docker va exécuter automatiquement schema.sql puis seed.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - mysql_data:/var/lib/mysql  # Pour persister les données
+    command: --default-authentication-plugin=mysql_native_password
+
+  # 3. phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: ecoride-phpmyadmin
+    ports:
+      - "8081:80"  # phpMyAdmin sur http://localhost:8081
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: ""  # Pas de mot de passe
+      PMA_ARBITRARY: 1
+    depends_on:
+      - mysql
+
+# Volume pour persister les données MySQL
+volumes:
+  mysql_data:

@@ -116,6 +116,7 @@
     gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem;
 }
 
 /* ========== COLONNE PRINCIPALE ========== */
@@ -153,6 +154,8 @@
 .trajet-title {
     font-size: 32px;
     margin-bottom: 0.5rem;
+    margin-top: 0;
+    padding-right: 200px; /* Laisser de la place pour le badge */
 }
 
 .trajet-datetime {

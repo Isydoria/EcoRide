@@ -21,6 +21,10 @@ $userId = $_SESSION['user_id'] ?? null;
 $userPseudo = $_SESSION['user_pseudo'] ?? '';
 $userCredits = $_SESSION['user_credits'] ?? 0;
 $userRole = $_SESSION['user_role'] ?? '';
+
+// DEBUG TEMPORAIRE
+error_log("DEBUG trajet-detail.php: isLoggedIn = " . ($isLoggedIn ? 'true' : 'false'));
+error_log("DEBUG trajet-detail.php: trajet_id = " . $trajet_id);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -200,7 +204,7 @@ $userRole = $_SESSION['user_role'] ?? '';
                         <div class="booking-card">
                             <div class="price-section">
                                 <div class="price-large">
-                                    <span id="prixTrajet">...</span>€
+                                    <span id="prixTrajet">...</span> crédits
                                     <small>/ place</small>
                                 </div>
                                 <div class="places-remaining">
@@ -318,6 +322,6 @@ $userRole = $_SESSION['user_role'] ?? '';
 
     <!-- Scripts JavaScript -->
     <script src="js/main.js"></script>
-    <script src="js/trajet-detail.js"></script>
+    <script src="js/trajet-detail.js?v=<?= time() ?>"></script>
 </body>
 </html>

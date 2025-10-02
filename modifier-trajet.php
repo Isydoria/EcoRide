@@ -9,12 +9,41 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once 'config/init.php';
 
+// Vérifier que l'ID du trajet est fourni
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header('Location: user/dashboard.php?section=my-trips');
+    exit;
+}
+
+$trip_id = intval($_GET['id']);
+$user_id = $_SESSION['user_id'];
+
 try {
     $pdo = db();
 
+    // Récupérer les détails du trajet pour vérifier que l'utilisateur est bien le conducteur
+    $stmt = $pdo->prepare("
+        SELECT c.*, v.marque, v.modele
+        FROM covoiturage c
+        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+        WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
+    ");
+    $stmt->execute(['trip_id' => $trip_id, 'user_id' => $user_id]);
+    $trip = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$trip) {
+        header('Location: user/dashboard.php?section=my-trips');
+        exit;
+    }
+
+    // Vérifier que le trajet peut encore être modifié (statut "planifie")
+    if ($trip['statut'] !== 'planifie') {
+        $error = "Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé.";
+    }
+
     // Récupérer les véhicules de l'utilisateur
     $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([$user_id]);
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Exception $e) {
@@ -27,7 +56,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un trajet - EcoRide</title>
+    <title>Modifier le trajet - EcoRide</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/trajets.css">
     <style>
@@ -84,7 +113,7 @@ try {
         }
 
         .submit-btn {
-            background: linear-gradient(135deg, #2ECC71, #27ae60);
+            background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
             padding: 15px 40px;
             border: none;
@@ -100,23 +129,35 @@ try {
             transform: translateY(-2px);
         }
 
-        .no-vehicle-notice {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 20px;
-            border-radius: 8px;
+        .cancel-btn {
+            background: #95a5a6;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.3s;
+            text-decoration: none;
+            display: inline-block;
             text-align: center;
-            margin: 20px 0;
         }
 
-        .add-vehicle-btn {
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 10px;
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+            background: #7f8c8d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -145,32 +186,31 @@ try {
 
     <main class="main-content" style="padding-top: 80px;">
         <div class="create-trip-container">
-            <h1>🚗 Créer un nouveau trajet</h1>
+            <h1>✏️ Modifier le trajet</h1>
+            <p style="color: #7f8c8d; margin-bottom: 20px;">
+                <?= htmlspecialchars($trip['ville_depart'] ?? '') ?> → <?= htmlspecialchars($trip['ville_arrivee'] ?? '') ?>
+            </p>
 
             <?php if (isset($error)): ?>
                 <div class="error-message"><?= htmlspecialchars($error) ?></div>
-            <?php endif; ?>
-
-            <?php if (empty($vehicles)): ?>
-                <div class="no-vehicle-notice">
-                    <h3>⚠️ Aucun véhicule enregistré</h3>
-                    <p>Vous devez d'abord enregistrer un véhicule pour créer des trajets.</p>
-                    <a href="user/dashboard.php#vehicles" class="add-vehicle-btn">Ajouter un véhicule</a>
-                </div>
+                <a href="user/dashboard.php?section=my-trips" class="cancel-btn">← Retour à mes trajets</a>
             <?php else: ?>
 
-                <form id="createTripForm" method="POST" action="api/create-trajet.php">
+                <form id="editTripForm" method="POST" action="api/edit-trajet.php">
+                    <input type="hidden" name="trip_id" value="<?= $trip_id ?>">
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ville_depart">🏁 Ville de départ *</label>
                             <input type="text" id="ville_depart" name="ville_depart" required
+                                   value="<?= htmlspecialchars($trip['ville_depart'] ?? '') ?>"
                                    placeholder="Ex: Paris, Lyon, Marseille...">
                         </div>
 
                         <div class="form-group">
                             <label for="ville_arrivee">🏁 Ville d'arrivée *</label>
                             <input type="text" id="ville_arrivee" name="ville_arrivee" required
+                                   value="<?= htmlspecialchars($trip['ville_arrivee'] ?? '') ?>"
                                    placeholder="Ex: Nice, Bordeaux, Lille...">
                         </div>
                     </div>
@@ -179,12 +219,14 @@ try {
                         <div class="form-group">
                             <label for="date_depart">📅 Date de départ *</label>
                             <input type="date" id="date_depart" name="date_depart" required
+                                   value="<?= date('Y-m-d', strtotime($trip['date_depart'])) ?>"
                                    min="<?= date('Y-m-d') ?>">
                         </div>
 
                         <div class="form-group">
                             <label for="heure_depart">🕒 Heure de départ *</label>
-                            <input type="time" id="heure_depart" name="heure_depart" required>
+                            <input type="time" id="heure_depart" name="heure_depart" required
+                                   value="<?= date('H:i', strtotime($trip['date_depart'])) ?>">
                         </div>
                     </div>
 
@@ -192,12 +234,14 @@ try {
                         <div class="form-group">
                             <label for="date_arrivee">📅 Date d'arrivée *</label>
                             <input type="date" id="date_arrivee" name="date_arrivee" required
+                                   value="<?= date('Y-m-d', strtotime($trip['date_arrivee'])) ?>"
                                    min="<?= date('Y-m-d') ?>">
                         </div>
 
                         <div class="form-group">
                             <label for="heure_arrivee">🕒 Heure d'arrivée prévue *</label>
-                            <input type="time" id="heure_arrivee" name="heure_arrivee" required>
+                            <input type="time" id="heure_arrivee" name="heure_arrivee" required
+                                   value="<?= date('H:i', strtotime($trip['date_arrivee'])) ?>">
                         </div>
                     </div>
 
@@ -207,7 +251,8 @@ try {
                             <select id="voiture_id" name="voiture_id" required>
                                 <option value="">Choisir un véhicule</option>
                                 <?php foreach ($vehicles as $vehicle): ?>
-                                    <option value="<?= $vehicle['voiture_id'] ?>">
+                                    <option value="<?= $vehicle['voiture_id'] ?>"
+                                            <?= ($vehicle['voiture_id'] == $trip['voiture_id']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($vehicle['marque'] . ' ' . $vehicle['modele']) ?>
                                         (<?= htmlspecialchars($vehicle['immatriculation']) ?>)
                                         - <?= $vehicle['places'] ?> places
@@ -220,10 +265,11 @@ try {
                             <label for="places_disponibles">👥 Places disponibles *</label>
                             <select id="places_disponibles" name="places_disponibles" required>
                                 <option value="">Sélectionner...</option>
-                                <option value="1">1 place</option>
-                                <option value="2">2 places</option>
-                                <option value="3">3 places</option>
-                                <option value="4">4 places</option>
+                                <?php for ($i = 1; $i <= 4; $i++): ?>
+                                    <option value="<?= $i ?>" <?= ($i == $trip['places_disponibles']) ? 'selected' : '' ?>>
+                                        <?= $i ?> place<?= $i > 1 ? 's' : '' ?>
+                                    </option>
+                                <?php endfor; ?>
                             </select>
                         </div>
                     </div>
@@ -232,6 +278,7 @@ try {
                         <label for="prix_par_place">💰 Prix par place (crédits) *</label>
                         <input type="number" id="prix_par_place" name="prix_par_place"
                                min="1" max="100" step="0.50" required
+                               value="<?= $trip['prix_par_place'] ?>"
                                placeholder="Ex: 15.50">
                     </div>
 
@@ -241,15 +288,13 @@ try {
                         Le prix que vous fixez est entièrement versé à votre compte de crédits.
                     </div>
 
-                    <div class="form-group">
-                        <label for="commentaire">💬 Commentaire (optionnel)</label>
-                        <textarea id="commentaire" name="commentaire" rows="3"
-                                  placeholder="Informations supplémentaires pour les passagers..."></textarea>
-                    </div>
-
                     <button type="submit" class="submit-btn">
-                        🚀 Publier mon trajet
+                        ✏️ Mettre à jour le trajet
                     </button>
+
+                    <a href="user/dashboard.php?section=my-trips" class="cancel-btn">
+                        ← Annuler et retourner
+                    </a>
 
                 </form>
 
@@ -262,14 +307,7 @@ try {
         <div style="max-width: 800px; margin: 0 auto; padding: 0 20px; text-align: center;">
             <div style="margin-bottom: 20px;">
                 <h4 style="color: #2ECC71; margin-bottom: 15px;">🚗🌱 EcoRide</h4>
-                <p style="color: #bdc3c7;">Créez vos trajets facilement et contribuez à un transport plus écologique</p>
-            </div>
-
-            <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; flex-wrap: wrap;">
-                <a href="index.php" style="color: #bdc3c7; text-decoration: none;">Accueil</a>
-                <a href="trajets.php" style="color: #bdc3c7; text-decoration: none;">Rechercher des trajets</a>
-                <a href="user/dashboard.php" style="color: #bdc3c7; text-decoration: none;">Mon espace</a>
-                <a href="contact.php" style="color: #bdc3c7; text-decoration: none;">Contact</a>
+                <p style="color: #bdc3c7;">Modifiez vos trajets facilement</p>
             </div>
 
             <div style="border-top: 1px solid #34495e; padding-top: 20px;">
@@ -279,7 +317,7 @@ try {
     </footer>
 
     <script>
-        document.getElementById('createTripForm')?.addEventListener('submit', function(e) {
+        document.getElementById('editTripForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
@@ -294,7 +332,7 @@ try {
             }
 
             // Soumission
-            fetch('api/create-trajet.php', {
+            fetch('api/edit-trajet.php', {
                 method: 'POST',
                 body: formData
             })
@@ -309,7 +347,7 @@ try {
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert('Erreur lors de la création du trajet');
+                alert('Erreur lors de la modification du trajet');
             });
         });
     </script>

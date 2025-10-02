@@ -69,9 +69,13 @@ function displayTrajetDetails(trajet) {
     // Itinéraire détaillé
     document.getElementById('adresseDepart').textContent = trajet.adresse_depart || trajet.ville_depart;
     document.getElementById('adresseArrivee').textContent = trajet.adresse_arrivee || trajet.ville_arrivee;
-    document.getElementById('heureDepartDetail').textContent = 'Départ à ' + formatTime(trajet.heure_depart);
-    document.getElementById('heureArriveeDetail').textContent = 'Arrivée prévue à ' + formatTime(trajet.heure_arrivee);
-    document.getElementById('dureeTrajet').textContent = calculateDuration(trajet.heure_depart, trajet.heure_arrivee);
+    // Extraire les heures depuis les dates complètes
+    const heureDeparExtracted = extractTimeFromDateTime(trajet.date_depart);
+    const heureArriveeExtracted = extractTimeFromDateTime(trajet.date_arrivee);
+
+    document.getElementById('heureDepartDetail').textContent = 'Départ à ' + heureDeparExtracted;
+    document.getElementById('heureArriveeDetail').textContent = 'Arrivée prévue à ' + heureArriveeExtracted;
+    document.getElementById('dureeTrajet').textContent = calculateDurationFromDates(trajet.date_depart, trajet.date_arrivee);
     
     // Informations sur le véhicule
     document.getElementById('vehiculeMarque').textContent = trajet.marque;
@@ -114,7 +118,12 @@ function displayTrajetDetails(trajet) {
     // Coût total (prix + commission de 2 crédits)
     const prixNumeric = parseFloat(trajet.prix);
     const coutTotal = prixNumeric + 2;
-    document.getElementById('coutTotal').textContent = coutTotal;
+
+    // Mettre à jour le coût total seulement si l'élément existe (utilisateur connecté)
+    const coutTotalElement = document.getElementById('coutTotal');
+    if (coutTotalElement) {
+        coutTotalElement.textContent = coutTotal;
+    }
     
     // Vérifier si l'utilisateur peut réserver
     if (isLoggedIn) {
@@ -401,4 +410,40 @@ function formatMemberSince(dateString) {
 function capitalizeFirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Extraire l'heure depuis une date-time complète
+function extractTimeFromDateTime(datetimeString) {
+    if (!datetimeString) return 'Non défini';
+
+    const date = new Date(datetimeString);
+    if (isNaN(date.getTime())) return 'Non défini';
+
+    return date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Calculer durée entre deux dates complètes
+function calculateDurationFromDates(dateDepart, dateArrivee) {
+    if (!dateDepart || !dateArrivee) return 'Non calculable';
+
+    const depart = new Date(dateDepart);
+    const arrivee = new Date(dateArrivee);
+
+    if (isNaN(depart.getTime()) || isNaN(arrivee.getTime())) return 'Non calculable';
+
+    const diffMs = arrivee - depart;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMinutes < 0) return 'Non calculable';
+
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+
+    if (hours > 0) {
+        return `${hours}h${minutes > 0 ? minutes.toString().padStart(2, '0') : ''}`;
+    }
+    return `${minutes}min`;
 }

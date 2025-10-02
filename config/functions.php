@@ -49,16 +49,22 @@ function startSecureSession() {
 /**
  * Vérifier si un utilisateur est connecté
  */
-function isLoggedIn() {
-    startSecureSession();
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+if (!function_exists('isLoggedIn')) {
+    function isLoggedIn() {
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
 }
 
 /**
  * Obtenir l'ID de l'utilisateur connecté
  */
 function getCurrentUserId() {
-    startSecureSession();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     return $_SESSION['user_id'] ?? null;
 }
 
@@ -66,7 +72,9 @@ function getCurrentUserId() {
  * Obtenir le rôle de l'utilisateur connecté
  */
 function getCurrentUserRole() {
-    startSecureSession();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     return $_SESSION['user_role'] ?? null;
 }
 
@@ -74,20 +82,61 @@ function getCurrentUserRole() {
  * Obtenir les crédits de l'utilisateur connecté
  */
 function getCurrentUserCredits() {
-    startSecureSession();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     return $_SESSION['user_credits'] ?? 0;
+}
+
+/**
+ * Vérifier le rôle
+ */
+if (!function_exists('hasRole')) {
+    function hasRole($role) {
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === $role;
+    }
 }
 
 /**
  * Rediriger vers une URL
  */
-function redirect($url) {
-    // Si l'URL commence par /, ajouter le dossier du projet
-    if (strpos($url, '/') === 0) {
-        $url = '/ecoride' . $url;
+if (!function_exists('redirect')) {
+    function redirect($url) {
+        // Détection automatique de l'environnement
+        $isDocker = getenv('DOCKER_ENV') === 'true';
+        
+        // Si l'URL commence par /, adapter selon l'environnement
+        if (strpos($url, '/') === 0) {
+            if ($isDocker) {
+                // Docker : pas de sous-dossier
+                // L'URL reste telle quelle
+            } else {
+                // WampServer : ajouter /ecoride
+                $url = '/ecoride' . $url;
+            }
+        }
+        
+        header("Location: $url");
+        exit();
     }
-    header("Location: $url");
-    exit();
+}
+
+/**
+ * Sécuriser les sorties HTML (alias pour e())
+ */
+if (!function_exists('e')) {
+    function e($string) {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+/**
+ * Sécuriser les sorties HTML (alias pour e())
+ */
+if (!function_exists('h')) {
+    function h($string) {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    }
 }
 
 /**
@@ -128,7 +177,9 @@ function generateCSRFToken() {
  * Vérifier le token CSRF
  */
 function verifyCSRFToken($token) {
-    startSecureSession();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     return isset($_SESSION['csrf_token']) && 
         hash_equals($_SESSION['csrf_token'], $token);
 }
@@ -137,18 +188,30 @@ function verifyCSRFToken($token) {
  * Formater une date en français
  */
 function formatDateFr($date) {
-    $formatter = new IntlDateFormatter(
-        'fr_FR',
-        IntlDateFormatter::LONG,
-        IntlDateFormatter::NONE
-    );
-    return $formatter->format(new DateTime($date));
+    if (empty($date)) return '';
+    
+    // Si IntlDateFormatter est disponible
+    if (class_exists('IntlDateFormatter')) {
+        $formatter = new IntlDateFormatter(
+            'fr_FR',
+            IntlDateFormatter::LONG,
+            IntlDateFormatter::NONE
+        );
+        return $formatter->format(new DateTime($date));
+    }
+    
+    // Sinon, formatage basique
+    $mois = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 
+             'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    $dt = new DateTime($date);
+    return $dt->format('j ') . $mois[$dt->format('n')] . $dt->format(' Y');
 }
 
 /**
  * Formater l'heure
  */
 function formatTime($time) {
+    if (empty($time)) return '';
     return date('H\hi', strtotime($time));
 }
 
@@ -178,6 +241,24 @@ function isEcologique($typeCarburant) {
 }
 
 /**
+ * Calculer la durée entre deux heures
+ */
+function calculerDuree($depart, $arrivee) {
+    $dep = new DateTime($depart);
+    $arr = new DateTime($arrivee);
+    $diff = $dep->diff($arr);
+    
+    $heures = $diff->h + ($diff->days * 24);
+    $minutes = $diff->i;
+    
+    if ($heures > 0) {
+        return $heures . 'h' . ($minutes > 0 ? sprintf('%02d', $minutes) : '');
+    } else {
+        return $minutes . 'min';
+    }
+}
+
+/**
  * Logger les erreurs
  */
 function logError($message, $context = []) {
@@ -195,5 +276,64 @@ function logError($message, $context = []) {
     $logMessage .= PHP_EOL;
     
     error_log($logMessage, 3, $logFile);
+}
+
+/**
+ * Fonction pour obtenir rapidement la connexion PDO
+ * Compatible avec l'ancien code qui utilise db()
+ */
+function db() {
+    $database = Database::getInstance();
+    return $database->getConnection();
+}
+
+/**
+ * Message flash dans la session
+ */
+function setFlash($type, $message) {
+    $_SESSION['flash'] = [
+        'type' => $type,
+        'message' => $message
+    ];
+}
+
+/**
+ * Récupérer et supprimer le message flash
+ */
+function getFlash() {
+    if (isset($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $flash;
+    }
+    return null;
+}
+
+/**
+ * Vérifier si l'utilisateur est admin
+ */
+function isAdmin() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'administrateur';
+}
+
+/**
+ * Vérifier si l'utilisateur est employé
+ */
+function isEmployee() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'employe';
+}
+
+/**
+ * Vérifier si l'utilisateur est conducteur
+ */
+function isDriver() {
+    return isset($_SESSION['is_driver']) && $_SESSION['is_driver'] === true;
+}
+
+/**
+ * Obtenir le pseudo de l'utilisateur
+ */
+function getUserPseudo() {
+    return $_SESSION['user_pseudo'] ?? 'Utilisateur';
 }
 ?>

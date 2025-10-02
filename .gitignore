@@ -36,3 +36,7 @@ Thumbs.db
 debug_*.php
 test_*.php
 *_temp.php
+
+# dossiers a ne pas ajouter
+enonce/
+non_commit/

@@ -12,8 +12,8 @@ ini_set('display_errors', 1);
 // Démarrer la session pour vérifier si l'utilisateur est connecté
 session_start();
 
-// Connexion à la base de données avec la classe Database
-require_once '../config/database.php';
+// Connexion à la base de données avec init 
+require_once '../config/init.php';
 
 try {
     $pdo = db();
@@ -39,7 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Récupérer l'ID du trajet
 $trajet_id = isset($_POST['trajet_id']) ? intval($_POST['trajet_id']) : 0;
 
+// Debug logs
+error_log("API DEBUG: trajet_id reçu = " . $trajet_id);
+error_log("API DEBUG: Méthode = " . $_SERVER['REQUEST_METHOD']);
+
 if ($trajet_id <= 0) {
+    error_log("API DEBUG: ID trajet invalide");
     die(json_encode([
         'success' => false,
         'message' => 'ID de trajet invalide'
@@ -50,6 +55,13 @@ if ($trajet_id <= 0) {
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
 try {
+    // Debug: Vérifier si le trajet existe de manière simple d'abord
+    $checkSql = "SELECT COUNT(*) as count FROM covoiturage WHERE covoiturage_id = :trajet_id";
+    $checkStmt = $pdo->prepare($checkSql);
+    $checkStmt->execute(['trajet_id' => $trajet_id]);
+    $count = $checkStmt->fetch(PDO::FETCH_ASSOC);
+    error_log("API DEBUG: Nombre de trajets trouvés avec ID $trajet_id = " . $count['count']);
+
     // Requête principale pour récupérer les détails du trajet
     $sql = "
         SELECT
@@ -68,14 +80,13 @@ try {
             t.ville_arrivee as adresse_arrivee,
             -- Info du conducteur
             u.pseudo as conducteur_pseudo,
-            u.photo as conducteur_photo,
             u.created_at as membre_depuis,
             -- Info du véhicule
             v.marque,
             v.modele,
-            v.energie as type_carburant,
             v.couleur,
             v.places as nombre_places_vehicule,
+            'essence' as type_carburant,
             -- Note moyenne du conducteur
             COALESCE(AVG(av.note), 0) as note_moyenne,
             COUNT(DISTINCT av.avis_id) as nb_avis,
@@ -84,7 +95,7 @@ try {
         FROM
             covoiturage t
             INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
-            INNER JOIN voiture v ON t.voiture_id = v.voiture_id
+            LEFT JOIN voiture v ON t.voiture_id = v.voiture_id
             LEFT JOIN avis av ON u.utilisateur_id = av.destinataire_id AND av.statut = 'valide'
         WHERE
             t.covoiturage_id = :trajet_id
@@ -95,8 +106,14 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['trajet_id' => $trajet_id]);
     $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
+    error_log("API DEBUG: Trajet trouvé = " . ($trajet ? 'OUI' : 'NON'));
+    if ($trajet) {
+        error_log("API DEBUG: Données trajet = " . json_encode($trajet));
+    }
+
     if (!$trajet) {
+        error_log("API DEBUG: Aucun trajet trouvé pour ID = " . $trajet_id);
         die(json_encode([
             'success' => false,
             'message' => 'Trajet introuvable'
@@ -116,14 +133,25 @@ try {
         WHERE
             utilisateur_id = :conducteur_id
     ";
-    
+
     $stmtPref = $pdo->prepare($sqlPref);
     $stmtPref->execute(['conducteur_id' => $trajet['id_conducteur']]);
     $preferences = $stmtPref->fetch(PDO::FETCH_ASSOC);
-    
+
+    // Si pas de préférences trouvées, utiliser des valeurs par défaut
+    if (!$preferences) {
+        $preferences = [
+            'accepte_fumeur' => false,
+            'accepte_animaux' => false,
+            'accepte_musique' => true,
+            'accepte_discussion' => true,
+            'preferences_autres' => ''
+        ];
+    }
+
     // Ajouter les préférences au trajet
     $trajet['preferences'] = $preferences;
-    
+
     // Récupérer les avis validés sur le conducteur
     $sqlAvis = "
         SELECT
@@ -141,11 +169,11 @@ try {
             a.created_at DESC
         LIMIT 10
     ";
-    
+
     $stmtAvis = $pdo->prepare($sqlAvis);
     $stmtAvis->execute(['conducteur_id' => $trajet['id_conducteur']]);
     $avis = $stmtAvis->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Ajouter les avis au trajet
     $trajet['avis'] = $avis;
     
@@ -175,6 +203,9 @@ try {
     $trajet['prix'] = number_format($trajet['prix'], 0, ',', ' ');
     $trajet['places_disponibles'] = intval($trajet['places_disponibles']);
     
+    // Debug final
+    error_log("API DEBUG: Retour SUCCESS avec trajet ID = " . $trajet['id_trajet']);
+
     // Retourner les données
     echo json_encode([
         'success' => true,

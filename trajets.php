@@ -25,7 +25,7 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
     
     <!-- Fichiers CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/trajets.css">
+    <link rel="stylesheet" href="css/trajets.css?v=<?= time() ?>">
 </head>
 <body>
     <!-- Navigation -->
@@ -129,7 +129,7 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                     
                     <!-- Filtre prix max -->
                     <div class="filter-item">
-                        <label class="filter-label">Prix maximum (€)</label>
+                        <label class="filter-label">Prix maximum (crédits)</label>
                         <input 
                             type="number" 
                             id="filter-prix" 
@@ -234,6 +234,6 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
 
     <!-- Scripts JavaScript -->
     <script src="js/main.js"></script>
-    <script src="js/trajets.js"></script>
+    <script src="js/trajets.js?v=<?= time() ?>"></script>
 </body>
 </html>

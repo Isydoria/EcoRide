@@ -6,7 +6,7 @@ session_start();
 if (!isset($_SESSION['user_id'])) {
     die(json_encode([
         'success' => false,
-        'message' => 'Vous devez être connecté pour ajouter un véhicule'
+        'message' => 'Vous devez être connecté pour modifier un véhicule'
     ]));
 }
 
@@ -25,12 +25,13 @@ try {
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
-        'message' => 'Erreur de connexion à la base de données: ' . $e->getMessage()
+        'message' => 'Erreur de connexion à la base de données'
     ]));
 }
 
 // Récupérer et valider les données
 $user_id = $_SESSION['user_id'];
+$vehicle_id = intval($_POST['vehicle_id'] ?? 0);
 $marque = trim($_POST['marque'] ?? '');
 $modele = trim($_POST['modele'] ?? '');
 $immatriculation = strtoupper(trim($_POST['immatriculation'] ?? ''));
@@ -40,6 +41,10 @@ $energie = trim($_POST['energie'] ?? '');
 
 // Validations
 $errors = [];
+
+if ($vehicle_id <= 0) {
+    $errors[] = 'ID véhicule invalide';
+}
 
 if (empty($marque)) {
     $errors[] = 'La marque est obligatoire';
@@ -74,58 +79,83 @@ if (!empty($errors)) {
 }
 
 try {
-    // Vérifier si l'immatriculation existe déjà
-    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation");
-    $stmt->execute(['immatriculation' => $immatriculation]);
+    // Vérifier que le véhicule appartient bien à l'utilisateur
+    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    $stmt->execute([
+        'vehicle_id' => $vehicle_id,
+        'user_id' => $user_id
+    ]);
+
+    if (!$stmt->fetch()) {
+        die(json_encode([
+            'success' => false,
+            'message' => 'Véhicule non trouvé ou non autorisé'
+        ]));
+    }
+
+    // Vérifier si l'immatriculation existe déjà (sauf pour ce véhicule)
+    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
+    $stmt->execute([
+        'immatriculation' => $immatriculation,
+        'vehicle_id' => $vehicle_id
+    ]);
 
     if ($stmt->fetch()) {
         die(json_encode([
             'success' => false,
-            'message' => 'Un véhicule avec cette immatriculation existe déjà'
+            'message' => 'Un autre véhicule avec cette immatriculation existe déjà'
         ]));
     }
 
-    // Insérer le nouveau véhicule
+    // Mettre à jour le véhicule
     $stmt = $pdo->prepare("
-        INSERT INTO voiture (
-            utilisateur_id, marque, modele, immatriculation,
-            couleur, places, energie, created_at
-        ) VALUES (
-            :utilisateur_id, :marque, :modele, :immatriculation,
-            :couleur, :places, :energie, NOW()
-        )
+        UPDATE voiture SET
+            marque = :marque,
+            modele = :modele,
+            immatriculation = :immatriculation,
+            couleur = :couleur,
+            places = :places,
+            energie = :energie
+        WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id
     ");
 
     $result = $stmt->execute([
-        'utilisateur_id' => $user_id,
         'marque' => $marque,
         'modele' => $modele,
         'immatriculation' => $immatriculation,
         'couleur' => $couleur,
         'places' => $places,
-        'energie' => $energie
+        'energie' => $energie,
+        'vehicle_id' => $vehicle_id,
+        'user_id' => $user_id
     ]);
 
     if (!$result) {
-        throw new Exception('Erreur lors de l\'ajout du véhicule');
+        throw new Exception('Erreur lors de la modification du véhicule');
     }
-
-    $vehicle_id = $pdo->lastInsertId();
 
     // Retourner le succès
     echo json_encode([
         'success' => true,
-        'message' => 'Véhicule ajouté avec succès ! Vous pouvez maintenant l\'utiliser pour créer des trajets.',
-        'vehicle_id' => $vehicle_id
+        'message' => 'Véhicule modifié avec succès !',
+        'vehicle' => [
+            'vehicle_id' => $vehicle_id,
+            'marque' => $marque,
+            'modele' => $modele,
+            'immatriculation' => $immatriculation,
+            'couleur' => $couleur,
+            'places' => $places,
+            'energie' => $energie
+        ]
     ]);
 
 } catch (Exception $e) {
     // Log l'erreur pour debug
-    error_log('Erreur ajout véhicule: ' . $e->getMessage());
+    error_log('Erreur modification véhicule: ' . $e->getMessage());
 
     echo json_encode([
         'success' => false,
-        'message' => 'Erreur lors de l\'ajout du véhicule. Veuillez réessayer.'
+        'message' => 'Erreur lors de la modification du véhicule. Veuillez réessayer.'
     ]);
 }
 ?>

@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
 // Connexion à la base de données avec la classe Database
-require_once '../config/database.php';
+require_once '../config/init.php';
 
 try {
     $pdo = db();
@@ -34,6 +34,12 @@ $ville_depart = isset($_POST['ville_depart']) ? trim($_POST['ville_depart']) : '
 $ville_arrivee = isset($_POST['ville_arrivee']) ? trim($_POST['ville_arrivee']) : '';
 $date_depart = isset($_POST['date_depart']) ? $_POST['date_depart'] : '';
 
+// Récupérer les filtres (US4)
+$ecologique = isset($_POST['ecologique']) ? $_POST['ecologique'] === 'true' : false;
+$prix_max = isset($_POST['prix_max']) && !empty($_POST['prix_max']) ? floatval($_POST['prix_max']) : null;
+$duree_max = isset($_POST['duree_max']) && !empty($_POST['duree_max']) ? floatval($_POST['duree_max']) : null;
+$note_min = isset($_POST['note_min']) && !empty($_POST['note_min']) ? intval($_POST['note_min']) : null;
+
 // Validation des paramètres
 if (empty($ville_depart) || empty($ville_arrivee) || empty($date_depart)) {
     die(json_encode([
@@ -43,8 +49,46 @@ if (empty($ville_depart) || empty($ville_arrivee) || empty($date_depart)) {
 }
 
 try {
-    // Requête pour chercher les trajets
-    // On joint plusieurs tables pour avoir toutes les infos nécessaires
+    // Construire la requête avec les filtres dynamiques (US4)
+    $whereConditions = [
+        "LOWER(t.ville_depart) LIKE LOWER(:ville_depart)",
+        "LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)",
+        "DATE(t.date_depart) = :date_depart",
+        "t.places_disponibles > 0",
+        "t.statut = 'planifie'",
+        "u.statut = 'actif'"
+    ];
+
+    $params = [
+        'ville_depart' => '%' . $ville_depart . '%',
+        'ville_arrivee' => '%' . $ville_arrivee . '%',
+        'date_depart' => $date_depart
+    ];
+
+    // Filtre écologique (US4)
+    if ($ecologique) {
+        $whereConditions[] = "v.energie = 'electrique'";
+    }
+
+    // Filtre prix maximum (US4)
+    if ($prix_max !== null) {
+        $whereConditions[] = "t.prix_par_place <= :prix_max";
+        $params['prix_max'] = $prix_max;
+    }
+
+    // Filtre durée maximum (US4) - calculée entre date_depart et date_arrivee
+    if ($duree_max !== null) {
+        $whereConditions[] = "TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) <= :duree_max";
+        $params['duree_max'] = $duree_max;
+    }
+
+    $havingConditions = [];
+    // Filtre note minimum (US4) - appliqué après GROUP BY
+    if ($note_min !== null) {
+        $havingConditions[] = "note_moyenne >= :note_min";
+        $params['note_min'] = $note_min;
+    }
+
     $sql = "
         SELECT
             t.covoiturage_id as id_trajet,
@@ -56,6 +100,8 @@ try {
             t.places_disponibles,
             t.prix_par_place as prix,
             t.statut,
+            -- Durée calculée
+            TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) as duree_heures,
             -- Info du conducteur
             u.pseudo as conducteur_pseudo,
             u.photo as conducteur_photo,
@@ -73,25 +119,17 @@ try {
             INNER JOIN voiture v ON t.voiture_id = v.voiture_id
             LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
         WHERE
-            LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
-            AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
-            AND DATE(t.date_depart) = :date_depart
-            AND t.places_disponibles > 0
-            AND t.statut = 'planifie'
-            AND u.statut = 'actif'
+            " . implode(' AND ', $whereConditions) . "
         GROUP BY
             t.covoiturage_id
+        " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
         ORDER BY
             t.date_depart ASC
     ";
-    
+
     // Préparer et exécuter la requête
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        'ville_depart' => '%' . $ville_depart . '%',
-        'ville_arrivee' => '%' . $ville_arrivee . '%',
-        'date_depart' => $date_depart
-    ]);
+    $stmt->execute($params);
     
     $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -99,12 +137,19 @@ try {
     foreach ($trajets as &$trajet) {
         // Arrondir la note moyenne
         $trajet['note_moyenne'] = round($trajet['note_moyenne'], 1);
-        
-        // Formater le prix
-        $trajet['prix'] = number_format($trajet['prix'], 0, ',', ' ');
-        
+
+        // Formater le prix (garder la valeur numérique pour les filtres)
+        $trajet['prix_formatted'] = number_format($trajet['prix'], 0, ',', ' ');
+
         // Convertir les places en nombre
         $trajet['places_disponibles'] = intval($trajet['places_disponibles']);
+
+        // Formater la durée
+        $trajet['duree_heures'] = floatval($trajet['duree_heures'] ?? 0);
+        $trajet['duree_formatted'] = $trajet['duree_heures'] . 'h';
+
+        // Ajouter indicateur écologique
+        $trajet['is_ecologique'] = ($trajet['type_carburant'] === 'electrique');
     }
     
     // Si aucun trajet trouvé, chercher des dates alternatives

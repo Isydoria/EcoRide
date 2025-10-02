@@ -1,100 +1,53 @@
 <?php
-/**
- * FICHIER: config/init.php
- * Initialisation de l'application EcoRide
- */
+// config/init.php
+// Initialisation de l'application EcoRide
 
-// Gestion des erreurs (à désactiver en production)
+// Démarrage de session (si pas déjà démarrée)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Configuration des erreurs (en développement)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Configuration du fuseau horaire
+// Timezone
 date_default_timezone_set('Europe/Paris');
 
-// Configuration des chemins
-define('ROOT_PATH', dirname(__DIR__));
-define('CONFIG_PATH', ROOT_PATH . '/config');
-define('INCLUDES_PATH', ROOT_PATH . '/includes');
-define('UPLOADS_PATH', ROOT_PATH . '/uploads');
+// Détection de l'environnement Docker
+$isDocker = getenv('DOCKER_ENV') === 'true' || (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === '172.18.0.4');
 
-// URL de base (adaptatif local/Railway)
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$folder = (strpos($host, 'railway.app') !== false) ? '' : '/ecoride'; // Railway = racine
-define('BASE_URL', $protocol . $host . $folder);
-
-// Inclure les fichiers de configuration (chemin direct)
-require_once __DIR__ . '/database.php';
-require_once __DIR__ . '/functions.php';
-
-// Démarrer la session sécurisée
-startSecureSession();
-
-// Générer un token CSRF si nécessaire
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-// Configuration des constantes de l'application
-define('CREDITS_INSCRIPTION', 20);
-define('COMMISSION_PLATEFORME', 2);
-define('MIN_PASSWORD_LENGTH', 8);
-define('MAX_PSEUDO_LENGTH', 20);
-define('MIN_PSEUDO_LENGTH', 3);
-
-// Configuration MongoDB (pour plus tard)
-define('MONGODB_URI', 'mongodb://localhost:27017');
-define('MONGODB_DATABASE', 'ecoride_nosql');
-
-/**
- * Autoloader simple pour les classes (si besoin)
- */
-spl_autoload_register(function ($class) {
-    $file = ROOT_PATH . '/classes/' . str_replace('\\', '/', $class) . '.php';
-    if (file_exists($file)) {
-        require_once $file;
-    }
-});
-
-/**
- * Fonction pour vérifier les permissions d'accès
- */
-function requireLogin() {
-    if (!isLoggedIn()) {
-        $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-        redirect('/connexion.php');
+// Chargement de la bonne configuration de base de données
+if (!class_exists('Database')) {
+    if ($isDocker && file_exists(__DIR__ . '/database_docker.php')) {
+        // Si on est dans Docker et que le fichier docker existe
+        require_once __DIR__ . '/database_docker.php';
+    } else {
+        // Sinon on utilise la config normale (WampServer)
+        require_once __DIR__ . '/database.php';
     }
 }
 
-/**
- * Fonction pour vérifier le rôle
- */
-function requireRole($role) {
-    requireLogin();
-    if (getCurrentUserRole() !== $role) {
-        $_SESSION['error'] = 'Accès non autorisé';
-        redirect('/index.php');
-    }
+// Chargement des fonctions utilitaires si elles existent
+if (file_exists(__DIR__ . '/functions.php')) {
+    require_once __DIR__ . '/functions.php';
 }
 
-/**
- * Fonction pour vérifier si l'utilisateur est conducteur
- */
-function isConducteur() {
-    if (!isLoggedIn()) return false;
-    
-    try {
-        $stmt = db()->prepare("
-            SELECT accepte_conducteur 
-            FROM preferences_conducteur 
-            WHERE id_utilisateur = ?
-        ");
-        $stmt->execute([getCurrentUserId()]);
-        $result = $stmt->fetch();
-        return $result && $result['accepte_conducteur'] == 1;
-    } catch (PDOException $e) {
-        logError('Erreur vérification conducteur: ' . $e->getMessage());
-        return false;
-    }
+// Constantes de l'application (seulement si pas déjà définies)
+if (!defined('APP_NAME')) {
+    define('APP_NAME', 'EcoRide');
+}
+if (!defined('APP_VERSION')) {
+    define('APP_VERSION', '1.0.0');
+}
+if (!defined('BASE_URL')) {
+    define('BASE_URL', $isDocker ? 'http://localhost:8080' : 'http://localhost/ecoride');
+}
+
+// Message de debug (à retirer en production)
+if ($isDocker) {
+    error_log("✅ EcoRide - Running in Docker environment");
+} else {
+    error_log("✅ EcoRide - Running in local environment (WampServer)");
 }
 ?>
