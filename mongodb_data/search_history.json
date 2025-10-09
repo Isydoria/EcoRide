@@ -1,0 +1,85 @@
+[
+    {
+        "user_id": 1,
+        "ville_depart": "Paris",
+        "ville_arrivee": "Lyon",
+        "search_date": "2025-10-07 10:43:17",
+        "filters": {
+            "test": true
+        },
+        "results_count": 5,
+        "_id": "68e4d2a5a87ea5.24899172",
+        "_created": "2025-10-07 10:43:17"
+    },
+    {
+        "user_id": 1,
+        "depart": "Paris",
+        "arrivee": "Lyon",
+        "filters": {
+            "test": true
+        },
+        "results_count": 5,
+        "_id": "68e4d953a81855.79584728",
+        "_created": "2025-10-07 11:11:47"
+    },
+    {
+        "user_id": 11,
+        "depart": "Lille",
+        "arrivee": "Paris",
+        "filters": {
+            "date_depart": "2025-10-09",
+            "ecologique": false,
+            "prix_max": null,
+            "duree_max": null,
+            "note_min": null
+        },
+        "results_count": 0,
+        "_id": "68e76a2685e1e0.70105821",
+        "_created": "2025-10-09 09:54:14"
+    },
+    {
+        "user_id": 11,
+        "depart": "Lille",
+        "arrivee": "Paris",
+        "filters": {
+            "date_depart": "2025-10-22",
+            "ecologique": false,
+            "prix_max": null,
+            "duree_max": null,
+            "note_min": null
+        },
+        "results_count": 1,
+        "_id": "68e76a2ab853a6.76251923",
+        "_created": "2025-10-09 09:54:18"
+    },
+    {
+        "user_id": 11,
+        "depart": "Lille",
+        "arrivee": "Paris",
+        "filters": {
+            "date_depart": "2025-10-09",
+            "ecologique": false,
+            "prix_max": null,
+            "duree_max": null,
+            "note_min": null
+        },
+        "results_count": 0,
+        "_id": "68e773848e8430.78379721",
+        "_created": "2025-10-09 10:34:12"
+    },
+    {
+        "user_id": 11,
+        "depart": "Lille",
+        "arrivee": "Paris",
+        "filters": {
+            "date_depart": "2025-10-22",
+            "ecologique": false,
+            "prix_max": null,
+            "duree_max": null,
+            "note_min": null
+        },
+        "results_count": 1,
+        "_id": "68e773869f4a73.27273849",
+        "_created": "2025-10-09 10:34:14"
+    }
+]

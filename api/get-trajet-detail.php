@@ -1,7 +1,7 @@
 <?php
 /**
  * api/get-trajet-detail.php
- * API pour récupérer tous les détails d'un trajet spécifique
+ * API pour récupérer tous les détails d'un trajet - VERSION CORRIGÉE
  */
 
 // Configuration
@@ -9,10 +9,10 @@ header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Démarrer la session pour vérifier si l'utilisateur est connecté
+// Démarrer la session
 session_start();
 
-// Connexion à la base de données avec init 
+// Connexion à la base de données
 require_once '../config/init.php';
 
 try {
@@ -23,10 +23,6 @@ try {
         'message' => 'Erreur DB: ' . $e->getMessage()
     ]));
 }
-
-// Log pour debug
-error_log("Method: " . $_SERVER['REQUEST_METHOD']);
-error_log("POST data: " . print_r($_POST, true));
 
 // Vérifier la méthode
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,12 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Récupérer l'ID du trajet
 $trajet_id = isset($_POST['trajet_id']) ? intval($_POST['trajet_id']) : 0;
 
-// Debug logs
-error_log("API DEBUG: trajet_id reçu = " . $trajet_id);
-error_log("API DEBUG: Méthode = " . $_SERVER['REQUEST_METHOD']);
-
 if ($trajet_id <= 0) {
-    error_log("API DEBUG: ID trajet invalide");
     die(json_encode([
         'success' => false,
         'message' => 'ID de trajet invalide'
@@ -55,72 +46,58 @@ if ($trajet_id <= 0) {
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
 try {
-    // Debug: Vérifier si le trajet existe de manière simple d'abord
-    $checkSql = "SELECT COUNT(*) as count FROM covoiturage WHERE covoiturage_id = :trajet_id";
-    $checkStmt = $pdo->prepare($checkSql);
-    $checkStmt->execute(['trajet_id' => $trajet_id]);
-    $count = $checkStmt->fetch(PDO::FETCH_ASSOC);
-    error_log("API DEBUG: Nombre de trajets trouvés avec ID $trajet_id = " . $count['count']);
-
-    // Requête principale pour récupérer les détails du trajet
+    // ✅ Requête principale CORRIGÉE avec les bons noms de colonnes
     $sql = "
         SELECT
-            t.covoiturage_id as id_trajet,
-            t.conducteur_id as id_conducteur,
-            t.ville_depart,
-            t.ville_arrivee,
-            t.date_depart,
-            t.date_depart as heure_depart,
-            t.date_arrivee as heure_arrivee,
-            t.places_disponibles,
-            t.prix_par_place as prix,
-            t.statut,
-            -- Adresses détaillées
-            t.ville_depart as adresse_depart,
-            t.ville_arrivee as adresse_arrivee,
+            c.covoiturage_id as id_trajet,
+            c.conducteur_id as id_conducteur,
+            c.ville_depart,
+            c.ville_arrivee,
+            c.adresse_depart,
+            c.adresse_arrivee,
+            c.date_depart,
+            c.date_arrivee,
+            c.places_disponibles,
+            c.prix_par_place as prix,
+            c.statut,
             -- Info du conducteur
             u.pseudo as conducteur_pseudo,
+            u.photo as conducteur_photo,
             u.created_at as membre_depuis,
             -- Info du véhicule
             v.marque,
             v.modele,
             v.couleur,
             v.places as nombre_places_vehicule,
-            'essence' as type_carburant,
+            v.energie as type_carburant,
             -- Note moyenne du conducteur
-            COALESCE(AVG(av.note), 0) as note_moyenne,
-            COUNT(DISTINCT av.avis_id) as nb_avis,
+            COALESCE(AVG(a.note), 0) as note_moyenne,
+            COUNT(DISTINCT a.avis_id) as nb_avis,
             -- Nombre total de trajets du conducteur
             (SELECT COUNT(*) FROM covoiturage WHERE conducteur_id = u.utilisateur_id) as total_trajets
         FROM
-            covoiturage t
-            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
-            LEFT JOIN voiture v ON t.voiture_id = v.voiture_id
-            LEFT JOIN avis av ON u.utilisateur_id = av.destinataire_id AND av.statut = 'valide'
+            covoiturage c
+            INNER JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
         WHERE
-            t.covoiturage_id = :trajet_id
+            c.covoiturage_id = :trajet_id
         GROUP BY
-            t.covoiturage_id
+            c.covoiturage_id
     ";
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['trajet_id' => $trajet_id]);
     $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    error_log("API DEBUG: Trajet trouvé = " . ($trajet ? 'OUI' : 'NON'));
-    if ($trajet) {
-        error_log("API DEBUG: Données trajet = " . json_encode($trajet));
-    }
-
     if (!$trajet) {
-        error_log("API DEBUG: Aucun trajet trouvé pour ID = " . $trajet_id);
         die(json_encode([
             'success' => false,
             'message' => 'Trajet introuvable'
         ]));
     }
     
-    // Récupérer les préférences du conducteur
+    // ✅ Récupérer les préférences du conducteur
     $sqlPref = "
         SELECT
             fumeur as accepte_fumeur,
@@ -138,7 +115,7 @@ try {
     $stmtPref->execute(['conducteur_id' => $trajet['id_conducteur']]);
     $preferences = $stmtPref->fetch(PDO::FETCH_ASSOC);
 
-    // Si pas de préférences trouvées, utiliser des valeurs par défaut
+    // Valeurs par défaut si pas de préférences
     if (!$preferences) {
         $preferences = [
             'accepte_fumeur' => false,
@@ -149,10 +126,9 @@ try {
         ];
     }
 
-    // Ajouter les préférences au trajet
     $trajet['preferences'] = $preferences;
 
-    // Récupérer les avis validés sur le conducteur
+    // ✅ Récupérer les avis validés sur le conducteur
     $sqlAvis = "
         SELECT
             a.note,
@@ -174,10 +150,9 @@ try {
     $stmtAvis->execute(['conducteur_id' => $trajet['id_conducteur']]);
     $avis = $stmtAvis->fetchAll(PDO::FETCH_ASSOC);
 
-    // Ajouter les avis au trajet
     $trajet['avis'] = $avis;
     
-    // Si l'utilisateur est connecté, vérifier s'il a déjà réservé ce trajet
+    // ✅ Vérifier si l'utilisateur a déjà réservé ce trajet
     if ($user_id) {
         $sqlReservation = "
             SELECT participation_id
@@ -203,8 +178,13 @@ try {
     $trajet['prix'] = number_format($trajet['prix'], 0, ',', ' ');
     $trajet['places_disponibles'] = intval($trajet['places_disponibles']);
     
-    // Debug final
-    error_log("API DEBUG: Retour SUCCESS avec trajet ID = " . $trajet['id_trajet']);
+    // ✅ S'assurer que les adresses existent (fallback sur villes)
+    if (empty($trajet['adresse_depart'])) {
+        $trajet['adresse_depart'] = $trajet['ville_depart'];
+    }
+    if (empty($trajet['adresse_arrivee'])) {
+        $trajet['adresse_arrivee'] = $trajet['ville_arrivee'];
+    }
 
     // Retourner les données
     echo json_encode([
@@ -213,12 +193,12 @@ try {
     ]);
     
 } catch (Exception $e) {
-    // Log l'erreur pour debug
     error_log('Erreur get-trajet-detail: ' . $e->getMessage());
     
     echo json_encode([
         'success' => false,
-        'message' => 'Erreur lors de la récupération des détails'
+        'message' => 'Erreur lors de la récupération des détails',
+        'debug' => $e->getMessage()
     ]);
 }
 ?>

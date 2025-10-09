@@ -1,0 +1,8 @@
+{
+    "name": "ecoride/app",
+    "description": "Plateforme de covoiturage écologique",
+    "license": "proprietary",
+    "require": {
+        "mongodb/mongodb": "^1.15"
+    }
+}

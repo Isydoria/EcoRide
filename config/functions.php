@@ -281,13 +281,15 @@ function logError($message, $context = []) {
 /**
  * Fonction pour obtenir rapidement la connexion PDO
  * Compatible avec l'ancien code qui utilise db()
- */
-function db() {
-    $database = Database::getInstance();
-    return $database->getConnection();
-}
+
+*function db() {
+*    $database = Database::getInstance();
+*    return $database->getConnection();
+*} 
+    */
 
 /**
+
  * Message flash dans la session
  */
 function setFlash($type, $message) {

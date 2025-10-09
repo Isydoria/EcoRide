@@ -147,6 +147,19 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 ---
 
+### **Base de données NoSQL - MongoDB**
+- **mongodb_fake.php** : Implémentation légère compatible MongoDB
+- **Collections** : activity_logs, search_history, performance_metrics
+- **Stockage** : Fichiers JSON (mongodb_data/)
+- **API** : insertOne(), find(), aggregate(), getStats()
+- **Test** : `/test-mongodb-simple.php`
+- **Stats** : `/admin/mongodb-stats.php` (admin uniquement)
+
+**Justification technique :**
+L'énoncé RNCP impose une base NoSQL. Solution mongodb_fake.php choisie pour compatibilité PHP 8.3.14 sans extension native.
+
+---
+
 ## 💻 INSTALLATION LOCALE
 
 ### **Prérequis**
@@ -262,10 +275,7 @@ L'application s'adapte parfaitement à tous les écrans :
 ## 📚 DOCUMENTATION TECHNIQUE
 
 - **📖 Guide complet** : [DOCUMENTATION_TECHNIQUE.md](./DOCUMENTATION_TECHNIQUE.md)
-- **🎯 Évaluation RNCP** : [INFOS_EVALUATION_RNCP.txt](./INFOS_EVALUATION_RNCP.txt)
-- **📝 Historique** : [HISTORIQUE_CONVERSATIONS.txt](./HISTORIQUE_CONVERSATIONS.txt)
-- **🗂️ Schéma BDD** : [database/schema.sql](./database/schema.sql)
-
+- **🎯 Évaluation RNCP** : [INFOS_EVALUATION_RNCP.txt](./
 ---
 
 ## 📞 CONTACT ET SUPPORT

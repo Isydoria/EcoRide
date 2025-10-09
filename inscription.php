@@ -74,9 +74,9 @@ $csrfToken = generateCSRFToken();
                         required
                         minlength="3"
                         maxlength="20"
-                        pattern="[a-zA-Z0-9_-]+"
                         title="Le pseudo ne peut contenir que des lettres, chiffres, tirets et underscores"
                     >
+                    <small class="form-hint">3-20 caractères : lettres, chiffres, - ou _</small>
                 </div>
 
                 <div class="form-group">

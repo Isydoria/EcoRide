@@ -62,7 +62,10 @@ class Database {
 }
 
 // Fonction helper
-function db() {
-    return Database::getInstance()->getPDO();
+// ✅ NOUVEAU
+if (!function_exists('db')) {
+    function db() {
+        return Database::getInstance()->getPDO();
+    }
 }
 ?>

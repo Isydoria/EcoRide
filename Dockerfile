@@ -1,14 +1,19 @@
-# On part d'une image PHP avec Apache déjà configuré
+# Dockerfile - Version mise à jour
 FROM php:8.2-apache
 
-# On installe les extensions PHP nécessaires
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+# Installer les extensions PHP nécessaires
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
+    && docker-php-ext-install pdo pdo_mysql mysqli
 
-# On active la réécriture d'URL (pour les jolies URLs)
+# Activer la réécriture d'URL
 RUN a2enmod rewrite
 
-# On copie notre projet dans le container
+# Copier le projet
 COPY . /var/www/html/
 
-# On donne les bonnes permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www/html

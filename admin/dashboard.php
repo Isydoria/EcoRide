@@ -261,6 +261,8 @@ try {
         <div class="admin-nav">
             <h1>🛠️ Administration EcoRide</h1>
             <div>
+                <a href="dashboard.php">📊 Tableau de bord</a>
+                <a href="mongodb-stats.php">🗄️ MongoDB Stats</a> <!-- 🆕 NOUVEAU -->
                 <a href="../user/dashboard.php">👤 Mode utilisateur</a>
                 <a href="../index.php">🏠 Accueil</a>
                 <a href="../logout.php">🚪 Déconnexion</a>

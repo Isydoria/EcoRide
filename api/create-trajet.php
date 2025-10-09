@@ -183,6 +183,23 @@ try {
     // Log l'erreur pour debug
     error_log('Erreur création trajet: ' . $e->getMessage());
 
+    // 🆕 LOGGER LA CRÉATION DANS MONGODB
+if (function_exists('mongodb')) {
+    try {
+        $mongo = mongodb();
+        $mongo->logActivity($conducteur_id, 'create_trip', [
+            'trip_id' => $trajet_id,
+            'ville_depart' => $ville_depart,
+            'ville_arrivee' => $ville_arrivee,
+            'date_depart' => $date_depart,
+            'prix' => $prix,
+            'places' => $places_disponibles
+        ]);
+    } catch (Exception $e) {
+        error_log("MongoDB log error: " . $e->getMessage());
+    }
+}
+
     echo json_encode([
         'success' => false,
         'message' => 'Erreur lors de la création du trajet. Veuillez réessayer.'

@@ -29,15 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('password', password);
             formData.append('remember', remember);
             
-            // Envoyer la requête AJAX - Utiliser login-simple.php qui fonctionne
+            // Envoyer la requête AJAX
             fetch('api/login-simple.php', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                // D'abord récupérer le texte pour debug
-                return response.text();
-            })
+            .then(response => response.text())
             .then(text => {
                 console.log('Réponse brute:', text);
                 try {
@@ -46,7 +43,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         showMessage('success', data.message, 'successMessage');
                         // Redirection après 1 seconde
                         setTimeout(() => {
-                            window.location.href = data.data.redirect;
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                            } else {
+                                // Redirection par défaut selon le rôle
+                                if (data.user && data.user.role === 'administrateur') {
+                                    window.location.href = '/ecoride/admin/dashboard.php';
+                                } else {
+                                    window.location.href = '/ecoride/user/dashboard.php';
+                                }
+                            }
                         }, 1000);
                     } else {
                         showMessage('error', data.message, 'errorMessage');
@@ -157,24 +163,32 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('password_confirm', passwordConfirm);
             formData.append('terms', terms);
             
-            // Envoyer la requête AJAX - Utiliser register-simple.php qui fonctionne
+            // Envoyer la requête AJAX
             fetch('api/register-simple.php', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                // D'abord récupérer le texte pour debug
-                return response.text();
-            })
+            .then(response => response.text())
             .then(text => {
                 console.log('Réponse inscription brute:', text);
                 try {
                     const data = JSON.parse(text);
+                    
+                    // Afficher le debug si présent
+                    if (data.debug) {
+                        console.error('Debug serveur:', data.debug);
+                    }
+                    
                     if (data.success) {
                         showMessage('success', data.message, 'successMessage');
+                        
                         // Redirection après 2 secondes
                         setTimeout(() => {
-                            window.location.href = data.data.redirect;
+                            if (data.data && data.data.redirect) {
+                                window.location.href = data.data.redirect;
+                            } else {
+                                window.location.href = '/ecoride/user/dashboard.php';
+                            }
                         }, 2000);
                     } else {
                         showMessage('error', data.message, 'errorMessage');

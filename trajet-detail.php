@@ -18,13 +18,37 @@ $trajet_id = intval($_GET['id']); // Sécuriser l'ID
 // Vérifier si l'utilisateur est connecté
 $isLoggedIn = isset($_SESSION['user_id']);
 $userId = $_SESSION['user_id'] ?? null;
-$userPseudo = $_SESSION['user_pseudo'] ?? '';
-$userCredits = $_SESSION['user_credits'] ?? 0;
-$userRole = $_SESSION['user_role'] ?? '';
+$userPseudo = $_SESSION['pseudo'] ?? '';
+$userRole = $_SESSION['role'] ?? '';
+
+// ✅ CORRECTION : Charger les vrais crédits depuis la base de données
+$userCredits = 0;
+
+if ($isLoggedIn) {
+    try {
+        require_once 'config/database.php';
+        $pdo = Database::getInstance()->getPDO();
+        
+        // Récupérer les crédits actuels depuis la base
+        $stmt = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        $userCredits = $stmt->fetchColumn();
+        
+        // Mettre à jour la session avec les vrais crédits
+        $_SESSION['credits'] = $userCredits;
+        
+    } catch(Exception $e) {
+        error_log("Erreur récupération crédits : " . $e->getMessage());
+        $userCredits = $_SESSION['credits'] ?? 0; // Fallback sur la session
+    }
+} else {
+    $userCredits = 0;
+}
 
 // DEBUG TEMPORAIRE
 error_log("DEBUG trajet-detail.php: isLoggedIn = " . ($isLoggedIn ? 'true' : 'false'));
 error_log("DEBUG trajet-detail.php: trajet_id = " . $trajet_id);
+error_log("DEBUG trajet-detail.php: userCredits RÉELS = " . $userCredits);
 ?>
 <!DOCTYPE html>
 <html lang="fr">

@@ -181,6 +181,29 @@ try {
             $alternatives[] = $alt['date_alternative'];
         }
     }
+
+    // 🆕 LOGGER LA RECHERCHE DANS MONGODB
+if (function_exists('mongodb')) {
+    try {
+        $mongo = mongodb();
+        $mongo->logSearch(
+            $_SESSION['user_id'] ?? 0,
+            $ville_depart ?? '',
+            $ville_arrivee ?? '',
+            [
+                'date_depart' => $_POST['date_depart'] ?? null,
+                'ecologique' => $_POST['ecologique'] ?? false,
+                'prix_max' => $_POST['prix_max'] ?? null,
+                'duree_max' => $_POST['duree_max'] ?? null,
+                'note_min' => $_POST['note_min'] ?? null
+            ],
+            count($trajets)
+        );
+    } catch (Exception $e) {
+        error_log("MongoDB log error: " . $e->getMessage());
+    }
+}
+
     
     // Retourner les résultats
     echo json_encode([

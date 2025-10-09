@@ -38,17 +38,27 @@ function loadTrajetDetails() {
         } else {
             // Afficher l'erreur
             document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('errorSection').style.display = 'block';
+            const errorSection = document.getElementById('errorSection');
+            if (errorSection) {
+                errorSection.style.display = 'block';
+            } else {
+                alert('Erreur : ' + data.message);
+            }
         }
     })
     .catch(error => {
         console.error('Erreur:', error);
         document.getElementById('loadingSection').style.display = 'none';
-        document.getElementById('errorSection').style.display = 'block';
+        const errorSection = document.getElementById('errorSection');
+        if (errorSection) {
+            errorSection.style.display = 'block';
+        } else {
+            alert('Erreur de chargement du trajet');
+        }
     });
 }
 
-// Fonction pour afficher les détails du trajet
+// ✅ Fonction pour afficher les détails du trajet - VERSION CORRIGÉE
 function displayTrajetDetails(trajet) {
     // Indicateur écologique
     const isEco = trajet.type_carburant === 'electrique' || 
@@ -60,29 +70,37 @@ function displayTrajetDetails(trajet) {
         document.getElementById('ecoIndicator').classList.remove('hidden');
     }
     
-    // Informations principales
+    // ✅ Informations principales avec formatage corrigé
     document.getElementById('villeDepart').textContent = trajet.ville_depart;
     document.getElementById('villeArrivee').textContent = trajet.ville_arrivee;
-    document.getElementById('dateDepart').textContent = formatDate(trajet.date_depart);
-    document.getElementById('heureDepart').textContent = formatTime(trajet.heure_depart);
     
-    // Itinéraire détaillé
+    // ✅ Date formatée en français complet (ex: "mercredi 22 octobre 2025")
+    const dateFrancais = formatDateFrancais(trajet.date_depart);
+    document.getElementById('dateDepart').textContent = dateFrancais;
+    
+    // ✅ Heure extraite du DATETIME (ex: "14:30")
+    const heureDepart = extractTimeFromDateTime(trajet.date_depart);
+    document.getElementById('heureDepart').textContent = heureDepart;
+    
+    // ✅ Itinéraire détaillé avec adresses ou villes
     document.getElementById('adresseDepart').textContent = trajet.adresse_depart || trajet.ville_depart;
     document.getElementById('adresseArrivee').textContent = trajet.adresse_arrivee || trajet.ville_arrivee;
-    // Extraire les heures depuis les dates complètes
-    const heureDeparExtracted = extractTimeFromDateTime(trajet.date_depart);
-    const heureArriveeExtracted = extractTimeFromDateTime(trajet.date_arrivee);
-
-    document.getElementById('heureDepartDetail').textContent = 'Départ à ' + heureDeparExtracted;
-    document.getElementById('heureArriveeDetail').textContent = 'Arrivée prévue à ' + heureArriveeExtracted;
-    document.getElementById('dureeTrajet').textContent = calculateDurationFromDates(trajet.date_depart, trajet.date_arrivee);
     
-    // Informations sur le véhicule
-    document.getElementById('vehiculeMarque').textContent = trajet.marque;
-    document.getElementById('vehiculeModele').textContent = trajet.modele;
-    document.getElementById('vehiculeCouleur').textContent = trajet.couleur;
-    document.getElementById('vehiculeEnergie').textContent = capitalizeFirst(trajet.type_carburant);
-    document.getElementById('vehiculePlaces').textContent = trajet.nombre_places_vehicule;
+    // ✅ Heures d'arrivée et départ dans l'itinéraire
+    const heureArrivee = extractTimeFromDateTime(trajet.date_arrivee);
+    document.getElementById('heureDepartDetail').textContent = 'Départ à ' + heureDepart;
+    document.getElementById('heureArriveeDetail').textContent = 'Arrivée prévue à ' + heureArrivee;
+    
+    // ✅ Calcul de la durée entre les deux DATETIME
+    const duree = calculateDurationFromDates(trajet.date_depart, trajet.date_arrivee);
+    document.getElementById('dureeTrajet').textContent = duree;
+    
+    // ✅ Informations sur le véhicule
+    document.getElementById('vehiculeMarque').textContent = trajet.marque || 'Marque inconnue';
+    document.getElementById('vehiculeModele').textContent = trajet.modele || 'Modèle inconnu';
+    document.getElementById('vehiculeCouleur').textContent = capitalizeFirst(trajet.couleur) || 'Non spécifiée';
+    document.getElementById('vehiculeEnergie').textContent = capitalizeFirst(trajet.type_carburant) || 'Non spécifié';
+    document.getElementById('vehiculePlaces').textContent = trajet.nombre_places_vehicule || '4';
     
     // Classe spéciale pour véhicule écologique
     if (isEco) {
@@ -104,7 +122,7 @@ function displayTrajetDetails(trajet) {
     const stars = createStarRating(trajet.note_moyenne || 0);
     document.getElementById('driverRating').innerHTML = `
         ${stars} 
-        <span>(${trajet.note_moyenne || 0}/5 - ${trajet.nb_avis || 0} avis)</span>
+        <span>${trajet.note_moyenne || 0}/5 (${trajet.nb_avis || 0} avis)</span>
     `;
     
     // Statistiques du conducteur
@@ -116,7 +134,7 @@ function displayTrajetDetails(trajet) {
     document.getElementById('placesDisponibles').textContent = trajet.places_disponibles;
     
     // Coût total (prix + commission de 2 crédits)
-    const prixNumeric = parseFloat(trajet.prix);
+    const prixNumeric = parseFloat(trajet.prix.toString().replace(/\s/g, ''));
     const coutTotal = prixNumeric + 2;
 
     // Mettre à jour le coût total seulement si l'élément existe (utilisateur connecté)
@@ -126,7 +144,7 @@ function displayTrajetDetails(trajet) {
     }
     
     // Vérifier si l'utilisateur peut réserver
-    if (isLoggedIn) {
+    if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
         checkBookingAvailability(trajet, coutTotal);
     }
 }
@@ -134,6 +152,8 @@ function displayTrajetDetails(trajet) {
 // Fonction pour afficher les préférences
 function displayPreferences(preferences) {
     const container = document.getElementById('preferencesContainer');
+    if (!container) return;
+    
     container.innerHTML = '';
     
     if (!preferences) {
@@ -176,6 +196,8 @@ function displayPreferences(preferences) {
 // Fonction pour afficher les avis
 function displayAvis(avis) {
     const container = document.getElementById('avisContainer');
+    if (!container) return;
+    
     container.innerHTML = '';
     
     if (!avis || avis.length === 0) {
@@ -194,7 +216,7 @@ function displayAvis(avis) {
                 <span class="avis-author">${item.auteur}</span>
                 <span class="avis-rating">${stars}</span>
             </div>
-            <p class="avis-comment">${item.commentaire}</p>
+            <p class="avis-comment">${item.commentaire || 'Aucun commentaire'}</p>
         `;
         
         container.appendChild(div);
@@ -204,9 +226,10 @@ function displayAvis(avis) {
 // Fonction pour vérifier la disponibilité de réservation
 function checkBookingAvailability(trajet, coutTotal) {
     const btnParticiper = document.getElementById('btnParticiper');
+    if (!btnParticiper) return;
     
     // Vérifier si l'utilisateur est le conducteur
-    if (parseInt(trajet.id_conducteur) === userId) {
+    if (typeof userId !== 'undefined' && parseInt(trajet.id_conducteur) === userId) {
         btnParticiper.textContent = 'Vous êtes le conducteur';
         btnParticiper.disabled = true;
         return;
@@ -220,7 +243,7 @@ function checkBookingAvailability(trajet, coutTotal) {
     }
     
     // Vérifier les crédits
-    if (userCredits < coutTotal) {
+    if (typeof userCredits !== 'undefined' && userCredits < coutTotal) {
         btnParticiper.textContent = 'Crédits insuffisants';
         btnParticiper.disabled = true;
         return;
@@ -241,7 +264,7 @@ function participerTrajet() {
     if (!trajetDetails) return;
     
     // Calculer le coût total
-    const prixNumeric = parseFloat(trajetDetails.prix);
+    const prixNumeric = parseFloat(trajetDetails.prix.toString().replace(/\s/g, ''));
     const coutTotal = prixNumeric + 2;
     
     // Afficher le modal de confirmation
@@ -249,7 +272,7 @@ function participerTrajet() {
     document.getElementById('modalTrajet').textContent = 
         trajetDetails.ville_depart + ' → ' + trajetDetails.ville_arrivee;
     document.getElementById('modalDate').textContent = 
-        formatDate(trajetDetails.date_depart) + ' à ' + formatTime(trajetDetails.heure_depart);
+        formatDateFrancais(trajetDetails.date_depart) + ' à ' + extractTimeFromDateTime(trajetDetails.date_depart);
     
     document.getElementById('confirmModal').style.display = 'flex';
 }
@@ -271,7 +294,7 @@ function closeFloatingBanner() {
 }
 
 // Fermer automatiquement la bannière après 10 secondes
-if (!isLoggedIn) {
+if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
     setTimeout(() => {
         closeFloatingBanner();
     }, 10000);
@@ -286,8 +309,10 @@ function confirmerReservation() {
     
     // Désactiver le bouton
     const btnParticiper = document.getElementById('btnParticiper');
-    btnParticiper.disabled = true;
-    btnParticiper.textContent = 'Réservation en cours...';
+    if (btnParticiper) {
+        btnParticiper.disabled = true;
+        btnParticiper.textContent = 'Réservation en cours...';
+    }
     
     // Créer les données à envoyer
     const formData = new FormData();
@@ -307,9 +332,11 @@ function confirmerReservation() {
             // Réservation réussie
             alert('✅ ' + data.message);
             
-            // Mettre à jour l'interface
-            btnParticiper.textContent = 'Réservé !';
-            btnParticiper.disabled = true;
+            if (btnParticiper) {
+                // Mettre à jour l'interface
+                btnParticiper.textContent = 'Réservé !';
+                btnParticiper.disabled = true;
+            }
             
             // Mettre à jour les crédits affichés
             if (data.nouveaux_credits !== undefined) {
@@ -326,19 +353,78 @@ function confirmerReservation() {
         } else {
             // Erreur
             alert('❌ ' + data.message);
-            btnParticiper.disabled = false;
-            btnParticiper.textContent = 'Réserver ce trajet';
+            if (btnParticiper) {
+                btnParticiper.disabled = false;
+                btnParticiper.textContent = 'Réserver ce trajet';
+            }
         }
     })
     .catch(error => {
         console.error('Erreur:', error);
         alert('❌ Une erreur est survenue. Veuillez réessayer.');
-        btnParticiper.disabled = false;
-        btnParticiper.textContent = 'Réserver ce trajet';
+        if (btnParticiper) {
+            btnParticiper.disabled = false;
+            btnParticiper.textContent = 'Réserver ce trajet';
+        }
     });
 }
 
 // ========== FONCTIONS UTILITAIRES ==========
+
+// ✅ Formater une date en français complet
+function formatDateFrancais(dateString) {
+    if (!dateString) return 'Date non définie';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Date invalide';
+    
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('fr-FR', options);
+}
+
+// ✅ Extraire l'heure depuis un DATETIME complet
+function extractTimeFromDateTime(datetimeString) {
+    if (!datetimeString) return 'Non défini';
+    
+    const date = new Date(datetimeString);
+    if (isNaN(date.getTime())) return 'Non défini';
+    
+    return date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// ✅ Calculer la durée entre deux dates complètes
+function calculateDurationFromDates(dateDepart, dateArrivee) {
+    if (!dateDepart || !dateArrivee) return 'Non calculable';
+    
+    const depart = new Date(dateDepart);
+    const arrivee = new Date(dateArrivee);
+    
+    if (isNaN(depart.getTime()) || isNaN(arrivee.getTime())) {
+        return 'Non calculable';
+    }
+    
+    const diffMs = arrivee - depart;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutes < 0) return 'Non calculable';
+    
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    
+    if (hours > 0) {
+        return `${hours}h${minutes > 0 ? minutes.toString().padStart(2, '0') : ''}`;
+    }
+    return `${minutes}min`;
+}
 
 // Créer les étoiles pour la notation
 function createStarRating(rating) {
@@ -356,94 +442,19 @@ function createStarRating(rating) {
     return stars;
 }
 
-// Formater une date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('fr-FR', options);
-}
-
-// Formater une heure
-function formatTime(timeString) {
-    if (!timeString) return '';
-    // Si c'est déjà au format HH:MM, on le retourne tel quel
-    if (timeString.includes(':')) {
-        return timeString.substring(0, 5);
-    }
-    // Sinon on essaie de le formater
-    return timeString;
-}
-
-// Calculer la durée entre deux heures
-function calculateDuration(heureDepart, heureArrivee) {
-    if (!heureDepart || !heureArrivee) return 'Non défini';
-    
-    const [h1, m1] = heureDepart.split(':').map(Number);
-    const [h2, m2] = heureArrivee.split(':').map(Number);
-    
-    const minutes1 = h1 * 60 + m1;
-    const minutes2 = h2 * 60 + m2;
-    
-    const diff = minutes2 - minutes1;
-    const hours = Math.floor(diff / 60);
-    const mins = diff % 60;
-    
-    if (hours > 0 && mins > 0) {
-        return `${hours}h${mins}min`;
-    } else if (hours > 0) {
-        return `${hours}h`;
-    } else {
-        return `${mins}min`;
-    }
-}
-
-// Formater la date d'inscription
+// Formater la date d'inscription (membre depuis)
 function formatMemberSince(dateString) {
     if (!dateString) return 'Nouveau';
     
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Nouveau';
+    
     const month = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
-    return month;
+    return month.charAt(0).toUpperCase() + month.slice(1);
 }
 
 // Mettre la première lettre en majuscule
 function capitalizeFirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// Extraire l'heure depuis une date-time complète
-function extractTimeFromDateTime(datetimeString) {
-    if (!datetimeString) return 'Non défini';
-
-    const date = new Date(datetimeString);
-    if (isNaN(date.getTime())) return 'Non défini';
-
-    return date.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Calculer durée entre deux dates complètes
-function calculateDurationFromDates(dateDepart, dateArrivee) {
-    if (!dateDepart || !dateArrivee) return 'Non calculable';
-
-    const depart = new Date(dateDepart);
-    const arrivee = new Date(dateArrivee);
-
-    if (isNaN(depart.getTime()) || isNaN(arrivee.getTime())) return 'Non calculable';
-
-    const diffMs = arrivee - depart;
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-
-    if (diffMinutes < 0) return 'Non calculable';
-
-    const hours = Math.floor(diffMinutes / 60);
-    const minutes = diffMinutes % 60;
-
-    if (hours > 0) {
-        return `${hours}h${minutes > 0 ? minutes.toString().padStart(2, '0') : ''}`;
-    }
-    return `${minutes}min`;
 }

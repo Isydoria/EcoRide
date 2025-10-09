@@ -1,3 +1,4 @@
+# docker-compose.yml - Version complète avec MongoDB
 version: '3.8'
 
 services:
@@ -6,45 +7,72 @@ services:
     build: .
     container_name: ecoride-web
     ports:
-      - "8080:80"  # Votre site sera sur http://localhost:8080
+      - "8080:80"
     volumes:
-      - .:/var/www/html  # Lie votre dossier projet au container
+      - .:/var/www/html
     environment:
-      - DOCKER_ENV=true  # Pour détecter qu'on est sous Docker
+      - DOCKER_ENV=true
     depends_on:
-      - mysql  # Démarre MySQL avant le serveur web
+      - mysql
+      - mongodb  # Ajout de la dépendance MongoDB
 
-  # 2. Base de données MySQL (SANS mot de passe pour root)
+  # 2. Base de données MySQL
   mysql:
     image: mysql:8.0
     container_name: ecoride-mysql
     ports:
-      - "3307:3306"  # Port 3307 pour éviter conflit avec WampServer
+      - "3307:3306"
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Permet un mot de passe vide
-      MYSQL_ROOT_PASSWORD: ""  # Pas de mot de passe
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: ""
       MYSQL_DATABASE: ecoride_db
     volumes:
-      # Important : Docker va exécuter automatiquement schema.sql puis seed.sql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
-      - mysql_data:/var/lib/mysql  # Pour persister les données
+      - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
 
-  # 3. phpMyAdmin
+  # 3. MongoDB (NOUVEAU)
+  mongodb:
+    image: mongo:6.0
+    container_name: ecoride-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ""  # Pas de mot de passe pour dev
+      MONGO_INITDB_ROOT_PASSWORD: ""
+      MONGO_INITDB_DATABASE: ecoride_logs
+    volumes:
+      - mongodb_data:/data/db
+      - ./database/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+  # 4. phpMyAdmin
   phpmyadmin:
     image: phpmyadmin
     container_name: ecoride-phpmyadmin
     ports:
-      - "8081:80"  # phpMyAdmin sur http://localhost:8081
+      - "8081:80"
     environment:
       PMA_HOST: mysql
       PMA_USER: root
-      PMA_PASSWORD: ""  # Pas de mot de passe
-      PMA_ARBITRARY: 1
+      PMA_PASSWORD: ""
     depends_on:
       - mysql
 
-# Volume pour persister les données MySQL
+  # 5. Mongo Express (Interface web pour MongoDB) - OPTIONNEL
+  mongo-express:
+    image: mongo-express
+    container_name: ecoride-mongo-express
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongodb
+
 volumes:
   mysql_data:
+  mongodb_data:  # Nouveau volume pour MongoDB

@@ -513,6 +513,36 @@ git push origin main
 - Sauvegarde automatique avant changement
 - Rollback possible en cas d'erreur
 ```
+## 🗄️ BASE DE DONNÉES NoSQL - MONGODB
+
+### Exigence RNCP
+L'énoncé requiert l'utilisation d'une base de données **relationnelle ET non relationnelle**.
+
+### Solution implémentée : mongodb_fake.php
+
+**Contexte technique :**
+- PHP 8.3.14 n'a pas l'extension MongoDB native disponible facilement
+- Solution alternative : implémentation légère compatible MongoDB
+
+**Fonctionnalités :**
+- Stockage fichier JSON dans `mongodb_data/`
+- API compatible MongoDB : `insertOne()`, `find()`, `aggregate()`
+- Collections : `activity_logs`, `search_history`, `performance_metrics`
+
+**Cas d'usage dans EcoRide :**
+1. **Logs d'activité utilisateur** : Connexions, actions importantes
+2. **Historique des recherches** : Trajets recherchés par les utilisateurs
+3. **Métriques de performance** : Temps de réponse des pages
+
+**Avantages de cette approche :**
+- ✅ Répond à l'exigence RNCP (base NoSQL)
+- ✅ Fonctionnel sans configuration serveur complexe
+- ✅ API similaire à MongoDB réel
+- ✅ Facilement testable avec `/test-mongodb-simple.php`
+- ✅ Peut être remplacé par vrai MongoDB en production
+
+**Démonstration :**
+URL : `/test-mongodb-simple.php`
 
 ### 🔍 **Monitoring et maintenance**
 

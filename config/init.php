@@ -44,10 +44,15 @@ if (!defined('BASE_URL')) {
     define('BASE_URL', $isDocker ? 'http://localhost:8080' : 'http://localhost/ecoride');
 }
 
-// Message de debug (à retirer en production)
-if ($isDocker) {
-    error_log("✅ EcoRide - Running in Docker environment");
-} else {
-    error_log("✅ EcoRide - Running in local environment (WampServer)");
+
+// Charger MongoDB fake (compatible PHP 8.3.14)
+if (file_exists(__DIR__ . '/mongodb_fake.php')) {
+    require_once __DIR__ . '/mongodb_fake.php';
+    
+    // Logger le chargement de MongoDB
+    if (function_exists('mongodb')) {
+        error_log("✅ MongoDB chargé pour PHP " . PHP_VERSION);
+    }
 }
+
 ?>
