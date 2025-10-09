@@ -1,42 +1,70 @@
-# Configuration
+# ==========================================
+# ⚙️ CONFIGURATION & SECRETS
+# ==========================================
 .env
+.env.local
 
-# Uploads
+
+# ==========================================
+# 📦 DÉPENDANCES
+# ==========================================
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+
+# ==========================================
+# 🗄️ BASES DE DONNÉES
+# ==========================================
+*.sqlite
+*.db
+*.sql.gz
+*.sql.zip
+database/backup/
+
+# ==========================================
+# 🐳 DOCKER
+# ==========================================
+mongodb_data/
+
+# ==========================================
+# 🧰 UPLOADS, LOGS, CACHE
+# ==========================================
 uploads/*
 !uploads/.gitkeep
 
-# Logs
 logs/*
 !logs/.gitkeep
 *.log
 
-# Cache
 cache/*
 !cache/.gitkeep
 
-# Dependencies
-vendor/
-node_modules/
+tmp/
+temp/
+*.tmp
+*.bak
+*.old
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Database
-*.sqlite
-*.db
-
-# Fichiers temporaires de développement
+# ==========================================
+# 🧪 FICHIERS DE DÉVELOPPEMENT / TEMP
+# ==========================================
 debug_*.php
 test_*.php
 *_temp.php
 
-# dossiers a ne pas ajouter
+# ==========================================
+# 🗂️ DOSSIERS À NE PAS AJOUTER
+# ==========================================
 enonce/
 non_commit/
+
+# ==========================================
+# 💻 IDE & OS
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

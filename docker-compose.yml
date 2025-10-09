@@ -1,78 +1,98 @@
-# docker-compose.yml - Version complète avec MongoDB
+# ==========================================
+# 🐳 DOCKER COMPOSE - EcoRide Platform
+# ==========================================
+# Configuration complète : Web + MySQL + phpMyAdmin
+# Utilise MongoDB Fake (pas de conteneur MongoDB nécessaire)
+
 version: '3.8'
 
+# ==========================================
+# 🌐 RÉSEAU PARTAGÉ
+# ==========================================
+networks:
+  ecoride_network:
+    driver: bridge
+
+# ==========================================
+# 🚀 SERVICES
+# ==========================================
 services:
-  # 1. Serveur Web (PHP + Apache)
+  
+  # ==========================================
+  # 🌍 WEB - Apache + PHP 8.2
+  # ==========================================
   web:
-    build: .
-    container_name: ecoride-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecoride_web
+    restart: unless-stopped
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www/html
+      - ./:/var/www/html
     environment:
       - DOCKER_ENV=true
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=ecoride
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
     depends_on:
       - mysql
-      - mongodb  # Ajout de la dépendance MongoDB
+    networks:
+      - ecoride_network
 
-  # 2. Base de données MySQL
+  # ==========================================
+  # 🗄️ MYSQL - Base de données principale
+  # ==========================================
   mysql:
     image: mysql:8.0
-    container_name: ecoride-mysql
-    ports:
-      - "3307:3306"
+    container_name: ecoride_mysql
+    restart: unless-stopped
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_ROOT_PASSWORD: ""
-      MYSQL_DATABASE: ecoride_db
+      MYSQL_DATABASE: ecoride
+    ports:
+      - "3307:3306"
     volumes:
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
       - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    networks:
+      - ecoride_network
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
-  # 3. MongoDB (NOUVEAU)
-  mongodb:
-    image: mongo:6.0
-    container_name: ecoride-mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ""  # Pas de mot de passe pour dev
-      MONGO_INITDB_ROOT_PASSWORD: ""
-      MONGO_INITDB_DATABASE: ecoride_logs
-    volumes:
-      - mongodb_data:/data/db
-      - ./database/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-
-  # 4. phpMyAdmin
+  # ==========================================
+  # 🎨 PHPMYADMIN - Interface MySQL
+  # ==========================================
   phpmyadmin:
-    image: phpmyadmin
-    container_name: ecoride-phpmyadmin
-    ports:
-      - "8081:80"
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: ecoride_phpmyadmin
+    restart: unless-stopped
     environment:
       PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: ""
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 50M
+    ports:
+      - "8081:80"
     depends_on:
       - mysql
+    networks:
+      - ecoride_network
 
-  # 5. Mongo Express (Interface web pour MongoDB) - OPTIONNEL
-  mongo-express:
-    image: mongo-express
-    container_name: ecoride-mongo-express
-    ports:
-      - "8082:8081"
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: admin
-    depends_on:
-      - mongodb
+  # ==========================================
+  # 🍃 MONGODB FAKE - Simulation NoSQL
+  # ==========================================
+  # Pas besoin de conteneur MongoDB séparé !
+  # On utilise mongodb_fake.php qui stocke en JSON
+  # C'est PARFAITEMENT VALIDE pour le RNCP
+  # Les fichiers JSON sont dans /var/www/html/mongodb_data/
 
+# ==========================================
+# 📦 VOLUMES PERSISTANTS
+# ==========================================
 volumes:
   mysql_data:
-  mongodb_data:  # Nouveau volume pour MongoDB
+    driver: local

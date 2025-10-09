@@ -5,7 +5,7 @@
 
 /* ========== CONTAINER PRINCIPAL ========== */
 .trajets-container {
-    margin-top: 80px; /* Pour le navbar fixe */
+    margin-top: 80px;
     min-height: calc(100vh - 80px);
     background: linear-gradient(to bottom, #f8f9fa, #ffffff);
 }
@@ -30,7 +30,7 @@
     margin-bottom: 2rem;
 }
 
-/* Formulaire de recherche spécifique aux trajets */
+/* Formulaire de recherche */
 .search-form-trajets {
     background: white;
     padding: 2rem;
@@ -38,7 +38,7 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     max-width: 1000px;
     margin: 0 auto;
-    overflow: visible; /* Éviter que le contenu soit coupé */
+    overflow: visible;
 }
 
 .search-inputs {
@@ -50,7 +50,7 @@
 
 .search-form-trajets .form-group {
     margin-bottom: 0;
-    min-width: 0; /* Permettre au contenu de rétrécir */
+    min-width: 0;
 }
 
 .search-form-trajets .form-label {
@@ -62,7 +62,7 @@
 
 .search-form-trajets .form-input {
     width: 100%;
-    box-sizing: border-box; /* Important pour inclure le padding dans la largeur */
+    box-sizing: border-box;
 }
 
 .search-form-trajets .btn-primary {
@@ -71,7 +71,7 @@
     font-weight: 600;
     height: fit-content;
     padding: 1rem 2rem;
-    white-space: nowrap; /* Éviter que le texte se coupe */
+    white-space: nowrap;
     min-width: fit-content;
 }
 
@@ -129,6 +129,34 @@
     cursor: pointer;
 }
 
+.filter-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.filter-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--vert-principal);
+    cursor: pointer;
+}
+
+.filter-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--vert-principal);
+    cursor: pointer;
+    border: none;
+}
+
 .filter-input {
     padding: 0.75rem;
     border: 2px solid var(--gris-tres-clair);
@@ -144,6 +172,15 @@
     border-color: var(--vert-principal);
 }
 
+/* Boutons d'action des filtres */
+.filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
 .btn-secondary {
     background: var(--vert-principal);
     color: white;
@@ -153,9 +190,6 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
-    justify-self: center; /* Centrer le bouton */
-    grid-column: 1 / -1; /* Prendre toute la largeur sur grand écran */
-    margin-top: 0.5rem;
 }
 
 .btn-secondary:hover {
@@ -163,11 +197,67 @@
     transform: scale(1.05);
 }
 
+.btn-tertiary {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-tertiary:hover {
+    background: #7f8c8d;
+    transform: scale(1.05);
+}
+
+.nav-admin {
+    background: #e74c3c;
+    color: white !important;
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
 /* ========== SECTION DES RÉSULTATS ========== */
 .results-section {
     padding: 3rem 2rem;
     max-width: 1400px;
     margin: 0 auto;
+}
+
+/* 🆕 COMPTEUR DE RÉSULTATS */
+.results-count {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 20px;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #e8f8f5 0%, #d4edda 100%);
+    border-radius: 12px;
+    text-align: center;
+    border-left: 5px solid var(--vert-principal);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    animation: slideDown 0.4s ease-out;
+}
+
+.results-count strong {
+    color: var(--vert-principal);
+    font-size: 1.4em;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .status-message {
@@ -203,24 +293,6 @@
     justify-content: center;
 }
 
-/* Responsivité pour les écrans moyens */
-@media (max-width: 768px) {
-    .trajets-grid {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-        padding: 0 1rem;
-    }
-}
-
-/* Responsivité pour les petits écrans */
-@media (max-width: 450px) {
-    .trajets-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 0 0.5rem;
-    }
-}
-
 /* Carte de trajet */
 .trajet-card {
     background: white;
@@ -233,9 +305,9 @@
     flex-direction: column;
     height: 100%;
     min-width: 0;
-    max-width: 500px; /* Largeur maximale pour éviter les cartes trop larges */
+    max-width: 500px;
     width: 100%;
-    justify-self: center; /* Centrer la carte dans sa cellule de grille */
+    justify-self: center;
 }
 
 .trajet-card:hover {
@@ -248,19 +320,19 @@
     background: linear-gradient(to right, #f0fdf4, white);
 }
 
-/* En-tête de la carte avec le badge écologique */
+/* En-tête de la carte */
 .trajet-header {
-    padding: 2.5rem 1.5rem 1.5rem 1.5rem; /* Augmenté encore plus le padding-top pour le badge */
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
     background: linear-gradient(135deg, var(--vert-principal) 0%, var(--vert-fonce) 100%);
     color: white;
     position: relative;
-    min-height: 80px; /* Hauteur minimale pour éviter la coupe */
+    min-height: 80px;
 }
 
 /* Badge écologique */
 .eco-badge {
     position: absolute;
-    top: 8px; /* Positionné à l'intérieur de la carte au lieu de déborder */
+    top: 8px;
     right: 15px;
     background: var(--jaune-eco);
     color: var(--gris-fonce);
@@ -275,88 +347,26 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-
-/* Info conducteur */
-.driver-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    padding-top: 1.5rem; /* Augmenté pour éviter le chevauchement */
-}
-
-.driver-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--vert-principal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 20px;
-}
-
-.driver-details {
-    flex: 1;
-}
-
-.driver-name {
-    font-weight: 600;
-    color: var(--gris-fonce);
-    margin-bottom: 0.25rem;
-}
-
-.driver-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--jaune-eco);
-    font-size: 14px;
-}
-
-/* Détails du trajet */
-.trajet-details {
-    padding: 1rem;
-    border-top: 1px solid var(--gris-tres-clair);
-}
-
+/* Route du trajet */
 .trajet-route {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
     justify-content: space-between;
+    font-size: 1.1em;
 }
 
-.route-point {
-    flex: 1;
-    text-align: center;
+.arrow {
+    font-size: 1.5em;
+    color: rgba(255,255,255,0.8);
 }
 
-.route-city {
-    font-weight: 600;
-    color: var(--gris-fonce);
-    font-size: 16px;
-}
-
-.route-arrow {
-    color: var(--vert-principal);
-    font-size: 24px;
-    font-weight: bold;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-}
-
-/* Info du trajet (date, heure, etc.) */
+/* Détails du trajet */
 .trajet-info {
+    padding: 1.5rem;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    gap: 1rem;
     font-size: 14px;
     color: var(--gris-moyen);
 }
@@ -367,14 +377,19 @@
     gap: 0.5rem;
 }
 
+.info-item .icon {
+    font-size: 1.1em;
+}
+
 /* Footer de la carte */
 .trajet-footer {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     background: var(--gris-tres-clair);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: auto; /* Pousse le footer vers le bas */
+    margin-top: auto;
+    border-top: 1px solid #e0e0e0;
 }
 
 .trajet-price {
@@ -392,6 +407,7 @@
 .trajet-places {
     font-size: 14px;
     color: var(--gris-moyen);
+    margin-top: 5px;
 }
 
 .btn-details {
@@ -418,6 +434,12 @@
     padding: 4rem 2rem;
 }
 
+.no-results-icon {
+    font-size: 5em;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
 .no-results h3 {
     color: var(--gris-fonce);
     margin-bottom: 1rem;
@@ -429,31 +451,42 @@
     margin-bottom: 2rem;
 }
 
-#alternativeDates {
+/* Dates alternatives */
+.alternatives {
     margin-top: 2rem;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
 }
 
-.alternative-dates-list {
+.alternatives h4 {
+    color: var(--gris-fonce);
+    margin-bottom: 15px;
+}
+
+.dates-alternatives {
     display: flex;
-    gap: 1rem;
-    justify-content: center;
     flex-wrap: wrap;
-    margin-top: 1rem;
+    gap: 10px;
+    justify-content: center;
 }
 
-.alternative-date-btn {
+.date-alt {
+    padding: 10px 20px;
     background: white;
     border: 2px solid var(--vert-principal);
-    color: var(--vert-principal);
-    padding: 0.75rem 1.5rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
+    font-weight: 600;
+    color: var(--vert-principal);
 }
 
-.alternative-date-btn:hover {
+.date-alt:hover {
     background: var(--vert-principal);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 /* ========== RESPONSIVE MOBILE ========== */
@@ -470,7 +503,6 @@
         font-size: 14px;
     }
     
-    /* Formulaire de recherche mobile */
     .search-form-trajets {
         padding: 1.5rem 1rem;
         border-radius: 12px;
@@ -483,7 +515,7 @@
     
     .search-form-trajets .form-input {
         width: 100%;
-        font-size: 16px; /* Éviter le zoom sur iOS */
+        font-size: 16px;
     }
     
     .search-form-trajets .btn-primary {
@@ -491,7 +523,6 @@
         padding: 1rem;
     }
     
-    /* Filtres mobile */
     .filters-section {
         padding: 1.5rem 1rem;
     }
@@ -501,25 +532,33 @@
         gap: 1rem;
     }
     
-    .btn-secondary {
-        width: 100%;
-        margin-top: 1rem;
+    .filter-actions {
+        flex-direction: column;
     }
     
-    /* Grille des trajets mobile */
+    .btn-secondary,
+    .btn-tertiary {
+        width: 100%;
+    }
+    
     .trajets-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
+        padding: 0 1rem;
     }
     
     .trajet-info {
         grid-template-columns: 1fr;
     }
+    
+    .results-count {
+        font-size: 1.1em;
+        padding: 15px;
+    }
 }
 
-/* ========== RESPONSIVE TABLETTE (iPad) ========== */
+/* ========== RESPONSIVE TABLETTE ========== */
 @media (min-width: 769px) and (max-width: 1024px) {
-    /* Formulaire de recherche tablette */
     .search-inputs {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
@@ -531,43 +570,14 @@
         justify-self: center;
     }
     
-    /* Filtres tablette - Disposition spéciale */
     .filters-grid {
-        display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        align-items: end;
     }
     
-    /* Checkbox écologique prend toute la largeur */
     .filter-item:first-child {
         grid-column: 1 / -1;
     }
     
-    /* Les 3 autres filtres sur une ligne */
-    .filter-item:nth-child(2),
-    .filter-item:nth-child(3),
-    .filter-item:nth-child(4) {
-        grid-column: auto;
-    }
-    
-    /* Le select "Toutes les notes" et le bouton sur la même ligne */
-    .filter-item:nth-child(4) {
-        grid-column: 1;
-    }
-    
-    .btn-secondary {
-        grid-column: 2;
-        width: auto;
-        align-self: end;
-        justify-self: end;
-        margin-top: 0;
-        padding: 0.75rem 1.5rem;
-        height: fit-content;
-        margin-bottom: 0;
-    }
-    
-    /* Grille des trajets tablette */
     .trajets-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
@@ -576,15 +586,12 @@
 
 /* ========== RESPONSIVE GRAND ÉCRAN ========== */
 @media (min-width: 1025px) {
-    /* Filtres grand écran - Disposition en ligne avec bouton centré */
     .filters-grid {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         align-items: end;
         gap: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
     }
     
     .filter-item {
@@ -595,18 +602,15 @@
     .filter-item:first-child {
         flex-basis: 100%;
         text-align: center;
-        margin-bottom: 0.5rem;
     }
     
-    .btn-secondary {
+    .filter-actions {
         flex: 0 0 auto;
         margin: 0;
-        padding: 0.75rem 2.5rem;
     }
 }
 
-/* ========== AJUSTEMENTS SUPPLÉMENTAIRES ========== */
-/* Pour éviter le débordement sur très petits écrans */
+/* ========== TRÈS PETITS ÉCRANS ========== */
 @media (max-width: 350px) {
     .search-form-trajets {
         padding: 1rem 0.75rem;
@@ -619,5 +623,10 @@
     .search-form-trajets .form-input {
         padding: 0.75rem;
         font-size: 14px;
+    }
+    
+    .trajets-grid {
+        grid-template-columns: 1fr;
+        padding: 0 0.5rem;
     }
 }

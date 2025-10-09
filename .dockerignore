@@ -1,6 +1,72 @@
-.git
+# .dockerignore - Fichiers à exclure de l'image Docker
+
+# ==========================================
+# 🗑️ ENVIRONNEMENTS LOCAUX
+# ==========================================
+.env
+.env.local
+.env.development
+
+# ==========================================
+# 🐛 WAMP & DÉVELOPPEMENT LOCAL
+# ==========================================
+wamp/
+wamp64/
+.wamp
+*.log
+error.log
+access.log
+
+# ==========================================
+# 📦 DÉPENDANCES & CACHE
+# ==========================================
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+
+# ==========================================
+# 🗂️ SYSTÈME & IDE
+# ==========================================
+.git/
 .gitignore
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 📄 DOCUMENTATION
+# ==========================================
 README.md
-docker-compose.yml
+docs/
+enonce/
+design/
+*.md
+
+# ==========================================
+# 🐳 DOCKER (évite récursion)
+# ==========================================
 Dockerfile
+docker-compose.yml
 .dockerignore
+
+# ==========================================
+# 🗄️ DONNÉES TEMPORAIRES
+# ==========================================
+tmp/
+temp/
+cache/
+*.tmp
+*.bak
+*.old
+
+# ==========================================
+# 🧪 TESTS
+# ==========================================
+tests/
+phpunit.xml
+.phpunit.result.cache

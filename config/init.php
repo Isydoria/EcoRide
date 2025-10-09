@@ -28,6 +28,17 @@ if (!class_exists('Database')) {
     }
 }
 
+// Fonction helper pour obtenir une connexion à la base de données
+if (!function_exists('db')) {
+    function db() {
+        static $database = null;
+        if ($database === null) {
+            $database = new Database();
+        }
+        return $database->getConnection();
+    }
+}
+
 // Chargement des fonctions utilitaires si elles existent
 if (file_exists(__DIR__ . '/functions.php')) {
     require_once __DIR__ . '/functions.php';

@@ -56,7 +56,7 @@ try {
 
     // Récupérer les participations (passager)
     $stmt = $pdo->prepare("
-        SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, u.pseudo as conducteur
+        SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix_par_place, u.pseudo as conducteur
         FROM participation p
         JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
         JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id

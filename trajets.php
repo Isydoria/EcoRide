@@ -49,7 +49,7 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                 <?php if ($isLoggedIn): ?>
                     <li><a href="user/dashboard.php" class="nav-link">Mon espace (<?php echo htmlspecialchars($userPseudo); ?>)</a></li>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'administrateur'): ?>
-                        <li><a href="admin/dashboard.php" class="nav-link" style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 20px;">🛠️ Admin</a></li>
+                        <li><a href="admin/dashboard.php" class="nav-link nav-admin">🛠️ Admin</a></li>
                     <?php endif; ?>
                     <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
                 <?php else: ?>
@@ -129,35 +129,37 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                     
                     <!-- Filtre prix max -->
                     <div class="filter-item">
-                        <label class="filter-label">Prix maximum (crédits)</label>
+                        <label class="filter-label">💰 Prix maximum : <span id="prix-display">50</span> crédits</label>
                         <input 
-                            type="number" 
+                            type="range" 
                             id="filter-prix" 
                             name="prix_max" 
-                            class="filter-input" 
-                            placeholder="50"
-                            min="0"
+                            class="filter-slider"
+                            min="10" 
+                            max="100" 
+                            value="50"
                             step="5"
                         >
                     </div>
                     
                     <!-- Filtre durée max -->
                     <div class="filter-item">
-                        <label class="filter-label">Durée maximum (heures)</label>
+                        <label class="filter-label">⏱️ Durée maximum : <span id="duree-display">10</span>h</label>
                         <input 
-                            type="number" 
+                            type="range" 
                             id="filter-duree" 
                             name="duree_max" 
-                            class="filter-input" 
-                            placeholder="5"
-                            min="0"
-                            step="0.5"
+                            class="filter-slider"
+                            min="1" 
+                            max="12" 
+                            value="10"
+                            step="1"
                         >
                     </div>
                     
                     <!-- Filtre note minimum -->
                     <div class="filter-item">
-                        <label class="filter-label">Note minimum du conducteur</label>
+                        <label class="filter-label">⭐ Note minimum conducteur</label>
                         <select id="filter-note" name="note_min" class="filter-input">
                             <option value="">Toutes les notes</option>
                             <option value="1">⭐ 1+ étoile</option>
@@ -168,9 +170,15 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                         </select>
                     </div>
                     
-                    <button type="button" class="btn btn-secondary" onclick="applyFilters()">
-                        Appliquer les filtres
-                    </button>
+                    <!-- Boutons d'action -->
+                    <div class="filter-actions">
+                        <button type="button" id="applyFilters" class="btn btn-secondary">
+                            Appliquer les filtres
+                        </button>
+                        <button type="button" id="resetFilters" class="btn btn-tertiary">
+                            Réinitialiser
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -178,6 +186,9 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
         <!-- Section des résultats -->
         <section class="results-section">
             <div class="container">
+                <!-- Compteur de résultats (sera ajouté par JS) -->
+                <div id="resultsCount" class="results-count" style="display: none;"></div>
+                
                 <!-- Message de statut -->
                 <div id="statusMessage" class="status-message">
                     <p>👆 Entrez vos critères de recherche pour trouver un trajet</p>
