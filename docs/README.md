@@ -23,10 +23,10 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - **Interface admin** : https://ecoride-om7c.onrender.com/admin/dashboard.php
 - **Init données démo** : https://ecoride-om7c.onrender.com/init-demo-data.php
 
-### 💻 **Local (Développement)**
+### 💻 **Local (Développement - MySQL)**
 - **URL principale** : http://localhost/ecoride
 - **Interface admin** : http://localhost/ecoride/admin/dashboard.php
-- **Init données démo** : http://localhost/ecoride/init-demo-data.php
+- **Init données démo** : http://localhost/ecoride/init-demo-data-local.php
 
 ---
 
@@ -207,18 +207,18 @@ Le système détecte automatiquement l'environnement :
 ### **Scripts d'Initialisation**
 
 ```bash
-# Initialiser les données de démonstration complètes
+# LOCAL (MySQL) - Initialiser les données de démonstration
 # - 3 employés (Sophie, Lucas, Emma)
 # - 8 véhicules variés
 # - 34 trajets jusqu'à fin février 2026
-# - Participations et avis
-http://localhost/ecoride/init-demo-data.php
+http://localhost/ecoride/init-demo-data-local.php
 
-# Initialiser la base de données PostgreSQL complète (Render uniquement)
+# RENDER (PostgreSQL) - Initialiser les données de démonstration
+# Mêmes données que le script local
+https://ecoride-om7c.onrender.com/init-demo-data.php
+
+# RENDER - Initialiser uniquement la structure (8 tables)
 https://ecoride-om7c.onrender.com/init-complete.php
-
-# Script d'initialisation simple (3 utilisateurs)
-https://ecoride-om7c.onrender.com/init-simple.php
 ```
 
 ### **Compatibilité Multi-Environnements**
