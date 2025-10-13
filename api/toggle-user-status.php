@@ -1,7 +1,7 @@
 <?php
 // api/toggle-user-status.php
-header('Content-Type: application/json');
 session_start();
+header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrateur') {
     die(json_encode(['success' => false, 'message' => 'Accès non autorisé']));

@@ -1,6 +1,6 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
 session_start();
+header('Content-Type: application/json; charset=utf-8');
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
@@ -121,9 +121,6 @@ try {
             'message' => 'Le nombre de places disponibles ne peut pas égaler ou dépasser la capacité totale du véhicule'
         ]));
     }
-
-    // Calculer l'heure d'arrivée estimée (ajouter 2 heures par défaut)
-    $datetime_arrivee = date('Y-m-d H:i:s', strtotime($datetime_depart . ' +2 hours'));
 
     // Commencer une transaction
     $pdo->beginTransaction();

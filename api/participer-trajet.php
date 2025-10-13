@@ -5,6 +5,7 @@
  */
 
 // Configuration
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -26,9 +27,6 @@ function jsonResponse($success, $message, $data = null, $debug = null) {
     echo json_encode($response);
     exit;
 }
-
-// Démarrer la session
-session_start();
 
 // Vérifier que l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
