@@ -58,9 +58,10 @@
 - `enonce/` - Énoncé du projet
 
 ### Scripts d'initialisation
-- `init-complete.php` - Initialisation complète PostgreSQL (8 tables)
-- `init-demo-data.php` - Données de démonstration (34 trajets, 3 employés, 8 véhicules)
-- `init-simple.php` - Initialisation minimale (3 utilisateurs)
+- `init-complete.php` - Initialisation structure PostgreSQL (8 tables) - **Render uniquement**
+- `init-demo-data.php` - Données démo PostgreSQL (34 trajets, 3 employés) - **Render**
+- `init-demo-data-local.php` - Données démo MySQL (mêmes données) - **Local/WampServer**
+- `init-simple.php` - Initialisation minimale PostgreSQL (3 utilisateurs) - **Render**
 
 ### Fichiers de projet
 - `README.md` - Documentation principale

@@ -550,17 +550,19 @@ Exemples :
 - Script init-database-render.php échoue (BOM UTF-8, SQL syntax)
 - Extension PDO non détectée correctement
 - Base vide sur Render sans données de test
+- Confusion scripts local (MySQL) vs Render (PostgreSQL)
 
 🔧 Actions correctives :
 1. DSN explicite PostgreSQL (sslmode=require)
 2. Script init-complete.php avec toutes les 8 tables
-3. Script init-demo-data.php avec 34 trajets et 3 employés
-4. Tests validation complète
+3. Script init-demo-data.php avec 34 trajets (Render/PostgreSQL)
+4. Script init-demo-data-local.php avec mêmes données (Local/MySQL)
+5. Documentation claire de la séparation des environnements
 
 ⏱️ Impact :
 - Perte : 6 heures (multiple tentatives)
 - Leçon : Tester tôt la configuration PostgreSQL
-- Amélioration : Scripts d'initialisation universels
+- Amélioration : Scripts d'initialisation séparés par environnement
 ```
 
 ### 🛡️ **Stratégies préventives**

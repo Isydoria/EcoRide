@@ -134,16 +134,23 @@
 
 ### **Étape 1 : Initialisation des données de test**
 
-1. **Accéder au script d'initialisation**
+1. **Accéder au script d'initialisation selon votre environnement**
+
+   **Production (Render - PostgreSQL) :**
    ```
    https://ecoride-om7c.onrender.com/init-demo-data.php
+   ```
+
+   **Local (WampServer - MySQL) :**
+   ```
+   http://localhost/ecoride/init-demo-data-local.php
    ```
 
 2. **Vérifier la création des données**
    - ✅ 3 employés créés (Sophie, Lucas, Emma)
    - ✅ 8 véhicules variés (électrique, hybride, essence, diesel)
    - ✅ 34 trajets jusqu'à fin février 2026
-   - ✅ Trajets multiples mêmes dates pour filtres :
+   - ✅ Trajets multiples mêmes dates pour tester les filtres :
      - Paris → Lyon : 3 trajets le 15/10/2025 (8h, 14h, 19h)
      - Marseille → Nice : 2 trajets le 18/10/2025
      - Toulouse → Bordeaux : 2 trajets le 25/10/2025
