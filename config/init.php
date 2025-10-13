@@ -96,7 +96,11 @@ if (!defined('APP_VERSION')) {
     define('APP_VERSION', '1.0.0');
 }
 if (!defined('BASE_URL')) {
-    if ($isFlyIO) {
+    if ($isRender) {
+        // Render.com : utiliser le nom du service
+        $renderServiceName = getenv('RENDER_SERVICE_NAME') ?: 'ecoride';
+        define('BASE_URL', 'https://' . $renderServiceName . '.onrender.com');
+    } elseif ($isFlyIO) {
         // Fly.io : utiliser le nom de l'app
         $flyAppName = getenv('FLY_APP_NAME') ?: 'ecoride-covoiturage';
         define('BASE_URL', 'https://' . $flyAppName . '.fly.dev');
@@ -129,6 +133,7 @@ if ($app_env !== 'production') {
     error_log("PHP Version: " . PHP_VERSION);
     error_log("Environnement: " . $app_env);
     error_log("Base URL: " . BASE_URL);
+    error_log("Render: " . ($isRender ? 'Oui' : 'Non'));
     error_log("Fly.io: " . ($isFlyIO ? 'Oui' : 'Non'));
     error_log("Docker: " . ($isDocker ? 'Oui' : 'Non'));
     error_log("====================================");
