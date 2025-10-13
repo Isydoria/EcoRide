@@ -129,12 +129,16 @@ try {
     }
     
     // Déterminer la redirection selon le rôle
-    $redirectUrl = '/user/dashboard.php';
-    
+    // Détection de l'environnement pour adapter les chemins
+    $isDocker = getenv('DOCKER_ENV') === 'true';
+    $baseUrl = $isDocker ? '' : '/ecoride';
+
+    $redirectUrl = $baseUrl . '/user/dashboard.php';
+
     if ($user['role'] === 'administrateur') {
-        $redirectUrl = '/admin/dashboard.php';
+        $redirectUrl = $baseUrl . '/admin/dashboard.php';
     } elseif ($user['role'] === 'employe') {
-        $redirectUrl = '/employee/dashboard.php';
+        $redirectUrl = $baseUrl . '/employee/dashboard.php';
     }
     
     // Réponse de succès

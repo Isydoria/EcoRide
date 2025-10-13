@@ -187,9 +187,13 @@ try {
 }
 
 // ✅ ÉTAPE 9 : Réponse de succès
+// Détection de l'environnement pour adapter les chemins
+$isDocker = getenv('DOCKER_ENV') === 'true';
+$baseUrl = $isDocker ? '' : '/ecoride';
+
 jsonResponse(true, 'Inscription réussie ! Bienvenue sur EcoRide 🎉', [
     'user_id' => $user_id,
     'pseudo' => $pseudo,
-    'redirect' => '/ecoride/user/dashboard.php'
+    'redirect' => $baseUrl . '/user/dashboard.php'
 ]);
 ?>
