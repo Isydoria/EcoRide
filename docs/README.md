@@ -21,12 +21,12 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 ### 🚀 **Production (Render.com - Recommandé)**
 - **URL principale** : https://ecoride-om7c.onrender.com
 - **Interface admin** : https://ecoride-om7c.onrender.com/admin/dashboard.php
-- **Init trajets** : https://ecoride-om7c.onrender.com/init-trajets-demo.php
+- **Init données démo** : https://ecoride-om7c.onrender.com/init-demo-data.php
 
 ### 💻 **Local (Développement)**
 - **URL principale** : http://localhost/ecoride
 - **Interface admin** : http://localhost/ecoride/admin/dashboard.php
-- **Init trajets** : http://localhost/ecoride/init-trajets-demo.php
+- **Init données démo** : http://localhost/ecoride/init-demo-data.php
 
 ---
 
@@ -34,13 +34,18 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 ### 🛠️ **Administrateur**
 - **Email** : `admin@ecoride.fr`
-- **Mot de passe** : `Ec0R1de!` (Render) / `Test123!` (Local après fix-admin.php)
+- **Mot de passe** : `Ec0R1de!`
 - **Accès** : Dashboard admin complet avec graphiques et statistiques
 
-### 👥 **Utilisateurs**
-- **Utilisateur demo** : `demo@ecoride.fr` / `demo123` (50 crédits)
-- **Jean Dupont** : `jean@example.com` / `Test123!` (50 crédits)
-- **Marie Martin** : `marie@example.com` / `Test123!` (30 crédits)
+### 👥 **Employés**
+- **Sophie Martin** : `sophie.martin@ecoride.fr` / `Sophie2025!`
+- **Lucas Dubois** : `lucas.dubois@ecoride.fr` / `Lucas2025!`
+- **Emma Bernard** : `emma.bernard@ecoride.fr` / `Emma2025!`
+
+### 🚗 **Utilisateurs**
+- **Jean Dupont** : `jean.dupont@ecoride.fr` / `Jean2025!` (100 crédits)
+- **Marie Martin** : `marie.martin@ecoride.fr` / `Marie2025!` (75 crédits)
+- **Paul Durand** : `paul.durand@ecoride.fr` / `Paul2025!` (60 crédits)
 - **Nouveau compte** : Inscription avec 20 crédits offerts
 
 ---
@@ -51,17 +56,22 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 1. **🔗 Accéder à l'app** : https://ecoride-om7c.onrender.com
 
-2. **🚗 Initialiser les trajets** : `/init-trajets-demo.php`
-   - Crée 5 trajets avec dates relatives (demain, après-demain...)
-   - Trajets Paris→Lyon, Lyon→Marseille, Bordeaux→Toulouse...
+2. **🚗 Initialiser les données** : `/init-demo-data.php`
+   - Crée 3 employés pour la modération
+   - Crée 8 véhicules variés (électrique, hybride, diesel, essence)
+   - Crée 34 trajets jusqu'à fin février 2026
+   - Trajets multiples aux mêmes dates pour tester les filtres
+   - Ajoute des participations et des avis
 
 3. **🔍 Test recherche** :
-   - Rechercher `Lyon` → `Marseille`
-   - Cliquer "Voir détail" sur un trajet
+   - Rechercher `Paris` → `Lyon` le `15/10/2025`
+   - Voir 3 résultats à différentes heures (8h, 14h, 19h)
+   - Tester les filtres de date et destination
 
 4. **👨‍💼 Interface admin** : `/admin/dashboard.php`
    - Connexion : `admin@ecoride.fr` / `Ec0R1de!`
-   - Voir statistiques et graphiques
+   - Voir les 3 employés créés
+   - Consulter statistiques et graphiques (34 trajets, 9 utilisateurs)
 
 ### 📋 **Test Complet (15 minutes)**
 
@@ -132,7 +142,9 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - **API RESTful** pour toutes les actions
 
 ### **Base de Données**
-- **MySQL 8.0+** avec charset UTF8MB4
+- **PostgreSQL 15** (Production - Render.com)
+- **MySQL 8.0+** (Développement - Local)
+- **Code compatible MySQL/PostgreSQL** avec détection automatique du driver
 - **8 tables** avec contraintes d'intégrité
 - **Index optimisés** pour les recherches géographiques
 - **Relations normalisées** avec clés étrangères
@@ -192,18 +204,32 @@ Le système détecte automatiquement l'environnement :
 - **☁️ Render** : Variables d'environnement automatiques (PostgreSQL)
 - **🔧 Adaptive** : Basculement transparent entre environnements
 
-### **Scripts Utilitaires**
+### **Scripts d'Initialisation**
 
 ```bash
-# Créer des trajets de test avec dates relatives
-http://localhost/ecoride/init-trajets-demo.php
+# Initialiser les données de démonstration complètes
+# - 3 employés (Sophie, Lucas, Emma)
+# - 8 véhicules variés
+# - 34 trajets jusqu'à fin février 2026
+# - Participations et avis
+http://localhost/ecoride/init-demo-data.php
 
-# Réinitialiser le mot de passe admin (local uniquement)
-http://localhost/ecoride/fix-admin.php
+# Initialiser la base de données PostgreSQL complète (Render uniquement)
+https://ecoride-om7c.onrender.com/init-complete.php
 
-# Debug des comptes utilisateurs
-http://localhost/ecoride/debug-users.php
+# Script d'initialisation simple (3 utilisateurs)
+https://ecoride-om7c.onrender.com/init-simple.php
 ```
+
+### **Compatibilité Multi-Environnements**
+
+Le code s'adapte automatiquement selon l'environnement :
+
+| Environnement | Base de données | Colonnes utilisées | Détection |
+|---------------|-----------------|-------------------|-----------|
+| **Render (Production)** | PostgreSQL 15 | `is_active`, `date_inscription`, `credits` | `RENDER=true` |
+| **WampServer (Local)** | MySQL 8.0 | `statut`, `created_at`, `credit` | Défaut |
+| **Docker (Dev)** | MySQL 8.0 | `statut`, `created_at`, `credit` | `DOCKER_ENV=true` |
 
 ---
 

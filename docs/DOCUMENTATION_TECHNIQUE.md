@@ -40,17 +40,23 @@ Le projet EcoRide répond à un double enjeu :
 - Java : Trop lourd pour ce type d'application
 ```
 
-#### **Base de données : MySQL 8.0+**
+#### **Base de données : MySQL 8.0+ (Local) & PostgreSQL 15 (Production)**
 ```
-✅ Avantages :
+✅ Avantages architecture multi-BDD :
+- MySQL : Développement local avec phpMyAdmin, écosystème connu
+- PostgreSQL : Production Render.com, robustesse professionnelle
+- Code compatible universellement (détection automatique du driver)
 - ACID compliance pour la cohérence des transactions
 - Support natif des contraintes de clés étrangères
 - Performance optimisée pour les requêtes géographiques
-- Écosystème mature (phpMyAdmin, outils de monitoring)
+
+🔄 Compatibilité assurée par :
+- Détection PDO driver (mysql vs pgsql)
+- Requêtes SQL conditionnelles
+- Conversion colonnes (statut/is_active, created_at/date_inscription)
 
 ❌ Alternatives écartées :
-- PostgreSQL : Excellente mais moins maîtrisée
-- MongoDB : NoSQL inadapté pour les relations complexes
+- MongoDB seul : NoSQL inadapté pour les relations complexes
 - SQLite : Limitation pour le multi-utilisateur
 ```
 
@@ -68,19 +74,25 @@ Le projet EcoRide répond à un double enjeu :
 - Bootstrap : Préférence pour CSS custom et apprentissage
 ```
 
-#### **Hébergement : Render**
+#### **Hébergement : Render.com (PostgreSQL)**
 ```
 ✅ Avantages :
 - Déploiement Git automatique
-- Base de données MySQL managée
-- Variables d'environnement sécurisées
-- HTTPS automatique
-- Monitoring intégré
+- Base de données PostgreSQL 15 managée
+- Variables d'environnement sécurisées (DATABASE_URL)
+- HTTPS automatique avec certificats Let's Encrypt
+- Monitoring intégré et logs en temps réel
+- Déploiement gratuit pour projets étudiants
+
+🔧 Configuration :
+- PostgreSQL 15 avec SSL requis (sslmode=require)
+- DSN explicite : pgsql:host=...;port=5432;dbname=...
+- Scripts d'initialisation: init-complete.php, init-demo-data.php
 
 ❌ Alternatives écartées :
-- Heroku : Plus cher, PostgreSQL par défaut
+- Heroku : Plus cher depuis suppression tier gratuit
 - Vercel : Orienté frontend, serverless functions
-- Hébergement classique : Moins moderne, configuration manuelle
+- Hébergement classique : Configuration manuelle complexe
 ```
 
 ### 🏗️ **Architecture choisie : MVC adapté**

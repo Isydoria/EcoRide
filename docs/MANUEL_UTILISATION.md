@@ -54,13 +54,14 @@
 
 ### 🚀 Version en ligne (Recommandée)
 
-**URL principale :** https://ecoride-production-2631.up.render.app
+**URL principale :** https://ecoride-om7c.onrender.com
 
 **Avantages :**
 - ✅ Toujours accessible 24h/24
-- ✅ Données de test pré-configurées
+- ✅ Base PostgreSQL 15 professionnelle
+- ✅ Données de démonstration complètes (34 trajets, 3 employés)
 - ✅ Performance optimisée
-- ✅ Sécurité HTTPS
+- ✅ Sécurité HTTPS avec certificats Let's Encrypt
 
 ### 💻 Version locale (Développement)
 
@@ -81,14 +82,23 @@
 
 | Environnement | Email | Mot de passe | Accès |
 |---------------|-------|--------------|-------|
-| **En ligne** | `admin@ecoride.fr` | `Ec0R1de!` | [Interface Admin](https://ecoride-production-2631.up.render.app/admin/dashboard.php) |
-| **Local** | `admin@ecoride.fr` | `Test123!` | http://localhost/ecoride/admin/dashboard.php |
+| **En ligne & Local** | `admin@ecoride.fr` | `Ec0R1de!` | [Interface Admin](https://ecoride-om7c.onrender.com/admin/dashboard.php) |
 
 **Fonctionnalités :**
-- Statistiques générales de la plateforme
-- Gestion des utilisateurs
-- Monitoring des trajets
-- Graphiques interactifs
+- Statistiques générales de la plateforme (9 utilisateurs, 34 trajets)
+- Gestion des utilisateurs (3 employés visibles)
+- Monitoring des trajets et réservations
+- Graphiques interactifs Chart.js
+
+### 👔 **Employés (Modération)**
+
+**🔐 Comptes employés pour gestion intermédiaire**
+
+| Nom | Email | Mot de passe | Rôle |
+|-----|-------|--------------|------|
+| **Sophie Martin** | `sophie.martin@ecoride.fr` | `Sophie2025!` | Employé |
+| **Lucas Dubois** | `lucas.dubois@ecoride.fr` | `Lucas2025!` | Employé |
+| **Emma Bernard** | `emma.bernard@ecoride.fr` | `Emma2025!` | Employé |
 
 ### 👥 **Utilisateurs Standards**
 
@@ -96,9 +106,9 @@
 
 | Nom | Email | Mot de passe | Crédits | Rôle |
 |-----|-------|--------------|---------|------|
-| **Demo User** | `demo@ecoride.fr` | `demo123` | 50 | Utilisateur |
-| **Jean Dupont** | `jean@example.com` | `Test123!` | 50 | Utilisateur |
-| **Marie Martin** | `marie@example.com` | `Test123!` | 30 | Utilisateur |
+| **Jean Dupont** | `jean.dupont@ecoride.fr` | `Jean2025!` | 100 | Utilisateur |
+| **Marie Martin** | `marie.martin@ecoride.fr` | `Marie2025!` | 75 | Utilisateur |
+| **Paul Durand** | `paul.durand@ecoride.fr` | `Paul2025!` | 60 | Utilisateur |
 
 **Fonctionnalités :**
 - Recherche et réservation de trajets
@@ -126,15 +136,18 @@
 
 1. **Accéder au script d'initialisation**
    ```
-   https://ecoride-production-2631.up.render.app/init-trajets-demo.php
+   https://ecoride-om7c.onrender.com/init-demo-data.php
    ```
 
-2. **Vérifier la création des trajets**
-   - ✅ Paris → Lyon (demain 9h00)
-   - ✅ Lyon → Marseille (demain 14h00)
-   - ✅ Bordeaux → Toulouse (dans 2 jours)
-   - ✅ Paris → Orléans (dans 3 jours)
-   - ✅ Lyon → Grenoble (dans 4 jours)
+2. **Vérifier la création des données**
+   - ✅ 3 employés créés (Sophie, Lucas, Emma)
+   - ✅ 8 véhicules variés (électrique, hybride, essence, diesel)
+   - ✅ 34 trajets jusqu'à fin février 2026
+   - ✅ Trajets multiples mêmes dates pour filtres :
+     - Paris → Lyon : 3 trajets le 15/10/2025 (8h, 14h, 19h)
+     - Marseille → Nice : 2 trajets le 18/10/2025
+     - Toulouse → Bordeaux : 2 trajets le 25/10/2025
+   - ✅ Participations et avis générés
 
 ### **Étape 2 : Connexion**
 

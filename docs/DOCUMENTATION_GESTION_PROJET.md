@@ -525,23 +525,42 @@ Exemples :
 - Amélioration : Configuration adaptative automatique
 ```
 
-#### **Crise 2 : Hash mots de passe corrompus (Jour 19)**
+#### **Crise 2 : Incompatibilité MySQL/PostgreSQL (Jour 20)**
 ```
 🔴 Problème :
-- Impossible de se connecter même avec comptes test
-- Hash password_verify() échoue
-- Blocage pour démonstration finale
+- Dashboard admin ne trouve pas les employés sur Render
+- Noms de colonnes différents entre MySQL et PostgreSQL
+- Colonnes: statut/is_active, created_at/date_inscription, credit/credits
 
 🔧 Actions correctives :
-1. Script de diagnostic (debug-users.php)
-2. Script de correction (fix-admin.php)
-3. Régénération hash avec password_hash()
-4. Documentation procédure pour évaluateur
+1. Détection automatique du driver PDO (mysql vs pgsql)
+2. Requêtes SQL conditionnelles selon le driver
+3. Conversion CASE WHEN pour compatibilité affichage
+4. Tests sur les deux environnements
 
 ⏱️ Impact :
-- Perte : 2 heures
-- Leçon : Nécessité scripts maintenance
-- Amélioration : Outils diagnostic intégrés
+- Perte : 3 heures
+- Leçon : Nécessité code universel multi-BDD
+- Amélioration : Architecture multi-environnements robuste
+```
+
+#### **Crise 3 : Initialisation données PostgreSQL (Jour 21)**
+```
+🔴 Problème :
+- Script init-database-render.php échoue (BOM UTF-8, SQL syntax)
+- Extension PDO non détectée correctement
+- Base vide sur Render sans données de test
+
+🔧 Actions correctives :
+1. DSN explicite PostgreSQL (sslmode=require)
+2. Script init-complete.php avec toutes les 8 tables
+3. Script init-demo-data.php avec 34 trajets et 3 employés
+4. Tests validation complète
+
+⏱️ Impact :
+- Perte : 6 heures (multiple tentatives)
+- Leçon : Tester tôt la configuration PostgreSQL
+- Amélioration : Scripts d'initialisation universels
 ```
 
 ### 🛡️ **Stratégies préventives**

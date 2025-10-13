@@ -57,35 +57,44 @@
 - `docs/` - Documentation technique
 - `enonce/` - Énoncé du projet
 
+### Scripts d'initialisation
+- `init-complete.php` - Initialisation complète PostgreSQL (8 tables)
+- `init-demo-data.php` - Données de démonstration (34 trajets, 3 employés, 8 véhicules)
+- `init-simple.php` - Initialisation minimale (3 utilisateurs)
+
 ### Fichiers de projet
 - `README.md` - Documentation principale
-- `INFOS_EVALUATION_RNCP.txt` - Récapitulatif évaluation
+- `HISTORIQUE_CONVERSATION.txt` - Journal détaillé des sessions
 - `STRUCTURE_PROJET.md` - Ce fichier
 - `.gitignore` - Fichiers ignorés par Git
-- `render.json` - Configuration déploiement Render
 
 ### Dossiers de cache et logs
 - `cache/` - Cache applicatif
 - `logs/` - Fichiers de logs
 
 ## 🚀 Déploiement
-- **Production** : Render (https://ecoride-production-2631.up.render.app)
+- **Production** : Render.com (https://ecoride-om7c.onrender.com)
 - **Repository** : GitHub (https://github.com/Isydoria/EcoRide)
-- **Base de données** : MySQL sur Render
+- **Base de données Production** : PostgreSQL 15 sur Render
+- **Base de données Développement** : MySQL 8.0 local (WampServer/Docker)
 
 ## 👥 Comptes de test
-- **Utilisateur** : demo@ecoride.fr / demo123
 - **Administrateur** : admin@ecoride.fr / Ec0R1de!
+- **Employés** : sophie.martin@ecoride.fr / Sophie2025! (et 2 autres)
+- **Utilisateurs** : jean.dupont@ecoride.fr / Jean2025! (100 crédits)
 
 ## 📊 État du projet
 ✅ Architecture MVC complète
+✅ Code compatible MySQL/PostgreSQL avec détection automatique
 ✅ Interface utilisateur moderne avec dashboard
-✅ Interface d'administration avec statistiques
-✅ API REST fonctionnelle
-✅ Système d'authentification sécurisé
-✅ Gestion des véhicules et trajets
-✅ Base de données relationnelle
-✅ Déployé en production
-✅ Documentation technique
+✅ Interface d'administration avec statistiques et graphiques
+✅ API REST fonctionnelle (15+ endpoints)
+✅ Système d'authentification sécurisé (bcrypt, sessions)
+✅ Gestion des véhicules et trajets (34 trajets de démo)
+✅ Base de données relationnelle + NoSQL (MongoDB fake)
+✅ 3 environnements supportés (WampServer, Docker, Render)
+✅ Déployé en production avec PostgreSQL 15
+✅ Documentation technique exhaustive (150+ pages)
+✅ Scripts d'initialisation universels
 
 **Prêt pour évaluation RNCP Développeur Web et Web Mobile**
