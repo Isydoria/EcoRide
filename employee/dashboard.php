@@ -41,7 +41,7 @@ try {
             JOIN utilisateur u1 ON a.id_auteur = u1.utilisateur_id
             JOIN utilisateur u2 ON a.id_utilisateur_note = u2.utilisateur_id
             LEFT JOIN covoiturage c ON a.id_trajet = c.covoiturage_id
-            WHERE a.note IS NOT NULL
+            WHERE a.statut = 'en_attente'
             ORDER BY a.date_avis DESC
         ");
     } else {
@@ -68,25 +68,14 @@ try {
     $pending_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Récupérer les statistiques - Compatible MySQL/PostgreSQL
-    if ($isPostgreSQL) {
-        // PostgreSQL n'a pas de colonne statut dans avis, on compte juste les avis
-        $stmt = $pdo->prepare("
-            SELECT
-                COUNT(*) as avis_en_attente,
-                0 as avis_valides,
-                0 as avis_refuses
-            FROM avis
-        ");
-    } else {
-        // MySQL avec colonne statut
-        $stmt = $pdo->prepare("
-            SELECT
-                COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
-                COUNT(CASE WHEN statut = 'valide' THEN 1 END) as avis_valides,
-                COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
-            FROM avis
-        ");
-    }
+    // Maintenant les deux ont la colonne statut après ajout des colonnes
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
+            COUNT(CASE WHEN statut = 'valide' THEN 1 END) as avis_valides,
+            COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
+        FROM avis
+    ");
     $stmt->execute();
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -94,36 +83,32 @@ try {
     $error_message = "Erreur de base de données : " . $e->getMessage();
 }
 
-// Gestion des actions POST - Uniquement pour MySQL
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($isPostgreSQL) && !$isPostgreSQL) {
-    if (isset($_POST['action'], $_POST['avis_id'])) {
-        $action = $_POST['action'];
-        $avis_id = intval($_POST['avis_id']);
-        $nouveau_statut = ($action === 'approve') ? 'valide' : 'refuse';
+// Gestion des actions POST - Compatible MySQL/PostgreSQL après ajout colonnes
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['avis_id'])) {
+    $action = $_POST['action'];
+    $avis_id = intval($_POST['avis_id']);
+    $nouveau_statut = ($action === 'approve') ? 'valide' : 'refuse';
 
-        try {
-            $stmt = $pdo->prepare("
-                UPDATE avis
-                SET statut = :statut,
-                    valide_par = :employe_id,
-                    date_validation = NOW()
-                WHERE avis_id = :avis_id
-            ");
-            $stmt->execute([
-                'statut' => $nouveau_statut,
-                'employe_id' => $user_id,
-                'avis_id' => $avis_id
-            ]);
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE avis
+            SET statut = :statut,
+                valide_par = :employe_id,
+                date_validation = NOW()
+            WHERE avis_id = :avis_id
+        ");
+        $stmt->execute([
+            'statut' => $nouveau_statut,
+            'employe_id' => $user_id,
+            'avis_id' => $avis_id
+        ]);
 
-            $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
-            header("Location: dashboard.php?success=" . urlencode($message));
-            exit();
-        } catch (PDOException $e) {
-            $error_message = "Erreur lors de la mise à jour : " . $e->getMessage();
-        }
+        $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
+        header("Location: dashboard.php?success=" . urlencode($message));
+        exit();
+    } catch (PDOException $e) {
+        $error_message = "Erreur lors de la mise à jour : " . $e->getMessage();
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($isPostgreSQL) && $isPostgreSQL) {
-    $error_message = "La modération des avis n'est pas encore implémentée pour PostgreSQL";
 }
 
 $success_message = $_GET['success'] ?? '';
