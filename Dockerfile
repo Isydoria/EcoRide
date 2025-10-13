@@ -1,8 +1,7 @@
 # ==========================================
-# 🐳 DOCKERFILE - EcoRide Platform
+# 🐳 DOCKERFILE - EcoRide Platform (Render)
 # ==========================================
-# Image PHP 8.2 + Apache pour environnement de production
-# Compatible avec Railway et déploiements cloud
+# Image PHP 8.2 + Apache optimisée pour Render.com
 
 FROM php:8.2-apache
 
@@ -11,7 +10,7 @@ FROM php:8.2-apache
 # ==========================================
 LABEL maintainer="EcoRide Team"
 LABEL version="1.0.0"
-LABEL description="EcoRide ecological carpooling platform"
+LABEL description="EcoRide ecological carpooling platform - Render.com deployment"
 
 # ==========================================
 # 🔧 INSTALLATION DES DÉPENDANCES SYSTÈME
@@ -28,6 +27,8 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libzip-dev \
     libonig-dev \
+    # PostgreSQL client (pour Render)
+    libpq-dev \
     # Nettoyage du cache apt
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -39,6 +40,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_mysql \
+        pdo_pgsql \
         mysqli \
         gd \
         zip \
@@ -54,15 +56,26 @@ RUN { \
         echo 'max_execution_time = 300'; \
         echo 'memory_limit = 256M'; \
         echo 'date.timezone = Europe/Paris'; \
-        echo 'display_errors = On'; \
-        echo 'error_reporting = E_ALL'; \
+        echo 'display_errors = Off'; \
+        echo 'log_errors = On'; \
+        echo 'error_log = /var/log/php_errors.log'; \
+        echo 'error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT'; \
     } > /usr/local/etc/php/conf.d/custom.ini
+
+# Configuration OPcache pour production
+RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.memory_consumption=128'; \
+        echo 'opcache.interned_strings_buffer=8'; \
+        echo 'opcache.max_accelerated_files=10000'; \
+        echo 'opcache.revalidate_freq=2'; \
+    } > /usr/local/etc/php/conf.d/opcache.ini
 
 # ==========================================
 # 🌐 CONFIGURATION APACHE
 # ==========================================
 # Activer mod_rewrite pour URL rewriting
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers expires deflate
 
 # Copier la configuration Apache personnalisée
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
@@ -82,17 +95,32 @@ COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Créer le dossier pour MongoDB Fake s'il n'existe pas
+# Créer le dossier pour MongoDB Fake
 RUN mkdir -p /var/www/html/mongodb_data \
     && chown -R www-data:www-data /var/www/html/mongodb_data \
     && chmod -R 775 /var/www/html/mongodb_data
 
+# Créer le dossier pour les logs
+RUN mkdir -p /var/www/html/logs \
+    && chown -R www-data:www-data /var/www/html/logs \
+    && chmod -R 775 /var/www/html/logs
+
 # ==========================================
 # 🚀 DÉMARRAGE
 # ==========================================
+# Render utilise la variable $PORT (dynamique)
+# Apache doit écouter sur ce port
+
+# Exposer le port (pour documentation, Render utilise $PORT)
 EXPOSE 80
 
-# Variable d'environnement pour indiquer qu'on est dans Docker
+# Variables d'environnement
 ENV DOCKER_ENV=true
+ENV APP_ENV=production
+ENV PORT=80
 
-CMD ["apache2-foreground"]
+# Script de démarrage personnalisé
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]

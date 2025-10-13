@@ -1,0 +1,59 @@
+# ==========================================
+# 🎨 RENDER.COM CONFIGURATION - EcoRide
+# ==========================================
+# Configuration Infrastructure as Code pour Render
+
+services:
+  # ==========================================
+  # 🌐 WEB SERVICE - Application principale
+  # ==========================================
+  - type: web
+    name: ecoride-web
+    env: docker
+    region: frankfurt  # Europe (proche de Paris)
+    plan: free
+    
+    # Construction Docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    
+    # Variables d'environnement
+    envVars:
+      - key: DOCKER_ENV
+        value: "true"
+      - key: APP_ENV
+        value: "production"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ecoride-db
+          property: connectionString
+    
+    # Health check
+    healthCheckPath: /
+    
+    # Auto-deploy depuis GitHub
+    autoDeploy: true
+    branch: main
+
+# ==========================================
+# 🗄️ DATABASE - PostgreSQL
+# ==========================================
+databases:
+  - name: ecoride-db
+    databaseName: ecoride
+    user: ecoride_user
+    plan: free
+    region: frankfurt
+    
+# ==========================================
+# 📝 NOTES
+# ==========================================
+# Ce fichier est optionnel. Vous pouvez aussi configurer
+# manuellement via l'interface web de Render.
+# 
+# Plan Free inclut :
+# - 750h/mois (suffisant pour 24/7)
+# - 512 MB RAM
+# - Mise en veille après 15 min d'inactivité
+# - PostgreSQL 1 GB gratuit
+# - SSL automatique
