@@ -19,35 +19,74 @@ $user_pseudo = $_SESSION['user_pseudo'] ?? 'Employé';
 try {
     $pdo = db();
 
-    // Récupérer les avis en attente de validation
-    $stmt = $pdo->prepare("
-        SELECT a.*,
-               u1.pseudo as auteur_pseudo,
-               u1.email as auteur_email,
-               u2.pseudo as destinataire_pseudo,
-               u2.email as destinataire_email,
-               c.ville_depart,
-               c.ville_arrivee,
-               c.date_depart,
-               c.covoiturage_id as trajet_id
-        FROM avis a
-        JOIN utilisateur u1 ON a.auteur_id = u1.utilisateur_id
-        JOIN utilisateur u2 ON a.destinataire_id = u2.utilisateur_id
-        LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
-        WHERE a.statut = 'en_attente'
-        ORDER BY a.created_at DESC
-    ");
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
+    // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL
+    if ($isPostgreSQL) {
+        // PostgreSQL : id_auteur, id_utilisateur_note, id_trajet, date_avis
+        $stmt = $pdo->prepare("
+            SELECT a.*,
+                   u1.pseudo as auteur_pseudo,
+                   u1.email as auteur_email,
+                   u2.pseudo as destinataire_pseudo,
+                   u2.email as destinataire_email,
+                   c.ville_depart,
+                   c.ville_arrivee,
+                   c.date_depart,
+                   c.covoiturage_id as trajet_id,
+                   a.date_avis as created_at
+            FROM avis a
+            JOIN utilisateur u1 ON a.id_auteur = u1.utilisateur_id
+            JOIN utilisateur u2 ON a.id_utilisateur_note = u2.utilisateur_id
+            LEFT JOIN covoiturage c ON a.id_trajet = c.covoiturage_id
+            WHERE a.note IS NOT NULL
+            ORDER BY a.date_avis DESC
+        ");
+    } else {
+        // MySQL : auteur_id, destinataire_id, covoiturage_id, created_at
+        $stmt = $pdo->prepare("
+            SELECT a.*,
+                   u1.pseudo as auteur_pseudo,
+                   u1.email as auteur_email,
+                   u2.pseudo as destinataire_pseudo,
+                   u2.email as destinataire_email,
+                   c.ville_depart,
+                   c.ville_arrivee,
+                   c.date_depart,
+                   c.covoiturage_id as trajet_id
+            FROM avis a
+            JOIN utilisateur u1 ON a.auteur_id = u1.utilisateur_id
+            JOIN utilisateur u2 ON a.destinataire_id = u2.utilisateur_id
+            LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
+            WHERE a.statut = 'en_attente'
+            ORDER BY a.created_at DESC
+        ");
+    }
     $stmt->execute();
     $pending_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Récupérer les statistiques
-    $stmt = $pdo->prepare("
-        SELECT
-            COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
-            COUNT(CASE WHEN statut = 'valide' THEN 1 END) as avis_valides,
-            COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
-        FROM avis
-    ");
+    // Récupérer les statistiques - Compatible MySQL/PostgreSQL
+    if ($isPostgreSQL) {
+        // PostgreSQL n'a pas de colonne statut dans avis, on compte juste les avis
+        $stmt = $pdo->prepare("
+            SELECT
+                COUNT(*) as avis_en_attente,
+                0 as avis_valides,
+                0 as avis_refuses
+            FROM avis
+        ");
+    } else {
+        // MySQL avec colonne statut
+        $stmt = $pdo->prepare("
+            SELECT
+                COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
+                COUNT(CASE WHEN statut = 'valide' THEN 1 END) as avis_valides,
+                COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
+            FROM avis
+        ");
+    }
     $stmt->execute();
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -55,8 +94,8 @@ try {
     $error_message = "Erreur de base de données : " . $e->getMessage();
 }
 
-// Gestion des actions POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Gestion des actions POST - Uniquement pour MySQL
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($isPostgreSQL) && !$isPostgreSQL) {
     if (isset($_POST['action'], $_POST['avis_id'])) {
         $action = $_POST['action'];
         $avis_id = intval($_POST['avis_id']);
@@ -64,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $stmt = $pdo->prepare("
-                UPDATE avis 
+                UPDATE avis
                 SET statut = :statut,
                     valide_par = :employe_id,
                     date_validation = NOW()
@@ -83,6 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = "Erreur lors de la mise à jour : " . $e->getMessage();
         }
     }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($isPostgreSQL) && $isPostgreSQL) {
+    $error_message = "La modération des avis n'est pas encore implémentée pour PostgreSQL";
 }
 
 $success_message = $_GET['success'] ?? '';
