@@ -47,7 +47,7 @@
 - Architecture MVC avec PHP/MySQL
 - Sécurité renforcée (authentification, CSRF, XSS)
 - Interface responsive (mobile-first)
-- Déploiement automatisé avec Railway
+- Déploiement automatisé avec Render
 
 ### 🎯 **Critères de succès**
 
@@ -108,7 +108,7 @@ Livrables :
 - Base de données modélisée et créée
 - Authentification fonctionnelle
 - Interface de base (HTML/CSS)
-- Déploiement initial sur Railway
+- Déploiement initial sur Render
 
 User Stories prioritaires :
 - US1 : Page d'accueil
@@ -267,7 +267,7 @@ Jalons     |    J7      |       J14        |        J21
 J1 : Analyse des besoins
 - Étude du cahier des charges RNCP
 - Définition des User Stories
-- Choix technologiques (PHP/MySQL/Railway)
+- Choix technologiques (PHP/MySQL/Render)
 - Architecture MVC
 
 J2 : Conception base de données
@@ -279,7 +279,7 @@ J2 : Conception base de données
 J3 : Setup environnement
 - Configuration locale (WAMP)
 - Initialisation Git repository
-- Setup Railway et déploiement initial
+- Setup Render et déploiement initial
 - Configuration CI/CD basique
 ```
 
@@ -303,7 +303,7 @@ Tests quotidiens :
 - Tests manuels de l'authentification
 - Validation sécurité (tentatives piratage)
 - Tests responsive sur différents devices
-- Déploiement continu sur Railway
+- Déploiement continu sur Render
 ```
 
 #### **Sous-phase 2.2 : Fonctionnalités métier (J8-J14)**
@@ -388,7 +388,7 @@ Intégration :
 🌐 Git & GitHub :
 - Versioning avec branches feature
 - Commits atomiques et descriptifs
-- Intégration continue Railway
+- Intégration continue Render
 - Documentation markdown
 ```
 
@@ -400,7 +400,7 @@ Intégration :
 - Tests responsive multi-device
 - Validation navigation et UX
 
-🚀 Railway :
+🚀 Render :
 - Déploiement automatique Git
 - Variables d'environnement sécurisées
 - Monitoring uptime et performance
@@ -425,10 +425,10 @@ php -S localhost:8000
 # 4. Merge et déploiement
 git checkout main
 git merge feature/nom-fonctionnalite
-git push origin main  # Déclanche déploiement Railway automatique
+git push origin main  # Déclanche déploiement Render automatique
 
 # 5. Tests production
-curl https://ecoride-production.railway.app/health
+curl https://ecoride-production.render.app/health
 ```
 
 #### **Convention de commits :**
@@ -461,7 +461,7 @@ Exemples :
 - Bugs critiques : 0
 - Vulnérabilités : 0 (audit sécurité)
 - Performance : <2s temps réponse
-- Uptime : 99.9% (Railway)
+- Uptime : 99.9% (Render)
 ```
 
 #### **Suivi projet :**
@@ -489,7 +489,7 @@ Exemples :
 
 | Risque | Probabilité | Impact | Mitigation |
 |--------|-------------|---------|------------|
-| **Problème déploiement Railway** | Moyenne | Élevé | Local + backup Heroku |
+| **Problème déploiement Render** | Moyenne | Élevé | Local + backup Heroku |
 | **Corruption base de données** | Faible | Critique | Backups quotidiens Git |
 | **Vulnérabilité sécurité** | Moyenne | Élevé | Audit OWASP régulier |
 | **Performance insuffisante** | Faible | Moyen | Tests charge + optimisation |
@@ -509,7 +509,7 @@ Exemples :
 #### **Crise 1 : Problème schéma base de données (Jour 10)**
 ```
 🔴 Problème :
-- Base locale incompatible avec Railway
+- Base locale incompatible avec Render
 - Tables avec anciens noms vs nouveau code
 - APIs complètement cassées
 
@@ -549,7 +549,7 @@ Exemples :
 #### **Sauvegarde et récupération :**
 ```
 📂 Stratégie 3-2-1 adaptée :
-- 3 copies : Local + GitHub + Railway
+- 3 copies : Local + GitHub + Render
 - 2 supports : Git (code) + Export SQL (data)
 - 1 externe : GitHub (cloud)
 
@@ -641,7 +641,7 @@ Une fonctionnalité est considérée terminée quand :
 
 🌐 Tests multi-environnements :
 - Local (development) ✅
-- Railway (production) ✅
+- Render (production) ✅
 - Mobile (responsive) ✅
 - Navigateurs (Chrome, Firefox, Safari) ✅
 ```
@@ -749,7 +749,7 @@ Une fonctionnalité est considérée terminée quand :
 ```
 📱 Plateforme Studi :
 - Messages formatés avec captures écran
-- Partage liens Railway pour tests live
+- Partage liens Render pour tests live
 - Questions techniques spécifiques
 
 📧 Documentation livrée :

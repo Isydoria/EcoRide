@@ -68,7 +68,7 @@ Le projet EcoRide répond à un double enjeu :
 - Bootstrap : Préférence pour CSS custom et apprentissage
 ```
 
-#### **Hébergement : Railway**
+#### **Hébergement : Render**
 ```
 ✅ Avantages :
 - Déploiement Git automatique
@@ -138,7 +138,7 @@ class Database {
     private $password;
 
     public function __construct() {
-        // Priorité aux variables Railway (production)
+        // Priorité aux variables Render (production)
         $this->host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST');
         $this->dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE');
         $this->username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER');
@@ -175,7 +175,7 @@ git add .
 git commit -m "feat: nouvelle fonctionnalité"
 git push origin main
 
-# Railway déploie automatiquement à chaque push
+# Render déploie automatiquement à chaque push
 ```
 
 #### **Base de données**
@@ -428,7 +428,7 @@ Conducteur   Interface   API Trajet   Database   Validation
 
 ### 🚀 **Stratégie de déploiement**
 
-#### **Choix de Railway**
+#### **Choix de Render**
 ```
 ✅ Avantages techniques :
 - Git-based deployment : Push automatique
@@ -451,9 +451,9 @@ Conducteur   Interface   API Trajet   Database   Validation
 # Configuration adaptative pour multi-environnements
 class Database {
     public function __construct() {
-        // Détection automatique Railway vs Local
+        // Détection automatique Render vs Local
         if (getenv('RAILWAY_ENVIRONMENT')) {
-            // Configuration Railway automatique
+            // Configuration Render automatique
             $this->host = $_ENV['MYSQLHOST'];
             $this->dbname = $_ENV['MYSQL_DATABASE'];
             // ...
@@ -467,7 +467,7 @@ class Database {
 }
 ```
 
-#### **2. Configuration Railway**
+#### **2. Configuration Render**
 ```yaml
 # Connexion GitHub automatique
 Repository: github.com/Isydoria/EcoRide
@@ -476,11 +476,11 @@ Build Command: (automatique pour PHP)
 Start Command: (pas nécessaire pour PHP)
 
 # Variables d'environnement (auto-configurées)
-MYSQLHOST: containers-us-west-xxx.railway.app
-MYSQL_DATABASE: railway
+MYSQLHOST: containers-us-west-xxx.render.app
+MYSQL_DATABASE: render
 MYSQLUSER: root
 MYSQLPASSWORD: [généré automatiquement]
-MYSQL_URL: mysql://root:pass@host:port/railway
+MYSQL_URL: mysql://root:pass@host:port/render
 ```
 
 #### **3. Déploiement automatique**
@@ -490,7 +490,7 @@ git add .
 git commit -m "feat: nouvelle fonctionnalité"
 git push origin main
 
-# Railway détecte automatiquement :
+# Render détecte automatiquement :
 1. Nouveau commit sur main
 2. Lance le build (copie des fichiers PHP)
 3. Redémarre l'application
@@ -502,7 +502,7 @@ git push origin main
 #### **4. Configuration base de données**
 ```sql
 -- Import automatique lors du premier déploiement
--- Railway détecte les fichiers .sql et les exécute
+-- Render détecte les fichiers .sql et les exécute
 
 1. database/schema.sql  → Structure des tables
 2. database/seed.sql    → Données de test
@@ -546,7 +546,7 @@ URL : `/test-mongodb-simple.php`
 
 ### 🔍 **Monitoring et maintenance**
 
-#### **Surveillance Railway**
+#### **Surveillance Render**
 ```yaml
 Métriques surveillées:
 - Temps de réponse moyen
@@ -590,7 +590,7 @@ git checkout main
 git merge feature/nouvelle-fonctionnalite
 git push origin main
 
-# 4. Railway déploie automatiquement
+# 4. Render déploie automatiquement
 # - Build : ~30 secondes
 # - Restart : ~10 secondes
 # - Total : ~1 minute
@@ -601,17 +601,17 @@ git push origin main
 #### **Variables d'environnement**
 ```bash
 # Jamais committées dans Git
-MYSQL_PASSWORD=xxx           # Généré par Railway
+MYSQL_PASSWORD=xxx           # Généré par Render
 SESSION_SECRET=xxx           # Clé de chiffrement sessions
 API_KEY_EXTERNAL=xxx         # Clés services externes (future)
 
 # Configuration sécurisée
-railway variables set KEY=value
+render variables set KEY=value
 ```
 
 #### **HTTPS et certificats**
 ```
-✅ Railway configure automatiquement :
+✅ Render configure automatiquement :
 - Certificat SSL Let's Encrypt
 - Redirection HTTP → HTTPS
 - Headers de sécurité (HSTS, etc.)

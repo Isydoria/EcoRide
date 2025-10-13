@@ -62,16 +62,16 @@
 - `INFOS_EVALUATION_RNCP.txt` - Récapitulatif évaluation
 - `STRUCTURE_PROJET.md` - Ce fichier
 - `.gitignore` - Fichiers ignorés par Git
-- `railway.json` - Configuration déploiement Railway
+- `render.json` - Configuration déploiement Render
 
 ### Dossiers de cache et logs
 - `cache/` - Cache applicatif
 - `logs/` - Fichiers de logs
 
 ## 🚀 Déploiement
-- **Production** : Railway (https://ecoride-production-2631.up.railway.app)
+- **Production** : Render (https://ecoride-production-2631.up.render.app)
 - **Repository** : GitHub (https://github.com/Isydoria/EcoRide)
-- **Base de données** : MySQL sur Railway
+- **Base de données** : MySQL sur Render
 
 ## 👥 Comptes de test
 - **Utilisateur** : demo@ecoride.fr / demo123

@@ -54,7 +54,7 @@
 
 ### 🚀 Version en ligne (Recommandée)
 
-**URL principale :** https://ecoride-production-2631.up.railway.app
+**URL principale :** https://ecoride-production-2631.up.render.app
 
 **Avantages :**
 - ✅ Toujours accessible 24h/24
@@ -81,7 +81,7 @@
 
 | Environnement | Email | Mot de passe | Accès |
 |---------------|-------|--------------|-------|
-| **En ligne** | `admin@ecoride.fr` | `Ec0R1de!` | [Interface Admin](https://ecoride-production-2631.up.railway.app/admin/dashboard.php) |
+| **En ligne** | `admin@ecoride.fr` | `Ec0R1de!` | [Interface Admin](https://ecoride-production-2631.up.render.app/admin/dashboard.php) |
 | **Local** | `admin@ecoride.fr` | `Test123!` | http://localhost/ecoride/admin/dashboard.php |
 
 **Fonctionnalités :**
@@ -126,7 +126,7 @@
 
 1. **Accéder au script d'initialisation**
    ```
-   https://ecoride-production-2631.up.railway.app/init-trajets-demo.php
+   https://ecoride-production-2631.up.render.app/init-trajets-demo.php
    ```
 
 2. **Vérifier la création des trajets**
@@ -140,7 +140,7 @@
 
 1. **Accéder à la page de connexion**
    ```
-   https://ecoride-production-2631.up.railway.app/connexion.php
+   https://ecoride-production-2631.up.render.app/connexion.php
    ```
 
 2. **Se connecter avec un compte de test**
@@ -200,7 +200,7 @@
 
 1. **Accéder au dashboard utilisateur**
    ```
-   https://ecoride-production-2631.up.railway.app/user/dashboard.php
+   https://ecoride-production-2631.up.render.app/user/dashboard.php
    ```
 
 2. **Vérifier les informations**
@@ -235,7 +235,7 @@
 
 1. **Accéder à la création de trajet**
    ```
-   https://ecoride-production-2631.up.railway.app/creer-trajet.php
+   https://ecoride-production-2631.up.render.app/creer-trajet.php
    ```
 
 2. **Remplir les informations du trajet**
@@ -283,7 +283,7 @@
 
 2. **Accéder au dashboard admin**
    ```
-   https://ecoride-production-2631.up.railway.app/admin/dashboard.php
+   https://ecoride-production-2631.up.render.app/admin/dashboard.php
    ```
 
 ### **Étape 2 : Consultation des statistiques**
@@ -414,7 +414,7 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 **Ressources :**
 - **Documentation technique :** DOCUMENTATION_TECHNIQUE.md
 - **Code source :** GitHub repository
-- **Démo en ligne :** Railway application
+- **Démo en ligne :** Render application
 
 ---
 
@@ -422,7 +422,7 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 
 ### ⚡ **Test Rapide (5 minutes)**
 
-1. ✅ Accéder à : https://ecoride-production-2631.up.railway.app
+1. ✅ Accéder à : https://ecoride-production-2631.up.render.app
 2. ✅ Initialiser : `/init-trajets-demo.php`
 3. ✅ Rechercher : Lyon → Marseille
 4. ✅ Admin : `admin@ecoride.fr` / `Ec0R1de!`
@@ -440,7 +440,7 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 **📅 Manuel créé le :** 22 septembre 2025
 **🔄 Version :** 1.0
 **🎓 Contexte :** Évaluation RNCP Développeur Web et Web Mobile
-**🚀 Application :** https://ecoride-production-2631.up.railway.app
+**🚀 Application :** https://ecoride-production-2631.up.render.app
 
 ---
 

@@ -6,32 +6,31 @@ class Database {
     private static $instance = null;
     private $pdo;
     
-    // Configuration adaptative (local + Railway)
+    // Configuration adaptative (local WampServer + Docker + Render.com)
     private $host;
     private $dbname;
     private $username;
     private $password;
     private $charset = 'utf8mb4';
-    
+
     private function __construct() {
-        // Configuration pour Railway (variables d'environnement réelles)
+        // Configuration multi-environnements
         $this->host = $_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost';
         $this->dbname = $_ENV['MYSQL_DATABASE'] ?? getenv('MYSQL_DATABASE') ?? 'ecoride_db';
         $this->username = $_ENV['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root';
         $this->password = $_ENV['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '';
 
-        // Debug local
+        // Fallback pour environnement local WampServer
         if (empty($this->host) || empty($this->dbname) || empty($this->username)) {
-            // Forcer les valeurs locales WAMP
             $this->host = 'localhost';
             $this->dbname = 'ecoride_db';
             $this->username = 'root';
             $this->password = '';
         }
 
-        // Debug pour Railway
+        // Debug pour environnements cloud (Docker/Render)
         if ($_ENV['MYSQLHOST'] ?? getenv('MYSQLHOST')) {
-            error_log("Railway DB Config: Host=" . $this->host . ", DB=" . $this->dbname);
+            error_log("Cloud DB Config: Host=" . $this->host . ", DB=" . $this->dbname);
         }
 
         try {

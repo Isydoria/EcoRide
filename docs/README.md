@@ -3,8 +3,6 @@
 > **Projet RNCP - Titre Professionnel Développeur Web et Web Mobile**
 > Développé par Nathanaëlle dans le cadre de l'évaluation Studi (Septembre 2025)
 
-[![Railway Deploy](https://railway.app/button.svg)](https://ecoride-production-2631.up.railway.app)
-
 ## 📋 Description du Projet
 
 EcoRide est une plateforme de covoiturage innovante qui encourage les déplacements écologiques. L'application permet aux utilisateurs de :
@@ -20,10 +18,10 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 ## 🌐 ACCÈS À L'APPLICATION
 
-### 🚀 **Production (Railway - Recommandé)**
-- **URL principale** : https://ecoride-production-2631.up.railway.app
-- **Interface admin** : https://ecoride-production-2631.up.railway.app/admin/dashboard.php
-- **Init trajets** : https://ecoride-production-2631.up.railway.app/init-trajets-demo.php
+### 🚀 **Production (Render.com - Recommandé)**
+- **URL principale** : https://ecoride-om7c.onrender.com
+- **Interface admin** : https://ecoride-om7c.onrender.com/admin/dashboard.php
+- **Init trajets** : https://ecoride-om7c.onrender.com/init-trajets-demo.php
 
 ### 💻 **Local (Développement)**
 - **URL principale** : http://localhost/ecoride
@@ -36,7 +34,7 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 ### 🛠️ **Administrateur**
 - **Email** : `admin@ecoride.fr`
-- **Mot de passe** : `Ec0R1de!` (Railway) / `Test123!` (Local après fix-admin.php)
+- **Mot de passe** : `Ec0R1de!` (Render) / `Test123!` (Local après fix-admin.php)
 - **Accès** : Dashboard admin complet avec graphiques et statistiques
 
 ### 👥 **Utilisateurs**
@@ -51,7 +49,7 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 
 ### ⚡ **Test Rapide (5 minutes)**
 
-1. **🔗 Accéder à l'app** : https://ecoride-production-2631.up.railway.app
+1. **🔗 Accéder à l'app** : https://ecoride-om7c.onrender.com
 
 2. **🚗 Initialiser les trajets** : `/init-trajets-demo.php`
    - Crée 5 trajets avec dates relatives (demain, après-demain...)
@@ -140,7 +138,7 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - **Relations normalisées** avec clés étrangères
 
 ### **Hébergement et Sécurité**
-- **Railway** : Déploiement cloud automatique
+- **Render.com** : Déploiement cloud automatique
 - **HTTPS** obligatoire avec certificats SSL
 - **Variables d'environnement** pour la configuration
 - **Protection CSRF, XSS** et injections SQL
@@ -191,7 +189,7 @@ mysql -u root -p ecoride_db < database/seed.sql
 Le système détecte automatiquement l'environnement :
 
 - **🖥️ Local** : `localhost`, `root`, `ecoride_db` (configuration par défaut)
-- **☁️ Railway** : Variables d'environnement automatiques
+- **☁️ Render** : Variables d'environnement automatiques (PostgreSQL)
 - **🔧 Adaptive** : Basculement transparent entre environnements
 
 ### **Scripts Utilitaires**
@@ -284,7 +282,7 @@ L'application s'adapte parfaitement à tous les écrans :
 **🎓 Formation** : RNCP Développeur Web et Web Mobile - Studi
 **📅 Date** : Septembre 2025
 **🔗 GitHub** : [Isydoria/EcoRide](https://github.com/Isydoria/EcoRide)
-**🚀 Demo Live** : [Railway App](https://ecoride-production-2631.up.railway.app)
+**🚀 Demo Live** : [Render App](https://ecoride-om7c.onrender.com)
 
 ---
 
