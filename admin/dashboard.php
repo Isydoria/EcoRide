@@ -24,6 +24,10 @@ $recent_trips = [];
 try {
     $pdo = db();
 
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
     // Statistiques générales
     $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateur");
     $stats['total_users'] = $stmt->fetchColumn();
@@ -31,7 +35,8 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM covoiturage");
     $stats['total_trips'] = $stmt->fetchColumn();
 
-    $stmt = $pdo->query("SELECT SUM(credit) FROM utilisateur");
+    $creditColumn = $isPostgreSQL ? 'credits' : 'credit';
+    $stmt = $pdo->query("SELECT SUM($creditColumn) FROM utilisateur");
     $stats['total_credits'] = $stmt->fetchColumn() ?? 0;
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM participation");
@@ -49,34 +54,65 @@ try {
         'annule' => $trip_stats_raw['annule'] ?? 0
     ];
 
-    // Liste des employés
-    $stmt = $pdo->query("
-        SELECT utilisateur_id, pseudo, email, created_at, statut 
-        FROM utilisateur 
-        WHERE role = 'employe' 
-        ORDER BY created_at DESC
-    ");
+    // Liste des employés - Compatible MySQL/PostgreSQL
+    if ($isPostgreSQL) {
+        $stmt = $pdo->query("
+            SELECT utilisateur_id, pseudo, email, date_inscription as created_at,
+                   CASE WHEN is_active THEN 'actif' ELSE 'suspendu' END as statut
+            FROM utilisateur
+            WHERE role = 'employe'
+            ORDER BY date_inscription DESC
+        ");
+    } else {
+        $stmt = $pdo->query("
+            SELECT utilisateur_id, pseudo, email, created_at, statut
+            FROM utilisateur
+            WHERE role = 'employe'
+            ORDER BY created_at DESC
+        ");
+    }
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Derniers utilisateurs inscrits
-    $stmt = $pdo->prepare("
-        SELECT utilisateur_id, pseudo, email, created_at, statut, role 
-        FROM utilisateur 
-        ORDER BY created_at DESC 
-        LIMIT 10
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT utilisateur_id, pseudo, email, date_inscription as created_at,
+                   CASE WHEN is_active THEN 'actif' ELSE 'suspendu' END as statut, role
+            FROM utilisateur
+            ORDER BY date_inscription DESC
+            LIMIT 10
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT utilisateur_id, pseudo, email, created_at, statut, role
+            FROM utilisateur
+            ORDER BY created_at DESC
+            LIMIT 10
+        ");
+    }
     $stmt->execute();
     $recent_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Derniers trajets créés
-    $stmt = $pdo->prepare("
-        SELECT c.*, u.pseudo as conducteur, v.marque, v.modele
-        FROM covoiturage c
-        LEFT JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
-        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-        ORDER BY c.created_at DESC
-        LIMIT 10
-    ");
+    // Derniers trajets créés - Compatible MySQL/PostgreSQL
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.pseudo as conducteur, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            ORDER BY c.covoiturage_id DESC
+            LIMIT 10
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.pseudo as conducteur, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            ORDER BY c.created_at DESC
+            LIMIT 10
+        ");
+    }
     $stmt->execute();
     $recent_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -416,7 +452,7 @@ try {
                         <?= htmlspecialchars(($trip['marque'] ?? '') . ' ' . ($trip['modele'] ?? '')) ?>
                     </td>
                     <td><?= date('d/m/Y H:i', strtotime($trip['date_depart'])) ?></td>
-                    <td><?= number_format($trip['prix_par_place'] ?? 0, 2) ?>€</td>
+                    <td><?= number_format($trip['prix_par_place'] ?? $trip['prix'] ?? 0, 2) ?>€</td>
                     <td><?= $trip['places_disponibles'] ?? 0 ?></td>
                     <td>
                         <span class="status-badge status-<?= $trip['statut'] ?? 'planifie' ?>">
