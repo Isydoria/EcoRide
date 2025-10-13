@@ -32,7 +32,7 @@ try {
         ['Emma Bernard', 'emma.bernard@ecoride.fr', 'Emma2025!']
     ];
 
-    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, mot_de_passe, role, credits, actif) VALUES (?, ?, ?, 'employe', 50, true) ON CONFLICT (email) DO NOTHING RETURNING id");
+    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits, is_active) VALUES (?, ?, ?, 'employe', 50, true) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
 
     foreach ($employees as $emp) {
         $stmt->execute([$emp[0], $emp[1], password_hash($emp[2], PASSWORD_DEFAULT)]);
@@ -41,27 +41,27 @@ try {
 
     // 2. VÉHICULES
     echo "<br><h2>🚗 Création des véhicules</h2>";
-    $users = $db->query("SELECT id FROM utilisateur WHERE role != 'administrateur' ORDER BY id")->fetchAll();
+    $users = $db->query("SELECT utilisateur_id FROM utilisateur WHERE role != 'administrateur' ORDER BY utilisateur_id")->fetchAll();
 
     $vehicles = [
-        ['Renault Clio', 'AB-123-CD', 4, 'Essence'],
-        ['Peugeot 308', 'EF-456-GH', 4, 'Diesel'],
-        ['Citroën C3', 'IJ-789-KL', 4, 'Essence'],
-        ['VW Golf', 'MN-012-OP', 5, 'Diesel'],
-        ['Toyota Yaris', 'QR-345-ST', 4, 'Hybride'],
-        ['Renault Zoe', 'UV-678-WX', 4, 'Électrique'],
-        ['Peugeot 208', 'YZ-901-AB', 4, 'Essence'],
-        ['Fiat 500', 'CD-234-EF', 4, 'Essence']
+        ['Renault', 'Clio', 'AB-123-CD', 4, 'Essence'],
+        ['Peugeot', '308', 'EF-456-GH', 4, 'Diesel'],
+        ['Citroën', 'C3', 'IJ-789-KL', 4, 'Essence'],
+        ['VW', 'Golf', 'MN-012-OP', 5, 'Diesel'],
+        ['Toyota', 'Yaris', 'QR-345-ST', 4, 'Hybride'],
+        ['Renault', 'Zoe', 'UV-678-WX', 4, 'Électrique'],
+        ['Peugeot', '208', 'YZ-901-AB', 4, 'Essence'],
+        ['Fiat', '500', 'CD-234-EF', 4, 'Essence']
     ];
 
-    $stmt = $db->prepare("INSERT INTO vehicule (utilisateur_id, marque_modele, immatriculation, nb_places, type_carburant) VALUES (?, ?, ?, ?, ?) RETURNING id");
+    $stmt = $db->prepare("INSERT INTO vehicule (id_conducteur, marque, modele, immatriculation, places, type_carburant) VALUES (?, ?, ?, ?, ?, ?) RETURNING vehicule_id");
 
     $vehicleIds = [];
     foreach ($vehicles as $i => $v) {
-        $userId = $users[$i % count($users)]['id'];
-        $stmt->execute([$userId, $v[0], $v[1], $v[2], $v[3]]);
-        $vehicleIds[$userId] = $stmt->fetch()['id'];
-        echo "✓ {$v[0]} ({$v[1]})<br>";
+        $userId = $users[$i % count($users)]['utilisateur_id'];
+        $stmt->execute([$userId, $v[0], $v[1], $v[2], $v[3], $v[4]]);
+        $vehicleIds[$userId] = $stmt->fetch()['vehicule_id'];
+        echo "✓ {$v[0]} {$v[1]} ({$v[2]})<br>";
     }
 
     // 3. TRAJETS
@@ -117,28 +117,30 @@ try {
         ['Paris', 'Reims', '2026-02-28 09:00:00', '2026-02-28 10:30:00', 12, 2]
     ];
 
-    $stmt = $db->prepare("INSERT INTO covoiturage (conducteur_id, vehicule_id, lieu_depart, lieu_arrivee, datetime_depart, datetime_arrivee, prix, places_disponibles, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'disponible') RETURNING id");
+    $stmt = $db->prepare("INSERT INTO covoiturage (id_conducteur, id_vehicule, ville_depart, ville_arrivee, date_depart, date_arrivee, prix, places_disponibles, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'planifie') RETURNING covoiturage_id");
 
     $trajetIds = [];
     foreach ($trajets as $i => $t) {
-        $userId = $users[$i % count($users)]['id'];
+        $userId = $users[$i % count($users)]['utilisateur_id'];
         $vehicleId = $vehicleIds[$userId] ?? array_values($vehicleIds)[0];
         $stmt->execute([$userId, $vehicleId, $t[0], $t[1], $t[2], $t[3], $t[4], $t[5]]);
-        $trajetIds[] = $stmt->fetch()['id'];
+        $trajetIds[] = $stmt->fetch()['covoiturage_id'];
         echo "✓ {$t[0]} → {$t[1]} ({$t[2]})<br>";
     }
 
     // 4. PARTICIPATIONS
     echo "<br><h2>🎫 Participations</h2>";
-    $stmt = $db->prepare("INSERT INTO participation (covoiturage_id, passager_id, nb_places, statut) VALUES (?, ?, 1, ?) ON CONFLICT DO NOTHING");
+    $stmt = $db->prepare("INSERT INTO participation (id_trajet, id_passager, nombre_places, statut) VALUES (?, ?, 1, ?)");
 
     $count = 0;
     foreach ($trajetIds as $i => $tid) {
         if ($i % 3 < 2) {
-            $passengerId = $users[($i + 2) % count($users)]['id'];
+            $passengerId = $users[($i + 2) % count($users)]['utilisateur_id'];
             $statut = ($i % 4 == 0) ? 'en_attente' : 'confirmee';
-            $stmt->execute([$tid, $passengerId, $statut]);
-            $count++;
+            try {
+                $stmt->execute([$tid, $passengerId, $statut]);
+                $count++;
+            } catch (Exception $e) {}
         }
     }
     echo "✓ {$count} participations créées<br>";
@@ -156,13 +158,13 @@ try {
         "Conduite sûre"
     ];
 
-    $stmt = $db->prepare("INSERT INTO avis (evaluateur_id, evalue_id, covoiturage_id, note, commentaire) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $db->prepare("INSERT INTO avis (id_auteur, id_utilisateur_note, id_trajet, note, commentaire) VALUES (?, ?, ?, ?, ?)");
 
     $avisCount = 0;
     foreach ($trajetIds as $i => $tid) {
         if ($i % 4 < 2) {
-            $evaluateurId = $users[($i + 1) % count($users)]['id'];
-            $evalueId = $users[$i % count($users)]['id'];
+            $evaluateurId = $users[($i + 1) % count($users)]['utilisateur_id'];
+            $evalueId = $users[$i % count($users)]['utilisateur_id'];
             $note = rand(3, 5);
             try {
                 $stmt->execute([$evaluateurId, $evalueId, $tid, $note, $comments[array_rand($comments)]]);
