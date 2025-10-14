@@ -65,7 +65,7 @@ try {
                 c.statut,
                 -- Info du conducteur
                 u.pseudo as conducteur_pseudo,
-                u.photo as conducteur_photo,
+                u.photo_profil as conducteur_photo,
                 u.date_inscription as membre_depuis,
                 -- Info du véhicule
                 v.marque,
@@ -89,7 +89,7 @@ try {
                 c.covoiturage_id, c.id_conducteur, c.ville_depart, c.ville_arrivee,
                 c.adresse_depart, c.adresse_arrivee, c.date_depart, c.date_arrivee,
                 c.places_disponibles, c.prix, c.statut,
-                u.pseudo, u.photo, u.date_inscription, u.utilisateur_id,
+                u.pseudo, u.photo_profil, u.date_inscription, u.utilisateur_id,
                 v.marque, v.modele, v.couleur, v.places, v.type_carburant
         ";
     } else {
