@@ -144,47 +144,46 @@ try {
     }
     
     // ✅ Récupérer les préférences du conducteur
-    if ($isPostgreSQL) {
-        $sqlPref = "
-            SELECT
-                fumeur as accepte_fumeur,
-                animaux as accepte_animaux,
-                musique as accepte_musique,
-                discussion as accepte_discussion,
-                preferences_custom as preferences_autres
-            FROM
-                preference
-            WHERE
-                utilisateur_id = :conducteur_id
-        ";
-    } else {
-        $sqlPref = "
-            SELECT
-                fumeur as accepte_fumeur,
-                animaux as accepte_animaux,
-                musique as accepte_musique,
-                discussion as accepte_discussion,
-                preferences_custom as preferences_autres
-            FROM
-                parametre
-            WHERE
-                utilisateur_id = :conducteur_id
-        ";
-    }
+    // Valeurs par défaut
+    $preferences = [
+        'accepte_fumeur' => false,
+        'accepte_animaux' => false,
+        'accepte_musique' => true,
+        'accepte_discussion' => true,
+        'preferences_autres' => ''
+    ];
 
-    $stmtPref = $pdo->prepare($sqlPref);
-    $stmtPref->execute(['conducteur_id' => $trajet['id_conducteur']]);
-    $preferences = $stmtPref->fetch(PDO::FETCH_ASSOC);
+    // Tenter de récupérer les préférences (si la table existe)
+    try {
+        if ($isPostgreSQL) {
+            // PostgreSQL - structure simplifiée ou inexistante
+            // On garde les valeurs par défaut pour l'instant
+        } else {
+            // MySQL
+            $sqlPref = "
+                SELECT
+                    fumeur as accepte_fumeur,
+                    animaux as accepte_animaux,
+                    musique as accepte_musique,
+                    discussion as accepte_discussion,
+                    preferences_custom as preferences_autres
+                FROM
+                    parametre
+                WHERE
+                    utilisateur_id = :conducteur_id
+            ";
 
-    // Valeurs par défaut si pas de préférences
-    if (!$preferences) {
-        $preferences = [
-            'accepte_fumeur' => false,
-            'accepte_animaux' => false,
-            'accepte_musique' => true,
-            'accepte_discussion' => true,
-            'preferences_autres' => ''
-        ];
+            $stmtPref = $pdo->prepare($sqlPref);
+            $stmtPref->execute(['conducteur_id' => $trajet['id_conducteur']]);
+            $prefResult = $stmtPref->fetch(PDO::FETCH_ASSOC);
+
+            if ($prefResult) {
+                $preferences = $prefResult;
+            }
+        }
+    } catch (Exception $e) {
+        // En cas d'erreur, on garde les préférences par défaut
+        error_log("Erreur récupération préférences : " . $e->getMessage());
     }
 
     $trajet['preferences'] = $preferences;
