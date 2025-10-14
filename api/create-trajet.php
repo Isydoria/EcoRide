@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(Exception $e) {
     die(json_encode([
         'success' => false,
@@ -100,7 +104,12 @@ if (!empty($errors)) {
 
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
-    $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT places FROM vehicule WHERE vehicule_id = :voiture_id AND id_conducteur = :user_id");
+    } else {
+        $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
+    }
+
     $stmt->execute([
         'voiture_id' => $voiture_id,
         'user_id' => $user_id
@@ -126,34 +135,67 @@ try {
     $pdo->beginTransaction();
 
     // Insérer le nouveau trajet
-    $stmt = $pdo->prepare("
-        INSERT INTO covoiturage (
-            conducteur_id, voiture_id, ville_depart, ville_arrivee,
-            date_depart, date_arrivee, places_disponibles, prix_par_place,
-            statut, created_at
-        ) VALUES (
-            :conducteur_id, :voiture_id, :ville_depart, :ville_arrivee,
-            :date_depart, :date_arrivee, :places_disponibles, :prix_par_place,
-            'planifie', NOW()
-        )
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            INSERT INTO covoiturage (
+                id_conducteur, id_vehicule, ville_depart, ville_arrivee,
+                date_depart, date_arrivee, places_disponibles, prix,
+                statut, created_at
+            ) VALUES (
+                :conducteur_id, :voiture_id, :ville_depart, :ville_arrivee,
+                :date_depart, :date_arrivee, :places_disponibles, :prix_par_place,
+                'planifie', CURRENT_TIMESTAMP
+            )
+            RETURNING covoiturage_id
+        ");
 
-    $result = $stmt->execute([
-        'conducteur_id' => $user_id,
-        'voiture_id' => $voiture_id,
-        'ville_depart' => $ville_depart,
-        'ville_arrivee' => $ville_arrivee,
-        'date_depart' => $datetime_depart,
-        'date_arrivee' => $datetime_arrivee,
-        'places_disponibles' => $places_disponibles,
-        'prix_par_place' => $prix_par_place
-    ]);
+        $result = $stmt->execute([
+            'conducteur_id' => $user_id,
+            'voiture_id' => $voiture_id,
+            'ville_depart' => $ville_depart,
+            'ville_arrivee' => $ville_arrivee,
+            'date_depart' => $datetime_depart,
+            'date_arrivee' => $datetime_arrivee,
+            'places_disponibles' => $places_disponibles,
+            'prix_par_place' => $prix_par_place
+        ]);
 
-    if (!$result) {
-        throw new Exception('Erreur lors de la création du trajet');
+        if (!$result) {
+            throw new Exception('Erreur lors de la création du trajet');
+        }
+
+        $trajetRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $trajet_id = $trajetRow['covoiturage_id'];
+    } else {
+        $stmt = $pdo->prepare("
+            INSERT INTO covoiturage (
+                conducteur_id, voiture_id, ville_depart, ville_arrivee,
+                date_depart, date_arrivee, places_disponibles, prix_par_place,
+                statut, created_at
+            ) VALUES (
+                :conducteur_id, :voiture_id, :ville_depart, :ville_arrivee,
+                :date_depart, :date_arrivee, :places_disponibles, :prix_par_place,
+                'planifie', NOW()
+            )
+        ");
+
+        $result = $stmt->execute([
+            'conducteur_id' => $user_id,
+            'voiture_id' => $voiture_id,
+            'ville_depart' => $ville_depart,
+            'ville_arrivee' => $ville_arrivee,
+            'date_depart' => $datetime_depart,
+            'date_arrivee' => $datetime_arrivee,
+            'places_disponibles' => $places_disponibles,
+            'prix_par_place' => $prix_par_place
+        ]);
+
+        if (!$result) {
+            throw new Exception('Erreur lors de la création du trajet');
+        }
+
+        $trajet_id = $pdo->lastInsertId();
     }
-
-    $trajet_id = $pdo->lastInsertId();
 
     // Si un commentaire a été ajouté, l'enregistrer dans une table dédiée
     if (!empty($commentaire)) {

@@ -47,33 +47,26 @@ try {
     
     // Connexion à la base de données
     $conn = db();
-    
+
+    // Détecter le type de base de données
+    $driver = $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
     // ==========================================
     // 🔄 REQUÊTE COMPATIBLE MySQL ET PostgreSQL
     // ==========================================
-    $user = null;
-    
-    // Essayer avec la colonne "statut" d'abord (MySQL local)
-    try {
+    if ($isPostgreSQL) {
+        // PostgreSQL : utilise is_active (boolean)
+        $query = "SELECT * FROM utilisateur WHERE email = :email AND is_active = true";
+    } else {
+        // MySQL : utilise statut (enum)
         $query = "SELECT * FROM utilisateur WHERE email = :email AND statut = 'actif'";
-        $stmt = $conn->prepare($query);
-        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Si erreur "statut", essayer sans (PostgreSQL Render)
-        if (strpos($e->getMessage(), 'statut') !== false || 
-            strpos($e->getMessage(), 'column') !== false) {
-            
-            $query = "SELECT * FROM utilisateur WHERE email = :email";
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        } else {
-            throw $e;
-        }
     }
+
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Vérifier si l'utilisateur existe
     if (!$user) {
