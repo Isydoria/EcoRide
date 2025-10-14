@@ -39,22 +39,17 @@ session_start();
 
 // ✅ ÉTAPE 1 : Connexion à la base de données
 try {
-    // Chemin absolu vers config
-    $configPath = __DIR__ . '/../config/database.php';
-    
-    if (!file_exists($configPath)) {
-        jsonResponse(false, 'Fichier de configuration introuvable', null, "Chemin: $configPath");
-    }
-    
-    require_once $configPath;
-    
-    // Tester la connexion
-    $pdo = Database::getInstance()->getPDO();
-    
+    require_once __DIR__ . '/../config/init.php';
+    $pdo = db();
+
     if (!$pdo) {
         jsonResponse(false, 'Impossible d\'obtenir la connexion PDO');
     }
-    
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
 } catch(Exception $e) {
     jsonResponse(false, 'Erreur de connexion à la base de données', null, $e->getMessage());
 }
@@ -137,38 +132,77 @@ $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 // ✅ ÉTAPE 7 : Insérer l'utilisateur dans la base
 try {
-    $stmt = $pdo->prepare("
-        INSERT INTO utilisateur (
-            pseudo, 
-            email, 
-            password, 
-            credit, 
-            role, 
-            statut,
-            created_at
-        ) VALUES (
-            :pseudo, 
-            :email, 
-            :password, 
-            20, 
-            'utilisateur', 
-            'actif',
-            NOW()
-        )
-    ");
-    
-    $stmt->bindParam(':pseudo', $pseudo);
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':password', $hashed_password);
-    
-    $result = $stmt->execute();
-    
-    if (!$result) {
-        jsonResponse(false, 'Erreur lors de l\'insertion', null, $stmt->errorInfo());
+    if ($isPostgreSQL) {
+        // PostgreSQL
+        $stmt = $pdo->prepare("
+            INSERT INTO utilisateur (
+                pseudo,
+                email,
+                password,
+                credits,
+                role,
+                is_active,
+                date_inscription
+            ) VALUES (
+                :pseudo,
+                :email,
+                :password,
+                20,
+                'utilisateur',
+                true,
+                CURRENT_TIMESTAMP
+            )
+            RETURNING utilisateur_id
+        ");
+
+        $stmt->bindParam(':pseudo', $pseudo);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashed_password);
+
+        $result = $stmt->execute();
+
+        if (!$result) {
+            jsonResponse(false, 'Erreur lors de l\'insertion', null, $stmt->errorInfo());
+        }
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user_id = $user['utilisateur_id'];
+
+    } else {
+        // MySQL
+        $stmt = $pdo->prepare("
+            INSERT INTO utilisateur (
+                pseudo,
+                email,
+                password,
+                credit,
+                role,
+                statut,
+                created_at
+            ) VALUES (
+                :pseudo,
+                :email,
+                :password,
+                20,
+                'utilisateur',
+                'actif',
+                NOW()
+            )
+        ");
+
+        $stmt->bindParam(':pseudo', $pseudo);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashed_password);
+
+        $result = $stmt->execute();
+
+        if (!$result) {
+            jsonResponse(false, 'Erreur lors de l\'insertion', null, $stmt->errorInfo());
+        }
+
+        $user_id = $pdo->lastInsertId();
     }
-    
-    $user_id = $pdo->lastInsertId();
-    
+
 } catch(PDOException $e) {
     jsonResponse(false, 'Erreur lors de l\'inscription', null, $e->getMessage());
 }
