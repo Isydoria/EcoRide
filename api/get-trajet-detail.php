@@ -144,18 +144,33 @@ try {
     }
     
     // ✅ Récupérer les préférences du conducteur
-    $sqlPref = "
-        SELECT
-            fumeur as accepte_fumeur,
-            animaux as accepte_animaux,
-            musique as accepte_musique,
-            discussion as accepte_discussion,
-            preferences_custom as preferences_autres
-        FROM
-            parametre
-        WHERE
-            utilisateur_id = :conducteur_id
-    ";
+    if ($isPostgreSQL) {
+        $sqlPref = "
+            SELECT
+                fumeur as accepte_fumeur,
+                animaux as accepte_animaux,
+                musique as accepte_musique,
+                discussion as accepte_discussion,
+                preferences_custom as preferences_autres
+            FROM
+                preference
+            WHERE
+                utilisateur_id = :conducteur_id
+        ";
+    } else {
+        $sqlPref = "
+            SELECT
+                fumeur as accepte_fumeur,
+                animaux as accepte_animaux,
+                musique as accepte_musique,
+                discussion as accepte_discussion,
+                preferences_custom as preferences_autres
+            FROM
+                parametre
+            WHERE
+                utilisateur_id = :conducteur_id
+        ";
+    }
 
     $stmtPref = $pdo->prepare($sqlPref);
     $stmtPref->execute(['conducteur_id' => $trajet['id_conducteur']]);

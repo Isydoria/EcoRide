@@ -9,25 +9,50 @@ $error_message = '';
 try {
     $pdo = db();
 
-    // Récupérer les trajets futurs disponibles (requête simplifiée compatible)
-    $stmt = $pdo->prepare("
-        SELECT c.*, u.pseudo as conducteur_pseudo,
-               0 as note_moyenne,
-               COALESCE(v.marque, 'Véhicule') as marque,
-               COALESCE(v.modele, 'non renseigné') as modele,
-               COALESCE(v.couleur, '') as couleur,
-               'essence' as type_carburant,
-               0 as reservations_count,
-               c.places_disponibles as places_libres
-        FROM covoiturage c
-        JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
-        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-        WHERE c.statut IN ('planifie', 'en_cours')
-        AND c.date_depart >= CURDATE()
-        AND c.places_disponibles > 0
-        ORDER BY c.date_depart ASC
-        LIMIT 6
-    ");
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
+    // Récupérer les trajets futurs disponibles
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.pseudo as conducteur_pseudo,
+                   0 as note_moyenne,
+                   COALESCE(v.marque, 'Véhicule') as marque,
+                   COALESCE(v.modele, 'non renseigné') as modele,
+                   COALESCE(v.couleur, '') as couleur,
+                   COALESCE(v.type_carburant, 'essence') as type_carburant,
+                   0 as reservations_count,
+                   c.places_disponibles as places_libres
+            FROM covoiturage c
+            JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            WHERE c.statut IN ('planifie', 'en_cours')
+            AND c.date_depart >= CURRENT_DATE
+            AND c.places_disponibles > 0
+            ORDER BY c.date_depart ASC
+            LIMIT 6
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.pseudo as conducteur_pseudo,
+                   0 as note_moyenne,
+                   COALESCE(v.marque, 'Véhicule') as marque,
+                   COALESCE(v.modele, 'non renseigné') as modele,
+                   COALESCE(v.couleur, '') as couleur,
+                   COALESCE(v.energie, 'essence') as type_carburant,
+                   0 as reservations_count,
+                   c.places_disponibles as places_libres
+            FROM covoiturage c
+            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            WHERE c.statut IN ('planifie', 'en_cours')
+            AND c.date_depart >= CURDATE()
+            AND c.places_disponibles > 0
+            ORDER BY c.date_depart ASC
+            LIMIT 6
+        ");
+    }
 
     $stmt->execute();
     $popular_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
