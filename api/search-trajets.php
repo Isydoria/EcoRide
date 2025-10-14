@@ -15,6 +15,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(Exception $e) {
     die(json_encode([
         'success' => false,
@@ -51,14 +55,26 @@ if (empty($ville_depart) || empty($ville_arrivee) || empty($date_depart)) {
 
 try {
     // Construire la requête avec les filtres dynamiques (US4)
-    $whereConditions = [
-        "LOWER(t.ville_depart) LIKE LOWER(:ville_depart)",
-        "LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)",
-        "DATE(t.date_depart) = :date_depart",
-        "t.places_disponibles > 0",
-        "t.statut = 'planifie'",
-        "u.statut = 'actif'"
-    ];
+    // Compatible MySQL/PostgreSQL
+    if ($isPostgreSQL) {
+        $whereConditions = [
+            "LOWER(t.ville_depart) LIKE LOWER(:ville_depart)",
+            "LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)",
+            "DATE(t.date_depart) = :date_depart",
+            "t.places_disponibles > 0",
+            "t.statut = 'planifie'",
+            "u.is_active = true"
+        ];
+    } else {
+        $whereConditions = [
+            "LOWER(t.ville_depart) LIKE LOWER(:ville_depart)",
+            "LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)",
+            "DATE(t.date_depart) = :date_depart",
+            "t.places_disponibles > 0",
+            "t.statut = 'planifie'",
+            "u.statut = 'actif'"
+        ];
+    }
 
     $params = [
         'ville_depart' => '%' . $ville_depart . '%',
@@ -68,18 +84,30 @@ try {
 
     // Filtre écologique (US4)
     if ($ecologique) {
-        $whereConditions[] = "v.energie = 'electrique'";
+        if ($isPostgreSQL) {
+            $whereConditions[] = "v.type_carburant = 'Électrique'";
+        } else {
+            $whereConditions[] = "v.energie = 'electrique'";
+        }
     }
 
     // Filtre prix maximum (US4)
     if ($prix_max !== null) {
-        $whereConditions[] = "t.prix_par_place <= :prix_max";
+        if ($isPostgreSQL) {
+            $whereConditions[] = "t.prix <= :prix_max";
+        } else {
+            $whereConditions[] = "t.prix_par_place <= :prix_max";
+        }
         $params['prix_max'] = $prix_max;
     }
 
     // Filtre durée maximum (US4) - calculée entre date_depart et date_arrivee
     if ($duree_max !== null) {
-        $whereConditions[] = "TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) <= :duree_max";
+        if ($isPostgreSQL) {
+            $whereConditions[] = "EXTRACT(EPOCH FROM (t.date_arrivee - t.date_depart))/3600 <= :duree_max";
+        } else {
+            $whereConditions[] = "TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) <= :duree_max";
+        }
         $params['duree_max'] = $duree_max;
     }
 
@@ -90,43 +118,84 @@ try {
         $params['note_min'] = $note_min;
     }
 
-    $sql = "
-        SELECT
-            t.covoiturage_id as id_trajet,
-            t.ville_depart,
-            t.ville_arrivee,
-            t.date_depart,
-            t.date_depart as heure_depart,
-            t.date_arrivee as heure_arrivee,
-            t.places_disponibles,
-            t.prix_par_place as prix,
-            t.statut,
-            -- Durée calculée
-            TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) as duree_heures,
-            -- Info du conducteur
-            u.pseudo as conducteur_pseudo,
-            u.photo as conducteur_photo,
-            -- Info du véhicule
-            v.marque,
-            v.modele,
-            v.energie as type_carburant,
-            v.couleur,
-            -- Note moyenne du conducteur (calculée depuis les avis)
-            COALESCE(AVG(a.note), 0) as note_moyenne,
-            COUNT(DISTINCT a.avis_id) as nb_avis
-        FROM
-            covoiturage t
-            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
-            INNER JOIN voiture v ON t.voiture_id = v.voiture_id
-            LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
-        WHERE
-            " . implode(' AND ', $whereConditions) . "
-        GROUP BY
-            t.covoiturage_id
-        " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
-        ORDER BY
-            t.date_depart ASC
-    ";
+    // Requête SQL adaptée selon la base de données
+    if ($isPostgreSQL) {
+        $sql = "
+            SELECT
+                t.covoiturage_id as id_trajet,
+                t.ville_depart,
+                t.ville_arrivee,
+                t.date_depart,
+                t.date_depart as heure_depart,
+                t.date_arrivee as heure_arrivee,
+                t.places_disponibles,
+                t.prix as prix,
+                t.statut,
+                -- Durée calculée
+                EXTRACT(EPOCH FROM (t.date_arrivee - t.date_depart))/3600 as duree_heures,
+                -- Info du conducteur
+                u.pseudo as conducteur_pseudo,
+                '' as conducteur_photo,
+                -- Info du véhicule
+                v.marque,
+                v.modele,
+                v.type_carburant,
+                v.couleur,
+                -- Note moyenne du conducteur
+                COALESCE(AVG(a.note), 0) as note_moyenne,
+                COUNT(DISTINCT a.avis_id) as nb_avis
+            FROM
+                covoiturage t
+                INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
+                INNER JOIN vehicule v ON t.id_vehicule = v.vehicule_id
+                LEFT JOIN avis a ON u.utilisateur_id = a.id_utilisateur_note AND a.statut = 'valide'
+            WHERE
+                " . implode(' AND ', $whereConditions) . "
+            GROUP BY
+                t.covoiturage_id, u.pseudo, v.marque, v.modele, v.type_carburant, v.couleur
+            " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
+            ORDER BY
+                t.date_depart ASC
+        ";
+    } else {
+        $sql = "
+            SELECT
+                t.covoiturage_id as id_trajet,
+                t.ville_depart,
+                t.ville_arrivee,
+                t.date_depart,
+                t.date_depart as heure_depart,
+                t.date_arrivee as heure_arrivee,
+                t.places_disponibles,
+                t.prix_par_place as prix,
+                t.statut,
+                -- Durée calculée
+                TIMESTAMPDIFF(HOUR, t.date_depart, t.date_arrivee) as duree_heures,
+                -- Info du conducteur
+                u.pseudo as conducteur_pseudo,
+                u.photo as conducteur_photo,
+                -- Info du véhicule
+                v.marque,
+                v.modele,
+                v.energie as type_carburant,
+                v.couleur,
+                -- Note moyenne du conducteur
+                COALESCE(AVG(a.note), 0) as note_moyenne,
+                COUNT(DISTINCT a.avis_id) as nb_avis
+            FROM
+                covoiturage t
+                INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+                INNER JOIN voiture v ON t.voiture_id = v.voiture_id
+                LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
+            WHERE
+                " . implode(' AND ', $whereConditions) . "
+            GROUP BY
+                t.covoiturage_id
+            " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
+            ORDER BY
+                t.date_depart ASC
+        ";
+    }
 
     // Préparer et exécuter la requête
     $stmt = $pdo->prepare($sql);
@@ -156,20 +225,37 @@ try {
     // Si aucun trajet trouvé, chercher des dates alternatives
     $alternatives = [];
     if (count($trajets) === 0) {
-        $sqlAlt = "
-            SELECT DISTINCT DATE(t.date_depart) as date_alternative
-            FROM covoiturage t
-            INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
-            WHERE
-                LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
-                AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
-                AND t.places_disponibles > 0
-                AND t.statut = 'planifie'
-                AND u.statut = 'actif'
-                AND DATE(t.date_depart) > CURDATE()
-            ORDER BY DATE(t.date_depart) ASC
-            LIMIT 5
-        ";
+        if ($isPostgreSQL) {
+            $sqlAlt = "
+                SELECT DISTINCT DATE(t.date_depart) as date_alternative
+                FROM covoiturage t
+                INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
+                WHERE
+                    LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
+                    AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
+                    AND t.places_disponibles > 0
+                    AND t.statut = 'planifie'
+                    AND u.is_active = true
+                    AND DATE(t.date_depart) > CURRENT_DATE
+                ORDER BY DATE(t.date_depart) ASC
+                LIMIT 5
+            ";
+        } else {
+            $sqlAlt = "
+                SELECT DISTINCT DATE(t.date_depart) as date_alternative
+                FROM covoiturage t
+                INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+                WHERE
+                    LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
+                    AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
+                    AND t.places_disponibles > 0
+                    AND t.statut = 'planifie'
+                    AND u.statut = 'actif'
+                    AND DATE(t.date_depart) > CURDATE()
+                ORDER BY DATE(t.date_depart) ASC
+                LIMIT 5
+            ";
+        }
         
         $stmtAlt = $pdo->prepare($sqlAlt);
         $stmtAlt->execute([
