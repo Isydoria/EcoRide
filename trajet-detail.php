@@ -26,17 +26,26 @@ $userCredits = 0;
 
 if ($isLoggedIn) {
     try {
-        require_once 'config/database.php';
-        $pdo = Database::getInstance()->getPDO();
-        
-        // Récupérer les crédits actuels depuis la base
-        $stmt = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
+        require_once 'config/init.php';
+        $pdo = db();
+
+        // Détecter le type de base de données
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $isPostgreSQL = ($driver === 'pgsql');
+
+        // Récupérer les crédits actuels depuis la base avec la bonne colonne
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("SELECT credits FROM utilisateur WHERE utilisateur_id = :user_id");
+        } else {
+            $stmt = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
+        }
+
         $stmt->execute(['user_id' => $userId]);
         $userCredits = $stmt->fetchColumn();
-        
+
         // Mettre à jour la session avec les vrais crédits
         $_SESSION['credits'] = $userCredits;
-        
+
     } catch(Exception $e) {
         error_log("Erreur récupération crédits : " . $e->getMessage());
         $userCredits = $_SESSION['credits'] ?? 0; // Fallback sur la session
