@@ -152,7 +152,9 @@ try {
             WHERE
                 " . implode(' AND ', $whereConditions) . "
             GROUP BY
-                t.covoiturage_id, u.pseudo, v.marque, v.modele, v.type_carburant, v.couleur
+                t.covoiturage_id, t.ville_depart, t.ville_arrivee, t.date_depart,
+                t.date_arrivee, t.places_disponibles, t.prix, t.statut,
+                u.pseudo, v.marque, v.modele, v.type_carburant, v.couleur
             " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
             ORDER BY
                 t.date_depart ASC
