@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
@@ -75,7 +79,11 @@ if (!empty($errors)) {
 
 try {
     // Vérifier si l'immatriculation existe déjà
-    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE immatriculation = :immatriculation");
+    } else {
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation");
+    }
     $stmt->execute(['immatriculation' => $immatriculation]);
 
     if ($stmt->fetch()) {
@@ -86,31 +94,61 @@ try {
     }
 
     // Insérer le nouveau véhicule
-    $stmt = $pdo->prepare("
-        INSERT INTO voiture (
-            utilisateur_id, marque, modele, immatriculation,
-            couleur, places, energie, created_at
-        ) VALUES (
-            :utilisateur_id, :marque, :modele, :immatriculation,
-            :couleur, :places, :energie, NOW()
-        )
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            INSERT INTO vehicule (
+                id_conducteur, marque, modele, immatriculation,
+                couleur, places, type_carburant, date_ajout
+            ) VALUES (
+                :utilisateur_id, :marque, :modele, :immatriculation,
+                :couleur, :places, :energie, CURRENT_TIMESTAMP
+            )
+            RETURNING vehicule_id
+        ");
 
-    $result = $stmt->execute([
-        'utilisateur_id' => $user_id,
-        'marque' => $marque,
-        'modele' => $modele,
-        'immatriculation' => $immatriculation,
-        'couleur' => $couleur,
-        'places' => $places,
-        'energie' => $energie
-    ]);
+        $result = $stmt->execute([
+            'utilisateur_id' => $user_id,
+            'marque' => $marque,
+            'modele' => $modele,
+            'immatriculation' => $immatriculation,
+            'couleur' => $couleur,
+            'places' => $places,
+            'energie' => $energie
+        ]);
 
-    if (!$result) {
-        throw new Exception('Erreur lors de l\'ajout du véhicule');
+        if (!$result) {
+            throw new Exception('Erreur lors de l\'ajout du véhicule');
+        }
+
+        $vehicleRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $vehicle_id = $vehicleRow['vehicule_id'];
+    } else {
+        $stmt = $pdo->prepare("
+            INSERT INTO voiture (
+                utilisateur_id, marque, modele, immatriculation,
+                couleur, places, energie, created_at
+            ) VALUES (
+                :utilisateur_id, :marque, :modele, :immatriculation,
+                :couleur, :places, :energie, NOW()
+            )
+        ");
+
+        $result = $stmt->execute([
+            'utilisateur_id' => $user_id,
+            'marque' => $marque,
+            'modele' => $modele,
+            'immatriculation' => $immatriculation,
+            'couleur' => $couleur,
+            'places' => $places,
+            'energie' => $energie
+        ]);
+
+        if (!$result) {
+            throw new Exception('Erreur lors de l\'ajout du véhicule');
+        }
+
+        $vehicle_id = $pdo->lastInsertId();
     }
-
-    $vehicle_id = $pdo->lastInsertId();
 
     // Retourner le succès
     echo json_encode([

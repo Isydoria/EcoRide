@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
@@ -46,14 +50,25 @@ try {
     $pdo->beginTransaction();
 
     // Vérifier que la participation existe et peut être annulée
-    $stmt = $pdo->prepare("
-        SELECT p.*, c.date_depart, c.ville_depart, c.ville_arrivee, c.statut as trip_status,
-               u.pseudo as conducteur, u.credit as user_credit
-        FROM participation p
-        JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-        JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-        WHERE p.covoiturage_id = :trip_id AND p.passager_id = :user_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT r.*, t.date_depart, t.ville_depart, t.ville_arrivee, t.is_active as trip_status,
+                   u.pseudo as conducteur, u.credits as user_credit
+            FROM reservation r
+            JOIN trajet t ON r.id_trajet = t.id_trajet
+            JOIN utilisateur u ON r.id_passager = u.id_utilisateur
+            WHERE r.id_trajet = :trip_id AND r.id_passager = :user_id
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT p.*, c.date_depart, c.ville_depart, c.ville_arrivee, c.statut as trip_status,
+                   u.pseudo as conducteur, u.credit as user_credit
+            FROM participation p
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+            WHERE p.covoiturage_id = :trip_id AND p.passager_id = :user_id
+        ");
+    }
     $stmt->execute([
         'trip_id' => $trip_id,
         'user_id' => $user_id
@@ -61,7 +76,7 @@ try {
 
     $participation = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$participation) {  // ✅ Correction : ajout du $
+    if (!$participation) {
         throw new Exception('Réservation non trouvée');
     }
 
@@ -80,44 +95,84 @@ try {
     }
 
     // Vérifier si le trajet n'est pas annulé
-    if ($participation['trip_status'] === 'annule') {
-        throw new Exception('Ce trajet a été annulé par le conducteur');
+    if ($isPostgreSQL) {
+        if (!$participation['trip_status']) {
+            throw new Exception('Ce trajet a été annulé par le conducteur');
+        }
+    } else {
+        if ($participation['trip_status'] === 'annule') {
+            throw new Exception('Ce trajet a été annulé par le conducteur');
+        }
     }
 
     // Rembourser les crédits à l'utilisateur
     $new_credit = $participation['user_credit'] + $participation['credit_utilise'];
-    $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
-    $stmt->execute([
-        'new_credit' => $new_credit,
-        'user_id' => $user_id
-    ]);
 
-    // Marquer la participation comme annulée
-    $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
-    $stmt->execute(['participation_id' => $participation['participation_id']]);
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE id_utilisateur = :user_id");
+        $stmt->execute([
+            'new_credit' => $new_credit,
+            'user_id' => $user_id
+        ]);
+
+        // Marquer la participation comme annulée
+        $stmt = $pdo->prepare("UPDATE reservation SET statut = 'annule' WHERE id_reservation = :participation_id");
+        $stmt->execute(['participation_id' => $participation['id_reservation']]);
+    } else {
+        $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
+        $stmt->execute([
+            'new_credit' => $new_credit,
+            'user_id' => $user_id
+        ]);
+
+        // Marquer la participation comme annulée
+        $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
+        $stmt->execute(['participation_id' => $participation['participation_id']]);
+    }
 
     // Augmenter le nombre de places disponibles dans le covoiturage
-    $stmt = $pdo->prepare("
-        UPDATE covoiturage
-        SET places_disponibles = places_disponibles + :places_liberated
-        WHERE covoiturage_id = :trip_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            UPDATE trajet
+            SET places_disponibles = places_disponibles + :places_liberated
+            WHERE id_trajet = :trip_id
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            UPDATE covoiturage
+            SET places_disponibles = places_disponibles + :places_liberated
+            WHERE covoiturage_id = :trip_id
+        ");
+    }
     $stmt->execute([
         'places_liberated' => $participation['nombre_places'],
         'trip_id' => $trip_id
     ]);
 
     // Créer une transaction de crédit pour la traçabilité
-    $stmt = $pdo->prepare("
-        INSERT INTO transaction_credit (utilisateur_id, montant, type, description, reference_id, reference_type, created_at)
-        VALUES (:user_id, :montant, 'credit', :description, :ref_id, 'remboursement', NOW())
-    ");
-    $stmt->execute([
-        'user_id' => $user_id,
-        'montant' => $participation['credit_utilise'],
-        'description' => 'Remboursement annulation trajet ' . $participation['ville_depart'] . ' → ' . $participation['ville_arrivee'],
-        'ref_id' => $participation['participation_id']
-    ]);
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            INSERT INTO transaction_credit (id_utilisateur, montant, type, description, reference_id, reference_type, date_inscription)
+            VALUES (:user_id, :montant, 'credit', :description, :ref_id, 'remboursement', CURRENT_TIMESTAMP)
+        ");
+        $stmt->execute([
+            'user_id' => $user_id,
+            'montant' => $participation['credit_utilise'],
+            'description' => 'Remboursement annulation trajet ' . $participation['ville_depart'] . ' → ' . $participation['ville_arrivee'],
+            'ref_id' => $participation['id_reservation']
+        ]);
+    } else {
+        $stmt = $pdo->prepare("
+            INSERT INTO transaction_credit (utilisateur_id, montant, type, description, reference_id, reference_type, created_at)
+            VALUES (:user_id, :montant, 'credit', :description, :ref_id, 'remboursement', NOW())
+        ");
+        $stmt->execute([
+            'user_id' => $user_id,
+            'montant' => $participation['credit_utilise'],
+            'description' => 'Remboursement annulation trajet ' . $participation['ville_depart'] . ' → ' . $participation['ville_arrivee'],
+            'ref_id' => $participation['participation_id']
+        ]);
+    }
 
     // Valider la transaction
     $pdo->commit();

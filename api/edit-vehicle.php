@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
@@ -80,7 +84,11 @@ if (!empty($errors)) {
 
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
-    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT id_vehicule FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+    } else {
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    }
     $stmt->execute([
         'vehicle_id' => $vehicle_id,
         'user_id' => $user_id
@@ -94,7 +102,11 @@ try {
     }
 
     // Vérifier si l'immatriculation existe déjà (sauf pour ce véhicule)
-    $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT id_vehicule FROM vehicule WHERE immatriculation = :immatriculation AND id_vehicule != :vehicle_id");
+    } else {
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
+    }
     $stmt->execute([
         'immatriculation' => $immatriculation,
         'vehicle_id' => $vehicle_id
@@ -108,16 +120,29 @@ try {
     }
 
     // Mettre à jour le véhicule
-    $stmt = $pdo->prepare("
-        UPDATE voiture SET
-            marque = :marque,
-            modele = :modele,
-            immatriculation = :immatriculation,
-            couleur = :couleur,
-            places = :places,
-            energie = :energie
-        WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            UPDATE vehicule SET
+                marque = :marque,
+                modele = :modele,
+                immatriculation = :immatriculation,
+                couleur = :couleur,
+                places = :places,
+                type_carburant = :energie
+            WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            UPDATE voiture SET
+                marque = :marque,
+                modele = :modele,
+                immatriculation = :immatriculation,
+                couleur = :couleur,
+                places = :places,
+                energie = :energie
+            WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id
+        ");
+    }
 
     $result = $stmt->execute([
         'marque' => $marque,

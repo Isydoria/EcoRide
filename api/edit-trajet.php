@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(Exception $e) {
     die(json_encode([
         'success' => false,
@@ -104,13 +108,23 @@ if (!empty($errors)) {
 
 try {
     // Vérifier que le trajet appartient bien à l'utilisateur et peut être modifié
-    $stmt = $pdo->prepare("
-        SELECT c.*, COUNT(p.participation_id) as participants
-        FROM covoiturage c
-        LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut = 'confirme'
-        WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
-        GROUP BY c.covoiturage_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT t.*, COUNT(r.id_reservation) as participants
+            FROM trajet t
+            LEFT JOIN reservation r ON t.id_trajet = :trip_id AND r.id_trajet = t.id_trajet AND r.statut = 'confirme'
+            WHERE t.id_trajet = :trip_id AND t.id_conducteur = :user_id
+            GROUP BY t.id_trajet, t.id_conducteur, t.id_vehicule, t.ville_depart, t.ville_arrivee, t.date_depart, t.date_arrivee, t.places_disponibles, t.prix, t.is_active, t.date_inscription
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, COUNT(p.participation_id) as participants
+            FROM covoiturage c
+            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut = 'confirme'
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
+            GROUP BY c.covoiturage_id
+        ");
+    }
     $stmt->execute([
         'trip_id' => $trip_id,
         'user_id' => $user_id
@@ -125,11 +139,20 @@ try {
     }
 
     // Vérifier que le trajet peut être modifié (statut "planifie")
-    if ($trip['statut'] !== 'planifie') {
-        die(json_encode([
-            'success' => false,
-            'message' => 'Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé'
-        ]));
+    if ($isPostgreSQL) {
+        if (!$trip['is_active']) {
+            die(json_encode([
+                'success' => false,
+                'message' => 'Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé'
+            ]));
+        }
+    } else {
+        if ($trip['statut'] !== 'planifie') {
+            die(json_encode([
+                'success' => false,
+                'message' => 'Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé'
+            ]));
+        }
     }
 
     // Si des passagers ont déjà réservé, vérifier que les places ne sont pas réduites
@@ -141,7 +164,11 @@ try {
     }
 
     // Vérifier que le véhicule appartient bien à l'utilisateur
-    $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT places FROM vehicule WHERE id_vehicule = :voiture_id AND id_conducteur = :user_id");
+    } else {
+        $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
+    }
     $stmt->execute([
         'voiture_id' => $voiture_id,
         'user_id' => $user_id
@@ -167,17 +194,31 @@ try {
     $pdo->beginTransaction();
 
     // Mettre à jour le trajet
-    $stmt = $pdo->prepare("
-        UPDATE covoiturage SET
-            voiture_id = :voiture_id,
-            ville_depart = :ville_depart,
-            ville_arrivee = :ville_arrivee,
-            date_depart = :date_depart,
-            date_arrivee = :date_arrivee,
-            places_disponibles = :places_disponibles,
-            prix_par_place = :prix_par_place
-        WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            UPDATE trajet SET
+                id_vehicule = :voiture_id,
+                ville_depart = :ville_depart,
+                ville_arrivee = :ville_arrivee,
+                date_depart = :date_depart,
+                date_arrivee = :date_arrivee,
+                places_disponibles = :places_disponibles,
+                prix = :prix_par_place
+            WHERE id_trajet = :trip_id AND id_conducteur = :user_id
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            UPDATE covoiturage SET
+                voiture_id = :voiture_id,
+                ville_depart = :ville_depart,
+                ville_arrivee = :ville_arrivee,
+                date_depart = :date_depart,
+                date_arrivee = :date_arrivee,
+                places_disponibles = :places_disponibles,
+                prix_par_place = :prix_par_place
+            WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
+        ");
+    }
 
     $result = $stmt->execute([
         'voiture_id' => $voiture_id,

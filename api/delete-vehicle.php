@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
@@ -43,7 +47,11 @@ if ($vehicle_id <= 0) {
 
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
-    $stmt = $pdo->prepare("SELECT voiture_id, marque, modele FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT id_vehicule, marque, modele FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+    } else {
+        $stmt = $pdo->prepare("SELECT voiture_id, marque, modele FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    }
     $stmt->execute([
         'vehicle_id' => $vehicle_id,
         'user_id' => $user_id
@@ -59,13 +67,23 @@ try {
     }
 
     // Vérifier si le véhicule est utilisé dans des trajets à venir
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) as count
-        FROM covoiturage
-        WHERE voiture_id = :vehicle_id
-        AND date_depart >= CURDATE()
-        AND statut IN ('actif', 'en_cours')
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as count
+            FROM trajet
+            WHERE id_vehicule = :vehicle_id
+            AND date_depart >= CURRENT_DATE
+            AND is_active = true
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as count
+            FROM covoiturage
+            WHERE voiture_id = :vehicle_id
+            AND date_depart >= CURDATE()
+            AND statut IN ('actif', 'en_cours')
+        ");
+    }
     $stmt->execute(['vehicle_id' => $vehicle_id]);
     $upcoming_trips = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -80,11 +98,19 @@ try {
     $pdo->beginTransaction();
 
     // Mettre à jour les anciens trajets pour ne plus référencer ce véhicule
-    $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("UPDATE trajet SET id_vehicule = NULL WHERE id_vehicule = :vehicle_id");
+    } else {
+        $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
+    }
     $stmt->execute(['vehicle_id' => $vehicle_id]);
 
     // Supprimer le véhicule
-    $stmt = $pdo->prepare("DELETE FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("DELETE FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+    } else {
+        $stmt = $pdo->prepare("DELETE FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
+    }
     $result = $stmt->execute([
         'vehicle_id' => $vehicle_id,
         'user_id' => $user_id

@@ -22,6 +22,10 @@ require_once '../config/init.php';
 
 try {
     $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
 } catch(PDOException $e) {
     die(json_encode([
         'success' => false,
@@ -54,14 +58,25 @@ try {
     $pdo->beginTransaction();
 
     // Vérifier que le trajet appartient bien au conducteur
-    $stmt = $pdo->prepare("
-        SELECT c.*, COUNT(p.participation_id) as participants_count
-        FROM covoiturage c
-        LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
-            AND p.statut IN ('reserve', 'confirme')
-        WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
-        GROUP BY c.covoiturage_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT t.*, COUNT(r.id_reservation) as participants_count
+            FROM trajet t
+            LEFT JOIN reservation r ON t.id_trajet = r.id_trajet
+                AND r.statut IN ('reserve', 'confirme')
+            WHERE t.id_trajet = :trip_id AND t.id_conducteur = :user_id
+            GROUP BY t.id_trajet, t.id_conducteur, t.id_vehicule, t.ville_depart, t.ville_arrivee, t.date_depart, t.date_arrivee, t.places_disponibles, t.prix, t.is_active, t.date_inscription
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, COUNT(p.participation_id) as participants_count
+            FROM covoiturage c
+            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
+                AND p.statut IN ('reserve', 'confirme')
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
+            GROUP BY c.covoiturage_id
+        ");
+    }
     $stmt->execute([
         'trip_id' => $trip_id,
         'user_id' => $user_id
@@ -75,8 +90,14 @@ try {
 
     if ($action === 'start') {
         // Démarrer le trajet (US11)
-        if ($trip['statut'] !== 'planifie') {
-            throw new Exception('Ce trajet ne peut plus être démarré (statut: ' . $trip['statut'] . ')');
+        if ($isPostgreSQL) {
+            if (!$trip['is_active']) {
+                throw new Exception('Ce trajet ne peut plus être démarré (statut: inactif)');
+            }
+        } else {
+            if ($trip['statut'] !== 'planifie') {
+                throw new Exception('Ce trajet ne peut plus être démarré (statut: ' . $trip['statut'] . ')');
+            }
         }
 
         // Vérifier que la date de départ n'est pas trop éloignée
@@ -91,15 +112,29 @@ try {
         }
 
         // Mettre à jour le statut du trajet
-        $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'en_cours' WHERE covoiturage_id = :trip_id");
+        if ($isPostgreSQL) {
+            // PostgreSQL: on pourrait ajouter un champ statut ou gérer différemment
+            // Pour l'instant, on garde is_active à true
+            $stmt = $pdo->prepare("UPDATE trajet SET is_active = true WHERE id_trajet = :trip_id");
+        } else {
+            $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'en_cours' WHERE covoiturage_id = :trip_id");
+        }
         $stmt->execute(['trip_id' => $trip_id]);
 
         // Mettre à jour le statut des participations
-        $stmt = $pdo->prepare("
-            UPDATE participation
-            SET statut = 'confirme'
-            WHERE covoiturage_id = :trip_id AND statut = 'reserve'
-        ");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                UPDATE reservation
+                SET statut = 'confirme'
+                WHERE id_trajet = :trip_id AND statut = 'reserve'
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                UPDATE participation
+                SET statut = 'confirme'
+                WHERE covoiturage_id = :trip_id AND statut = 'reserve'
+            ");
+        }
         $stmt->execute(['trip_id' => $trip_id]);
 
         $message = "Trajet démarré avec succès !";
@@ -109,29 +144,56 @@ try {
 
     } elseif ($action === 'finish') {
         // Terminer le trajet (US11)
-        if ($trip['statut'] !== 'en_cours') {
-            throw new Exception('Ce trajet ne peut être terminé que s\'il est en cours');
+        if ($isPostgreSQL) {
+            if (!$trip['is_active']) {
+                throw new Exception('Ce trajet ne peut être terminé que s\'il est actif');
+            }
+        } else {
+            if ($trip['statut'] !== 'en_cours') {
+                throw new Exception('Ce trajet ne peut être terminé que s\'il est en cours');
+            }
         }
 
         // Mettre à jour le statut du trajet
-        $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'termine' WHERE covoiturage_id = :trip_id");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("UPDATE trajet SET is_active = false WHERE id_trajet = :trip_id");
+        } else {
+            $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'termine' WHERE covoiturage_id = :trip_id");
+        }
         $stmt->execute(['trip_id' => $trip_id]);
 
         // Mettre à jour le statut des participations
-        $stmt = $pdo->prepare("
-            UPDATE participation
-            SET statut = 'termine'
-            WHERE covoiturage_id = :trip_id AND statut = 'confirme'
-        ");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                UPDATE reservation
+                SET statut = 'termine'
+                WHERE id_trajet = :trip_id AND statut = 'confirme'
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                UPDATE participation
+                SET statut = 'termine'
+                WHERE covoiturage_id = :trip_id AND statut = 'confirme'
+            ");
+        }
         $stmt->execute(['trip_id' => $trip_id]);
 
         // Récupérer les participants pour notification
-        $stmt = $pdo->prepare("
-            SELECT p.*, u.pseudo, u.email
-            FROM participation p
-            JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-            WHERE p.covoiturage_id = :trip_id AND p.statut = 'termine'
-        ");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                SELECT r.*, u.pseudo, u.email
+                FROM reservation r
+                JOIN utilisateur u ON r.id_passager = u.id_utilisateur
+                WHERE r.id_trajet = :trip_id AND r.statut = 'termine'
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                SELECT p.*, u.pseudo, u.email
+                FROM participation p
+                JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+                WHERE p.covoiturage_id = :trip_id AND p.statut = 'termine'
+            ");
+        }
         $stmt->execute(['trip_id' => $trip_id]);
         $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
