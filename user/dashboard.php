@@ -18,6 +18,8 @@ $user_data = null;
 $vehicles = [];
 $my_trips = [];
 $my_bookings = [];
+$history_trips = [];
+$history_bookings = [];
 $stats = [
     'credits' => 0,
     'trips_created' => 0,
@@ -99,10 +101,7 @@ try {
     $stmt->execute(['user_id' => $user_id]);
     $my_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Récupérer l'historique complet pour la section historique
-    $history_trips = [];
-    $history_bookings = [];
-
+    // Charger l'historique complet si on est dans la section historique
     if (isset($_GET['section']) && $_GET['section'] === 'history') {
         // Tous les trajets créés (conducteur) avec filtres de statut
         if ($isPostgreSQL) {
