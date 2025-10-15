@@ -179,7 +179,7 @@ try {
                 id_passager,
                 nombre_places,
                 statut,
-                date_participation
+                date_reservation
             ) VALUES (
                 :trajet_id,
                 :user_id,
