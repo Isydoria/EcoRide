@@ -17,6 +17,7 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT c.*, u.pseudo as conducteur_pseudo,
+                   c.prix as prix_par_place,
                    0 as note_moyenne,
                    COALESCE(v.marque, 'Véhicule') as marque,
                    COALESCE(v.modele, 'non renseigné') as modele,
