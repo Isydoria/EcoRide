@@ -168,6 +168,7 @@ try {
 
 } catch (Exception $e) {
     $error = "Erreur de connexion : " . $e->getMessage();
+    error_log("❌ DASHBOARD ERROR: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
 }
 
 // Gestion section active
@@ -893,7 +894,8 @@ $active_section = $_GET['section'] ?? 'overview';
                     <strong>🔍 DEBUG:</strong>
                     Nombre de réservations trouvées: <?= count($my_bookings) ?> |
                     empty(): <?= empty($my_bookings) ? 'TRUE' : 'FALSE' ?> |
-                    User ID: <?= $user_id ?>
+                    User ID: <?= $user_id ?> |
+                    Erreur: <?= $error ? htmlspecialchars($error) : 'Aucune' ?>
                 </div>
 
                 <?php if (empty($my_bookings)): ?>
