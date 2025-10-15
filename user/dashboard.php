@@ -45,7 +45,7 @@ try {
 
     // Récupérer les véhicules de l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = :user_id ORDER BY date_ajout DESC");
+        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = :user_id ORDER BY created_at DESC");
     } else {
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :user_id ORDER BY created_at DESC");
     }
