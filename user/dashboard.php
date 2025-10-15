@@ -888,6 +888,14 @@ $active_section = $_GET['section'] ?? 'overview';
             <div class="section <?= $active_section === 'my-bookings' ? 'active' : '' ?>">
                 <h2>🎫 Mes réservations (en tant que passager)</h2>
 
+                <!-- DEBUG TEMPORAIRE -->
+                <div style="background: #fff3cd; padding: 10px; margin-bottom: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <strong>🔍 DEBUG:</strong>
+                    Nombre de réservations trouvées: <?= count($my_bookings) ?> |
+                    empty(): <?= empty($my_bookings) ? 'TRUE' : 'FALSE' ?> |
+                    User ID: <?= $user_id ?>
+                </div>
+
                 <?php if (empty($my_bookings)): ?>
                     <div class="empty-state">
                         <h3>Aucune réservation</h3>
