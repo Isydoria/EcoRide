@@ -112,9 +112,14 @@ try {
     }
 
     $havingConditions = [];
+    $havingConditionsPG = [];
+
     // Filtre note minimum (US4) - appliqué après GROUP BY
     if ($note_min !== null) {
+        // MySQL : peut utiliser l'alias
         $havingConditions[] = "note_moyenne >= :note_min";
+        // PostgreSQL : doit répéter l'expression complète
+        $havingConditionsPG[] = "COALESCE(AVG(a.note), 0) >= :note_min";
         $params['note_min'] = $note_min;
     }
 
@@ -155,7 +160,7 @@ try {
                 t.covoiturage_id, t.ville_depart, t.ville_arrivee, t.date_depart,
                 t.date_arrivee, t.places_disponibles, t.prix, t.statut,
                 u.pseudo, v.marque, v.modele, v.type_carburant, v.couleur
-            " . (empty($havingConditions) ? "" : "HAVING " . implode(' AND ', $havingConditions)) . "
+            " . (empty($havingConditionsPG) ? "" : "HAVING " . implode(' AND ', $havingConditionsPG)) . "
             ORDER BY
                 t.date_depart ASC
         ";
