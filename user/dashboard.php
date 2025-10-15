@@ -28,6 +28,10 @@ $stats = [
 try {
     $pdo = db();
 
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
     // Récupérer les infos utilisateur actualisées
     $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE utilisateur_id = :user_id");
     $stmt->execute(['user_id' => $user_id]);
@@ -38,32 +42,60 @@ try {
     }
 
     // Récupérer les véhicules de l'utilisateur
-    $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :user_id ORDER BY created_at DESC");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = :user_id ORDER BY date_ajout DESC");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :user_id ORDER BY created_at DESC");
+    }
     $stmt->execute(['user_id' => $user_id]);
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Récupérer les trajets créés par l'utilisateur (conducteur)
-    $stmt = $pdo->prepare("
-        SELECT c.*, c.covoiturage_id AS trip_id, v.marque, v.modele
-        FROM covoiturage c
-        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-        WHERE c.conducteur_id = :user_id
-        ORDER BY c.date_depart DESC
-        LIMIT 10
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT c.*, c.covoiturage_id AS trip_id, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            WHERE c.id_conducteur = :user_id
+            ORDER BY c.date_depart DESC
+            LIMIT 10
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, c.covoiturage_id AS trip_id, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            WHERE c.conducteur_id = :user_id
+            ORDER BY c.date_depart DESC
+            LIMIT 10
+        ");
+    }
     $stmt->execute(['user_id' => $user_id]);
     $my_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Récupérer les participations (passager)
-    $stmt = $pdo->prepare("
-        SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix_par_place, u.pseudo as conducteur
-        FROM participation p
-        JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-        JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
-        WHERE p.passager_id = :user_id
-        ORDER BY c.date_depart DESC
-        LIMIT 10
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix,
+                   (c.prix * p.nombre_places) as credit_utilise, u.pseudo as conducteur
+            FROM participation p
+            JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
+            JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+            WHERE p.id_passager = :user_id
+            ORDER BY c.date_depart DESC
+            LIMIT 10
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix_par_place, u.pseudo as conducteur
+            FROM participation p
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            WHERE p.passager_id = :user_id
+            ORDER BY c.date_depart DESC
+            LIMIT 10
+        ");
+    }
     $stmt->execute(['user_id' => $user_id]);
     $my_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -73,37 +105,63 @@ try {
 
     if (isset($_GET['section']) && $_GET['section'] === 'history') {
         // Tous les trajets créés (conducteur) avec filtres de statut
-        $stmt = $pdo->prepare("
-            SELECT c.*, v.marque, v.modele, 'conducteur' as role,
-                   COUNT(p.participation_id) as participants
-            FROM covoiturage c
-            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut != 'annule'
-            WHERE c.conducteur_id = :user_id
-            GROUP BY c.covoiturage_id
-            ORDER BY c.date_depart DESC
-        ");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                SELECT c.*, v.marque, v.modele, 'conducteur' as role,
+                       COUNT(p.participation_id) as participants
+                FROM covoiturage c
+                LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+                LEFT JOIN participation p ON c.covoiturage_id = p.id_trajet AND p.statut != 'annule'
+                WHERE c.id_conducteur = :user_id
+                GROUP BY c.covoiturage_id, v.marque, v.modele
+                ORDER BY c.date_depart DESC
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                SELECT c.*, v.marque, v.modele, 'conducteur' as role,
+                       COUNT(p.participation_id) as participants
+                FROM covoiturage c
+                LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+                LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut != 'annule'
+                WHERE c.conducteur_id = :user_id
+                GROUP BY c.covoiturage_id
+                ORDER BY c.date_depart DESC
+            ");
+        }
         $stmt->execute(['user_id' => $user_id]);
         $history_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Toutes les participations (passager) avec filtres de statut
-        $stmt = $pdo->prepare("
-            SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
-                   c.prix_par_place, u.pseudo as conducteur, 'passager' as role,
-                   c.statut as trip_status
-            FROM participation p
-            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
-            WHERE p.passager_id = :user_id
-            ORDER BY c.date_depart DESC
-        ");
+        if ($isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
+                       c.prix, (c.prix * p.nombre_places) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
+                       c.statut as trip_status
+                FROM participation p
+                JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
+                JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+                WHERE p.id_passager = :user_id
+                ORDER BY c.date_depart DESC
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
+                       c.prix_par_place, u.pseudo as conducteur, 'passager' as role,
+                       c.statut as trip_status
+                FROM participation p
+                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+                JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+                WHERE p.passager_id = :user_id
+                ORDER BY c.date_depart DESC
+            ");
+        }
         $stmt->execute(['user_id' => $user_id]);
         $history_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Statistiques
     $stats = [
-        'credits' => $user_data['credit'] ?? 0,
+        'credits' => $isPostgreSQL ? ($user_data['credits'] ?? 0) : ($user_data['credit'] ?? 0),
         'trips_created' => count($my_trips),
         'trips_taken' => count($my_bookings),
         'vehicles' => count($vehicles)
@@ -808,7 +866,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                 </div>
                                 <div class="trip-details">
                                     <div>📅 <?= date('d/m/Y à H:i', strtotime($trip['date_depart'])) ?></div>
-                                    <div>💰 <?= number_format($trip['prix_par_place'], 2) ?> crédits/place</div>
+                                    <div>💰 <?= number_format($trip['prix_par_place'] ?? $trip['prix'] ?? 0, 2) ?> crédits/place</div>
                                     <div>👥 <?= $trip['places_disponibles'] ?> places</div>
                                     <div>🚗 <?= htmlspecialchars(($trip['marque'] ?? '') . ' ' . ($trip['modele'] ?? '')) ?></div>
                                     <div>📊 <?= ucfirst($trip['statut']) ?></div>
@@ -864,7 +922,7 @@ $active_section = $_GET['section'] ?? 'overview';
                 <?php if (!empty($vehicles)): ?>
                     <div class="vehicles-grid">
                         <?php foreach ($vehicles as $vehicle): ?>
-                            <div class="vehicle-card" data-vehicle-id="<?= $vehicle['voiture_id'] ?>">
+                            <div class="vehicle-card" data-vehicle-id="<?= $vehicle['voiture_id'] ?? $vehicle['vehicule_id'] ?? '' ?>">
                                 <div class="vehicle-header">
                                     <div class="vehicle-title">
                                         <strong><?= htmlspecialchars(($vehicle['marque'] ?? '') . ' ' . ($vehicle['modele'] ?? '')) ?></strong>
@@ -886,7 +944,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                     </div>
                                     <div class="detail-item">
                                         <span class="label">Énergie:</span>
-                                        <span class="value energy-<?= $vehicle['energie'] ?>"><?= ucfirst($vehicle['energie']) ?></span>
+                                        <span class="value energy-<?= $vehicle['energie'] ?? $vehicle['type_carburant'] ?? '' ?>"><?= ucfirst($vehicle['energie'] ?? $vehicle['type_carburant'] ?? '') ?></span>
                                     </div>
                                     <?php if (!empty($vehicle['date_premiere_immatriculation'])): ?>
                                     <div class="detail-item">
@@ -1088,7 +1146,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                     <div class="history-details">
                                         <div class="history-info">
                                             <div>📅 <?= date('d/m/Y à H:i', strtotime($trip['date_depart'])) ?></div>
-                                            <div>💰 <?= number_format($trip['prix_par_place'] ?? 0, 2) ?> crédits/place</div>
+                                            <div>💰 <?= number_format($trip['prix_par_place'] ?? $trip['prix'] ?? 0, 2) ?> crédits/place</div>
 
                                             <?php if ($is_conductor): ?>
                                                 <div>👥 <?= $trip['participants'] ?> participant(s)</div>
@@ -1096,7 +1154,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                             <?php else: ?>
                                                 <div>👨‍✈️ <?= htmlspecialchars($trip['conducteur'] ?? '') ?></div>
                                                 <div>🎫 <?= $trip['nombre_places'] ?> place(s)</div>
-                                                <div>💳 <?= $trip['credit_utilise'] ?> crédits</div>
+                                                <div>💳 <?= $trip['credit_utilise'] ?? 0 ?> crédits</div>
                                             <?php endif; ?>
                                         </div>
 
@@ -1158,11 +1216,11 @@ $active_section = $_GET['section'] ?? 'overview';
                     <div class="form-row">
                         <div class="form-group">
                             <label>Crédits</label>
-                            <input type="text" value="<?= $user_data['credit'] ?>" readonly>
+                            <input type="text" value="<?= $user_data['credit'] ?? $user_data['credits'] ?? 0 ?>" readonly>
                         </div>
                         <div class="form-group">
                             <label>Membre depuis</label>
-                            <input type="text" value="<?= date('d/m/Y', strtotime($user_data['created_at'])) ?>" readonly>
+                            <input type="text" value="<?= date('d/m/Y', strtotime($user_data['created_at'] ?? $user_data['date_inscription'] ?? 'now')) ?>" readonly>
                         </div>
                     </div>
                     <p><em>💡 La modification du profil sera disponible dans une prochaine version.</em></p>
