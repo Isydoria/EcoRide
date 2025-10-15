@@ -6,27 +6,14 @@
 
 // Configuration
 session_start();
+
+// Charger les fonctions globales (inclut jsonResponse)
+require_once __DIR__ . '/../config/init.php';
+
 header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ob_start();
-
-// Fonction helper pour les réponses JSON
-function jsonResponse($success, $message, $data = null, $debug = null) {
-    ob_clean();
-    $response = [
-        'success' => $success,
-        'message' => $message
-    ];
-    if ($data !== null) {
-        $response['data'] = $data;
-    }
-    if ($debug !== null) {
-        $response['debug'] = $debug;
-    }
-    echo json_encode($response);
-    exit;
-}
 
 // Vérifier que l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
@@ -37,7 +24,6 @@ $user_id = $_SESSION['user_id'];
 
 // Connexion à la base de données
 try {
-    require_once __DIR__ . '/../config/init.php';
     $pdo = db();
 
     // Détecter le type de base de données
