@@ -71,7 +71,7 @@ try {
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as count
             FROM covoiturage
-            WHERE voiture_id = :vehicle_id
+            WHERE id_vehicule = :vehicle_id
             AND date_depart >= CURRENT_DATE
             AND statut IN ('planifie', 'en_cours')
         ");
@@ -99,7 +99,7 @@ try {
 
     // Mettre à jour les anciens trajets pour ne plus référencer ce véhicule
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
+        $stmt = $pdo->prepare("UPDATE covoiturage SET id_vehicule = NULL WHERE id_vehicule = :vehicle_id");
     } else {
         $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
     }
