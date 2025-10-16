@@ -25,7 +25,7 @@ try {
 
     // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL
     if ($isPostgreSQL) {
-        // PostgreSQL : id_auteur, id_utilisateur_note, id_trajet, date_avis
+        // PostgreSQL : evaluateur_id, evalue_id, covoiturage_id, created_at
         $stmt = $pdo->prepare("
             SELECT a.*,
                    u1.pseudo as auteur_pseudo,
@@ -36,13 +36,13 @@ try {
                    c.ville_arrivee,
                    c.date_depart,
                    c.covoiturage_id as trajet_id,
-                   a.date_avis as created_at
+                   a.created_at
             FROM avis a
-            JOIN utilisateur u1 ON a.id_auteur = u1.utilisateur_id
-            JOIN utilisateur u2 ON a.id_utilisateur_note = u2.utilisateur_id
-            LEFT JOIN covoiturage c ON a.id_trajet = c.covoiturage_id
-            WHERE a.statut = 'en_attente'
-            ORDER BY a.date_avis DESC
+            JOIN utilisateur u1 ON a.evaluateur_id = u1.utilisateur_id
+            JOIN utilisateur u2 ON a.evalue_id = u2.utilisateur_id
+            LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
+            ORDER BY a.created_at DESC
+            LIMIT 50
         ");
     } else {
         // MySQL : auteur_id, destinataire_id, covoiturage_id, created_at
@@ -68,14 +68,25 @@ try {
     $pending_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Récupérer les statistiques - Compatible MySQL/PostgreSQL
-    // Maintenant les deux ont la colonne statut après ajout des colonnes
-    $stmt = $pdo->prepare("
-        SELECT
-            COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
-            COUNT(CASE WHEN statut = 'valide' THEN 1 END) as avis_valides,
-            COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
-        FROM avis
-    ");
+    if ($isPostgreSQL) {
+        // PostgreSQL : Pas de système de modération, tous les avis sont publiés directement
+        $stmt = $pdo->prepare("
+            SELECT
+                0 as avis_en_attente,
+                COUNT(*) as avis_valides,
+                0 as avis_refuses
+            FROM avis
+        ");
+    } else {
+        // MySQL : Système de modération avec statuts
+        $stmt = $pdo->prepare("
+            SELECT
+                COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
+                COUNT(CASE WHEN statut = 'valide' OR statut = 'publie' THEN 1 END) as avis_valides,
+                COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
+            FROM avis
+        ");
+    }
     $stmt->execute();
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
