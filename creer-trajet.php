@@ -12,13 +12,22 @@ require_once 'config/init.php';
 try {
     $pdo = db();
 
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
     // Récupérer les véhicules de l'utilisateur
-    $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = ?");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
+    }
     $stmt->execute([$_SESSION['user_id']]);
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Exception $e) {
     $error = "Erreur de connexion : " . $e->getMessage();
+    error_log("Erreur creer-trajet.php récupération véhicules: " . $e->getMessage());
 }
 ?>
 
@@ -213,7 +222,8 @@ try {
                             <select id="voiture_id" name="voiture_id" required>
                                 <option value="">Choisir un véhicule</option>
                                 <?php foreach ($vehicles as $vehicle): ?>
-                                    <option value="<?= $vehicle['voiture_id'] ?>">
+                                    <?php $vehicle_id = $vehicle['vehicule_id'] ?? $vehicle['voiture_id']; ?>
+                                    <option value="<?= $vehicle_id ?>">
                                         <?= htmlspecialchars($vehicle['marque'] . ' ' . $vehicle['modele']) ?>
                                         (<?= htmlspecialchars($vehicle['immatriculation']) ?>)
                                         - <?= $vehicle['places'] ?> places

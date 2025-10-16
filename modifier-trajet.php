@@ -21,13 +21,26 @@ $user_id = $_SESSION['user_id'];
 try {
     $pdo = db();
 
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $isPostgreSQL = ($driver === 'pgsql');
+
     // Récupérer les détails du trajet pour vérifier que l'utilisateur est bien le conducteur
-    $stmt = $pdo->prepare("
-        SELECT c.*, v.marque, v.modele
-        FROM covoiturage c
-        LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-        WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
-    ");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("
+            SELECT c.*, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+        ");
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT c.*, v.marque, v.modele
+            FROM covoiturage c
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
+        ");
+    }
     $stmt->execute(['trip_id' => $trip_id, 'user_id' => $user_id]);
     $trip = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -42,12 +55,17 @@ try {
     }
 
     // Récupérer les véhicules de l'utilisateur
-    $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
+    if ($isPostgreSQL) {
+        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = ?");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
+    }
     $stmt->execute([$user_id]);
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Exception $e) {
     $error = "Erreur de connexion : " . $e->getMessage();
+    error_log("Erreur modifier-trajet.php: " . $e->getMessage());
 }
 ?>
 
@@ -257,8 +275,12 @@ try {
                             <select id="voiture_id" name="voiture_id" required>
                                 <option value="">Choisir un véhicule</option>
                                 <?php foreach ($vehicles as $vehicle): ?>
-                                    <option value="<?= $vehicle['voiture_id'] ?>"
-                                            <?= ($vehicle['voiture_id'] == $trip['voiture_id']) ? 'selected' : '' ?>>
+                                    <?php
+                                        $vehicle_id = $vehicle['vehicule_id'] ?? $vehicle['voiture_id'];
+                                        $trip_vehicle_id = $trip['id_vehicule'] ?? $trip['voiture_id'];
+                                    ?>
+                                    <option value="<?= $vehicle_id ?>"
+                                            <?= ($vehicle_id == $trip_vehicle_id) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($vehicle['marque'] . ' ' . $vehicle['modele']) ?>
                                         (<?= htmlspecialchars($vehicle['immatriculation']) ?>)
                                         - <?= $vehicle['places'] ?> places
