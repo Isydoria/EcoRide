@@ -95,7 +95,7 @@ try {
 
     // Récupérer quelques trajets
     $stmt = $pdo->query("
-        SELECT covoiturage_id, conducteur_id, ville_depart, ville_arrivee
+        SELECT covoiturage_id, id_conducteur as conducteur_id, ville_depart, ville_arrivee
         FROM covoiturage
         ORDER BY covoiturage_id
         LIMIT 10
