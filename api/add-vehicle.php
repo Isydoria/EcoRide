@@ -98,7 +98,7 @@ try {
         $stmt = $pdo->prepare("
             INSERT INTO vehicule (
                 id_conducteur, marque, modele, immatriculation,
-                couleur, places, type_carburant, date_ajout
+                couleur, places, type_carburant, created_at
             ) VALUES (
                 :utilisateur_id, :marque, :modele, :immatriculation,
                 :couleur, :places, :energie, CURRENT_TIMESTAMP
