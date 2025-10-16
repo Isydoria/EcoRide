@@ -48,7 +48,7 @@ if ($vehicle_id <= 0) {
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT id_vehicule, marque, modele FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+        $stmt = $pdo->prepare("SELECT vehicule_id, marque, modele FROM vehicule WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id, marque, modele FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
     }
@@ -70,10 +70,10 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as count
-            FROM trajet
-            WHERE id_vehicule = :vehicle_id
+            FROM covoiturage
+            WHERE voiture_id = :vehicle_id
             AND date_depart >= CURRENT_DATE
-            AND is_active = true
+            AND statut IN ('planifie', 'en_cours')
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -81,7 +81,7 @@ try {
             FROM covoiturage
             WHERE voiture_id = :vehicle_id
             AND date_depart >= CURDATE()
-            AND statut IN ('actif', 'en_cours')
+            AND statut IN ('planifie', 'en_cours')
         ");
     }
     $stmt->execute(['vehicle_id' => $vehicle_id]);
@@ -99,7 +99,7 @@ try {
 
     // Mettre à jour les anciens trajets pour ne plus référencer ce véhicule
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("UPDATE trajet SET id_vehicule = NULL WHERE id_vehicule = :vehicle_id");
+        $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
     } else {
         $stmt = $pdo->prepare("UPDATE covoiturage SET voiture_id = NULL WHERE voiture_id = :vehicle_id");
     }
@@ -107,7 +107,7 @@ try {
 
     // Supprimer le véhicule
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("DELETE FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+        $stmt = $pdo->prepare("DELETE FROM vehicule WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id");
     } else {
         $stmt = $pdo->prepare("DELETE FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
     }

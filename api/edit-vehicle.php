@@ -85,7 +85,7 @@ if (!empty($errors)) {
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT id_vehicule FROM vehicule WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id");
+        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
     }
@@ -103,7 +103,7 @@ try {
 
     // Vérifier si l'immatriculation existe déjà (sauf pour ce véhicule)
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT id_vehicule FROM vehicule WHERE immatriculation = :immatriculation AND id_vehicule != :vehicle_id");
+        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE immatriculation = :immatriculation AND vehicule_id != :vehicle_id");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
     }
@@ -129,7 +129,7 @@ try {
                 couleur = :couleur,
                 places = :places,
                 type_carburant = :energie
-            WHERE id_vehicule = :vehicle_id AND id_conducteur = :user_id
+            WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id
         ");
     } else {
         $stmt = $pdo->prepare("
