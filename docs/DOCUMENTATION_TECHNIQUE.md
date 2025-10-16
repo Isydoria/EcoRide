@@ -708,6 +708,502 @@ class SecurityMiddleware {
 }
 ```
 
+### ⭐ **Système d'avis et évaluation**
+
+#### **Architecture du système d'avis**
+
+Le système d'avis bidirectionnel permet aux conducteurs et passagers de s'évaluer mutuellement après un trajet terminé.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FLUX SYSTÈME D'AVIS                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. Trajet terminé (statut = 'termine')                    │
+│        ↓                                                    │
+│  2. Section "Mes avis" → Trajets à évaluer                 │
+│        ↓                                                    │
+│  3. Utilisateur clique "Laisser un avis"                   │
+│        ↓                                                    │
+│  4. Modal s'ouvre avec notation interactive (1-5 étoiles)  │
+│        ↓                                                    │
+│  5. Validation : note + commentaire (10-500 caractères)    │
+│        ↓                                                    │
+│  6. POST /api/create-avis.php                              │
+│        ↓                                                    │
+│  7. Vérifications :                                        │
+│     - Participation au trajet confirmée                     │
+│     - Pas d'avis existant (évite doublons)                 │
+│     - Pas d'auto-évaluation                                │
+│     - Trajet effectivement terminé                         │
+│        ↓                                                    │
+│  8. Insertion en base de données                           │
+│        ↓                                                    │
+│  9. Affichage dans "Avis reçus" du destinataire           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### **Structure base de données : Table AVIS**
+
+```sql
+-- PostgreSQL (Production Render)
+CREATE TABLE avis (
+    avis_id SERIAL PRIMARY KEY,
+    evaluateur_id INT NOT NULL,              -- Qui donne l'avis
+    evalue_id INT NOT NULL,                  -- Qui reçoit l'avis
+    covoiturage_id INT NOT NULL,             -- Trajet concerné
+    note INT NOT NULL CHECK (note BETWEEN 1 AND 5),
+    commentaire TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evaluateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+    FOREIGN KEY (evalue_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+    FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE
+);
+
+-- MySQL (Développement local)
+CREATE TABLE avis (
+    avis_id INT AUTO_INCREMENT PRIMARY KEY,
+    auteur_id INT NOT NULL,                  -- Qui donne l'avis
+    destinataire_id INT NOT NULL,            -- Qui reçoit l'avis
+    covoiturage_id INT NOT NULL,
+    note INT NOT NULL CHECK (note BETWEEN 1 AND 5),
+    commentaire TEXT,
+    statut ENUM('publie', 'signale', 'masque') DEFAULT 'publie',
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (auteur_id) REFERENCES utilisateur(utilisateur_id),
+    FOREIGN KEY (destinataire_id) REFERENCES utilisateur(utilisateur_id),
+    FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id)
+);
+```
+
+**Différences MySQL/PostgreSQL gérées automatiquement :**
+- Colonnes : `evaluateur_id/evalue_id` (PostgreSQL) vs `auteur_id/destinataire_id` (MySQL)
+- Timestamp : `created_at` (PostgreSQL) vs `date_creation` (MySQL)
+- Contraintes : PostgreSQL CASCADE obligatoire, MySQL optionnel
+
+#### **API Endpoints**
+
+**1. POST /api/create-avis.php** - Création d'un avis
+
+```php
+// Paramètres requis (POST)
+{
+    "evalue_id": 15,              // ID utilisateur à évaluer
+    "covoiturage_id": 42,         // ID du trajet
+    "note": 5,                    // Note 1-5 étoiles
+    "commentaire": "Excellent..."  // 10-500 caractères
+}
+
+// Validations effectuées
+✅ Note entre 1 et 5
+✅ Commentaire 10-500 caractères
+✅ Utilisateur a participé au trajet
+✅ Trajet terminé (statut = 'termine')
+✅ Pas d'avis existant pour ce trajet/utilisateur
+✅ Pas d'auto-évaluation (evaluateur ≠ évalué)
+✅ Conducteur évalue passager OU passager évalue conducteur
+
+// Réponse succès
+{
+    "success": true,
+    "message": "Votre avis a été publié avec succès"
+}
+
+// Réponse erreur
+{
+    "success": false,
+    "message": "Vous avez déjà laissé un avis pour ce trajet"
+}
+```
+
+**2. GET /api/get-avis.php** - Récupération des avis reçus
+
+```php
+// Paramètres URL
+?user_id=15&limit=10&offset=0
+
+// Réponse JSON
+{
+    "success": true,
+    "avis": [
+        {
+            "avis_id": 1,
+            "note": 5,
+            "commentaire": "Excellent conducteur, très ponctuel!",
+            "date": "2025-10-15 14:30:00",
+            "evaluateur": {
+                "id": 12,
+                "pseudo": "Sophie"
+            },
+            "trajet": {
+                "id": 42,
+                "depart": "Paris",
+                "arrivee": "Lyon",
+                "date": "2025-10-15"
+            }
+        }
+    ],
+    "stats": {
+        "total": 15,
+        "moyenne": 4.7
+    },
+    "pagination": {
+        "limit": 10,
+        "offset": 0,
+        "has_more": true
+    }
+}
+```
+
+**3. GET /api/get-trips-to-rate.php** - Trajets à évaluer
+
+```php
+// Paramètres URL
+?user_id=15
+
+// Logique de récupération
+- Trajets terminés où l'utilisateur était conducteur
+  → Liste des passagers à évaluer (sans avis existant)
+
+- Trajets terminés où l'utilisateur était passager
+  → Conducteur à évaluer (sans avis existant)
+
+// Réponse JSON
+{
+    "success": true,
+    "trips": [
+        {
+            "covoiturage_id": 42,
+            "ville_depart": "Paris",
+            "ville_arrivee": "Lyon",
+            "date_depart": "2025-10-15 08:00:00",
+            "prix": 15.50,
+            "other_user_id": 12,
+            "other_user_pseudo": "Sophie",
+            "is_conductor": false  // false = passager à évaluer
+        }
+    ],
+    "count": 5
+}
+```
+
+#### **Frontend : Interface utilisateur**
+
+**Section Dashboard "⭐ Mes avis"** (user/dashboard.php)
+
+```javascript
+// Composants principaux
+
+1. Navigation sidebar
+   - Nouvel onglet "⭐ Mes avis" (ligne 1085)
+   - Lien : ?section=avis
+
+2. Section avis reçus
+   - Badge statistiques (note moyenne)
+   - Cartes d'avis avec étoiles
+   - Information trajet associé
+   - Date formatée en français
+
+3. Section trajets à évaluer
+   - Liste des trajets terminés sans avis
+   - Bouton "Laisser un avis" par trajet
+   - Distinction conducteur/passager
+
+4. Modal interactif
+   - 5 étoiles cliquables avec hover effect
+   - Textarea commentaire (10-500 caractères)
+   - Compteur de caractères temps réel
+   - Validation avant soumission
+   - Boutons Annuler/Publier
+```
+
+**CSS Animations** (lignes 762-1051)
+
+```css
+/* Cartes d'avis avec hover effect */
+.avis-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.avis-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Modal avec animations */
+.modal {
+    animation: fadeIn 0.3s;
+}
+.modal-content {
+    animation: slideIn 0.3s;
+}
+
+/* Étoiles interactives */
+.stars-input .star:hover,
+.stars-input .star.hover {
+    transform: scale(1.2);
+    transition: all 0.2s;
+}
+```
+
+**JavaScript AJAX** (lignes 2018-2327)
+
+```javascript
+// Fonctions principales
+
+loadReceivedAvis()
+  → GET /api/get-avis.php?user_id=X
+  → Affiche avis reçus + statistiques
+
+loadTripsToRate()
+  → GET /api/get-trips-to-rate.php?user_id=X
+  → Affiche trajets à évaluer
+
+openAvisModal(tripId, evaluateId, ...)
+  → Ouvre modal avec infos trajet
+  → Initialise étoiles et formulaire
+
+handleStarClick(rating)
+  → Gère sélection notation 1-5
+
+submitAvis()
+  → POST /api/create-avis.php
+  → FormData avec note + commentaire
+  → Recharge listes après succès
+
+escapeHtml(text)
+  → Protection XSS sur affichage
+```
+
+#### **Compatibilité MySQL/PostgreSQL**
+
+**Stratégie de détection automatique :**
+
+```php
+// Détection du driver PDO
+$driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+$isPostgreSQL = ($driver === 'pgsql');
+
+// Requêtes conditionnelles
+if ($isPostgreSQL) {
+    $sql = "SELECT ... FROM avis a
+            JOIN utilisateur u ON a.evaluateur_id = u.utilisateur_id
+            WHERE a.evalue_id = :user_id";
+} else {
+    $sql = "SELECT ... FROM avis a
+            JOIN utilisateur u ON a.auteur_id = u.utilisateur_id
+            WHERE a.destinataire_id = :user_id
+            AND a.statut = 'publie'";
+}
+```
+
+**Tableau des différences gérées :**
+
+| Fonctionnalité | PostgreSQL | MySQL |
+|---|---|---|
+| Colonne évaluateur | `evaluateur_id` | `auteur_id` |
+| Colonne évalué | `evalue_id` | `destinataire_id` |
+| Colonne date | `created_at` | `date_creation` |
+| Statut | (pas de colonne) | `statut ENUM` |
+| Cascade DELETE | Obligatoire | Optionnel |
+| Contraintes CHECK | Natif | MySQL 8.0+ |
+
+#### **Scripts de migration**
+
+**1. database/check_and_create_avis_table.sql**
+```sql
+-- Vérifier et créer la table avis si nécessaire (PostgreSQL)
+CREATE TABLE IF NOT EXISTS avis (
+    avis_id SERIAL PRIMARY KEY,
+    evaluateur_id INT NOT NULL,
+    evalue_id INT NOT NULL,
+    ...
+);
+```
+
+**2. database/migration_add_terminee_status.sql**
+```sql
+-- Ajouter le statut 'terminee' à la participation
+ALTER TABLE participation
+DROP CONSTRAINT IF EXISTS participation_statut_reservation_check;
+
+ALTER TABLE participation
+ADD CONSTRAINT participation_statut_reservation_check
+CHECK (statut_reservation IN ('en_attente', 'confirmee', 'annulee', 'terminee'));
+```
+
+#### **Sécurité et validations**
+
+**Validations côté serveur (create-avis.php) :**
+
+```php
+// 1. Authentification requise
+if (!isset($_SESSION['user_id'])) {
+    die(json_encode(['success' => false, 'message' => 'Non connecté']));
+}
+
+// 2. Validation des données
+$errors = [];
+if ($note < 1 || $note > 5) {
+    $errors[] = 'Note invalide (1-5)';
+}
+if (strlen($commentaire) < 10 || strlen($commentaire) > 500) {
+    $errors[] = 'Commentaire invalide (10-500 caractères)';
+}
+
+// 3. Vérification participation
+$stmt = $pdo->prepare("
+    SELECT * FROM participation p
+    JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+    WHERE p.covoiturage_id = :trip_id
+    AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
+    AND c.statut = 'termine'
+");
+
+// 4. Vérification doublon
+$stmt = $pdo->prepare("
+    SELECT 1 FROM avis
+    WHERE evaluateur_id = :evaluateur AND evalue_id = :evalue
+    AND covoiturage_id = :trip
+");
+
+// 5. Protection XSS côté client
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+```
+
+**Validations côté client (JavaScript) :**
+
+```javascript
+// Bouton désactivé tant que formulaire invalide
+function updateSubmitButton() {
+    const comment = document.getElementById('avisComment').value.trim();
+    const submitBtn = document.getElementById('submitAvis');
+
+    if (currentRating > 0 && comment.length >= 10) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+
+// Compteur caractères en temps réel
+commentTextarea.addEventListener('input', function() {
+    const count = this.value.length;
+    document.getElementById('charCount').textContent = count;
+    updateSubmitButton();
+});
+```
+
+#### **Workflow complet utilisateur**
+
+```
+1. Utilisateur se connecte au dashboard
+2. Clique sur "⭐ Mes avis" dans le menu
+3. Voit deux sections :
+
+   A. Avis reçus
+      - Badge note moyenne (ex: 4.7 ⭐)
+      - Liste des avis avec :
+        * Pseudo de l'évaluateur
+        * Étoiles (1-5)
+        * Commentaire
+        * Information trajet
+        * Date
+
+   B. Trajets à évaluer
+      - Liste des trajets terminés sans avis
+      - Pour chaque trajet :
+        * Route (Départ → Arrivée)
+        * Date
+        * Autre utilisateur (conducteur ou passager)
+        * Prix
+        * Bouton "Laisser un avis"
+
+4. Clique sur "Laisser un avis"
+5. Modal s'ouvre :
+   - Information trajet affiché
+   - Sélectionne note (clic sur étoiles)
+   - Hover sur étoiles → feedback visuel
+   - Écrit commentaire
+   - Compteur caractères mis à jour
+   - Bouton "Publier" activé si valide
+
+6. Clique "Publier l'avis"
+7. AJAX POST vers create-avis.php
+8. Succès :
+   - Alert "✅ Avis publié"
+   - Modal se ferme
+   - Listes rechargées automatiquement
+   - Trajet disparaît de "À évaluer"
+   - Avis apparaît chez le destinataire
+
+9. Erreur :
+   - Alert "❌ Message d'erreur"
+   - Modal reste ouvert
+   - Utilisateur peut corriger
+```
+
+#### **Indicateurs de qualité**
+
+**Métriques calculées :**
+- Note moyenne par utilisateur (AVG sur tous les avis)
+- Nombre total d'avis reçus (COUNT)
+- Taux d'évaluation (avis donnés / trajets terminés)
+
+**Affichage :**
+```javascript
+// Badge note moyenne avec gradient
+<div class="avis-stats">
+    <div class="avis-stats-number">4.7 ⭐</div>
+    <div class="avis-stats-label">Note moyenne sur 15 avis</div>
+</div>
+```
+
+**Calcul SQL (PostgreSQL) :**
+```sql
+SELECT
+    COUNT(*) as total_avis,
+    AVG(note) as note_moyenne
+FROM avis
+WHERE evalue_id = :user_id;
+```
+
+#### **Évolutions futures possibles**
+
+```
+📈 Améliorations envisageables :
+
+1. Système de modération
+   - Signalement d'avis abusifs
+   - Validation manuelle par admin
+   - Masquage d'avis problématiques
+
+2. Réponses aux avis
+   - Permettre à l'évalué de répondre
+   - Thread de conversation
+
+3. Badges et récompenses
+   - Conducteur 5 étoiles
+   - Passager exemplaire
+   - Membre de confiance
+
+4. Filtres et tri
+   - Trier par note (meilleurs/pires)
+   - Filtrer par rôle (conducteur/passager)
+   - Recherche dans commentaires
+
+5. Analytics
+   - Évolution note moyenne dans le temps
+   - Graphique distribution notes
+   - Statistiques détaillées dashboard
+```
+
+---
+
 ### 📊 **Performances et optimisation**
 
 #### **Requêtes optimisées**

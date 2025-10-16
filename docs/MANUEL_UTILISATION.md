@@ -388,6 +388,256 @@
 - 💻 Desktop : Vue complète avec sidebar
 - 🖥️ Grands écrans : Utilisation maximale de l'espace
 
+### ⭐ **Système d'Avis et Évaluation**
+
+**Fonctionnalité :** Évaluer les autres utilisateurs après un trajet terminé pour construire une communauté de confiance.
+
+#### **Accéder à la section "Mes avis"**
+
+1. **Se connecter au dashboard**
+   ```
+   https://ecoride-om7c.onrender.com/user/dashboard.php
+   ```
+
+2. **Cliquer sur "⭐ Mes avis"** dans le menu de navigation
+
+3. **Découvrir les deux sections**
+   - **Avis que j'ai reçus** : Consulter les évaluations reçues
+   - **Trajets à évaluer** : Laisser un avis pour les trajets terminés
+
+#### **Consulter ses avis reçus**
+
+**Informations affichées :**
+- **Badge note moyenne** avec gradient coloré (ex: 4.7 ⭐)
+- **Total d'avis reçus** pour mesurer sa réputation
+- **Liste détaillée des avis** avec :
+  - Pseudo de l'évaluateur
+  - Note sur 5 étoiles (★★★★★)
+  - Commentaire détaillé
+  - Information sur le trajet concerné
+  - Date de l'évaluation
+
+**Exemple d'affichage :**
+```
+┌──────────────────────────────────────────────┐
+│  4.7 ⭐                                       │
+│  Note moyenne sur 15 avis                    │
+├──────────────────────────────────────────────┤
+│  Sophie Martin                    15/10/2025 │
+│  ★★★★★ (5/5)                                 │
+│  "Excellent conducteur, très ponctuel!       │
+│   Voiture propre et trajet agréable."        │
+│  📍 Paris → Lyon (15/10/2025)                │
+└──────────────────────────────────────────────┘
+```
+
+#### **Laisser un avis pour un trajet terminé**
+
+**Étape 1 : Identifier les trajets à évaluer**
+
+1. Dans la section "Trajets à évaluer"
+2. Consulter la liste des trajets terminés sans avis
+3. Pour chaque trajet, voir :
+   - Route (Départ → Arrivée)
+   - Date et heure du trajet
+   - Nom de l'autre utilisateur (conducteur ou passager)
+   - Prix payé en crédits
+   - Bouton "⭐ Laisser un avis"
+
+**Étape 2 : Ouvrir le formulaire d'évaluation**
+
+1. **Cliquer sur "⭐ Laisser un avis"**
+2. Un modal interactif s'ouvre avec :
+   - Rappel de l'information du trajet
+   - Système de notation par étoiles
+   - Zone de commentaire
+
+**Étape 3 : Noter l'utilisateur**
+
+1. **Sélectionner une note de 1 à 5 étoiles**
+   - Cliquer sur l'étoile correspondante
+   - Effet visuel au survol (hover)
+   - Transformation avec animation scale
+
+2. **Signification des notes :**
+   - ★☆☆☆☆ (1/5) : Très insatisfait
+   - ★★☆☆☆ (2/5) : Insatisfait
+   - ★★★☆☆ (3/5) : Correct
+   - ★★★★☆ (4/5) : Satisfait
+   - ★★★★★ (5/5) : Excellent !
+
+**Étape 4 : Rédiger un commentaire**
+
+1. **Écrire un commentaire détaillé** (minimum 10 caractères, maximum 500)
+2. **Utiliser le compteur** en temps réel (ex: "125/500")
+3. **Être constructif et respectueux**
+
+**Exemples de bons commentaires :**
+```
+✅ "Conducteur très ponctuel et sympathique.
+    Véhicule propre et confortable. Je recommande !"
+
+✅ "Passagère agréable et respectueuse.
+    Bonne conversation pendant le trajet."
+
+✅ "Trajet fluide et sécuritaire.
+    Bonne musique et ambiance détendue."
+```
+
+**Exemples à éviter :**
+```
+❌ "Bien" (trop court, minimum 10 caractères)
+❌ Messages avec insultes ou propos déplacés
+❌ Informations personnelles sensibles
+```
+
+**Étape 5 : Valider et publier**
+
+1. **Vérifier que le formulaire est complet**
+   - Note sélectionnée (étoiles colorées)
+   - Commentaire valide (compteur vert)
+   - Bouton "Publier l'avis" activé
+
+2. **Cliquer sur "Publier l'avis"**
+   - Message de confirmation : "✅ Votre avis a été publié avec succès"
+   - Modal se ferme automatiquement
+   - Listes rechargées en temps réel
+
+3. **Vérifier la publication**
+   - Le trajet disparaît de "Trajets à évaluer"
+   - L'avis apparaît immédiatement dans la section "Avis reçus" du destinataire
+   - Impossible de modifier ou supprimer (définitif)
+
+#### **Règles et validations**
+
+**Conditions pour laisser un avis :**
+- ✅ Avoir participé au trajet (conducteur ou passager)
+- ✅ Le trajet doit être terminé (statut = 'termine')
+- ✅ Pas d'avis déjà laissé pour ce trajet/utilisateur
+- ✅ Pas d'auto-évaluation (impossible de s'évaluer soi-même)
+
+**Validations automatiques :**
+- Note obligatoire entre 1 et 5 étoiles
+- Commentaire entre 10 et 500 caractères
+- Protection contre les doublons
+- Vérification de la participation effective
+
+**Sécurité :**
+- Protection XSS (échappement HTML)
+- Authentification requise
+- Validation côté serveur et client
+- Données stockées de manière sécurisée
+
+#### **Utilisation stratégique des avis**
+
+**Pour les passagers :**
+1. **Consulter les avis des conducteurs** avant de réserver
+2. **Privilégier les conducteurs bien notés** (4+ ⭐)
+3. **Lire les commentaires** pour connaître le style de conduite
+4. **Évaluer objectivement** après chaque trajet
+
+**Pour les conducteurs :**
+1. **Maintenir une note élevée** pour attirer plus de passagers
+2. **Lire les avis reçus** pour s'améliorer
+3. **Évaluer les passagers** pour construire une communauté fiable
+4. **Répondre positivement** aux critiques constructives
+
+**Impact sur la réputation :**
+```
+Note moyenne       Impact
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.0 ⭐            Excellent (top conducteur)
+4.5 - 4.9 ⭐      Très bon (recommandé)
+4.0 - 4.4 ⭐      Bon (fiable)
+3.5 - 3.9 ⭐      Correct (acceptable)
+< 3.5 ⭐          À améliorer
+```
+
+#### **Scénarios d'utilisation**
+
+**Scénario 1 : Passager évalue un conducteur**
+```
+1. Sophie a voyagé avec Jean de Paris à Lyon
+2. Le trajet s'est terminé le 15/10/2025
+3. Sophie accède à "⭐ Mes avis"
+4. Elle voit le trajet dans "Trajets à évaluer"
+5. Elle clique "Laisser un avis"
+6. Elle donne 5 étoiles et écrit :
+   "Excellent conducteur, conduite sécuritaire"
+7. Jean reçoit l'avis instantanément
+8. Sa note moyenne passe de 4.6 à 4.7 ⭐
+```
+
+**Scénario 2 : Conducteur évalue un passager**
+```
+1. Jean (conducteur) a terminé son trajet
+2. Il avait 2 passagers : Sophie et Marc
+3. Il accède à "⭐ Mes avis"
+4. Il voit 2 trajets à évaluer (1 par passager)
+5. Il évalue Sophie : 5⭐ "Passagère ponctuelle"
+6. Il évalue Marc : 4⭐ "Agréable mais un peu bavard"
+7. Les deux passagers reçoivent leurs avis
+```
+
+**Scénario 3 : Consultation avant réservation**
+```
+1. Marie recherche un trajet Lyon → Marseille
+2. Elle trouve 3 trajets disponibles
+3. Elle consulte les profils des conducteurs :
+   - Jean : 4.7⭐ (15 avis) ✅ Choisi
+   - Paul : 3.2⭐ (8 avis) ❌ Évité
+   - Luc : Nouveau (0 avis) ⚠️ Incertain
+4. Marie réserve avec Jean grâce aux bons avis
+```
+
+#### **Statistiques et indicateurs**
+
+**Métriques affichées :**
+- **Note moyenne** : Moyenne de toutes les notes reçues (ex: 4.7/5)
+- **Nombre total d'avis** : Crédibilité de la note (ex: 15 avis)
+- **Distribution** : Répartition des notes (future fonctionnalité)
+- **Taux d'évaluation** : Pourcentage de trajets évalués (admin)
+
+**Badge de qualité (futur) :**
+- 🏆 Conducteur Elite (5.0 ⭐ avec 20+ avis)
+- ⭐ Membre de Confiance (4.5+ ⭐ avec 10+ avis)
+- 🌟 Passager Exemplaire (4.8+ ⭐ comme passager)
+
+#### **Bonnes pratiques**
+
+**✅ À faire :**
+- Évaluer rapidement après le trajet (mémoire fraîche)
+- Être honnête et objectif
+- Mentionner les points positifs ET les axes d'amélioration
+- Utiliser un langage respectueux
+- Détailler l'expérience (ponctualité, propreté, conduite, ambiance)
+
+**❌ À éviter :**
+- Laisser un avis sous le coup de l'émotion
+- Écrire des commentaires trop courts ("Bien", "OK")
+- Utiliser des insultes ou propos déplacés
+- Divulguer des informations personnelles
+- Laisser un mauvais avis pour se venger
+
+#### **Dépannage**
+
+**Problème : Le bouton "Laisser un avis" est grisé**
+- Solution : Vérifier que vous avez sélectionné une note (étoiles)
+- Solution : Vérifier que le commentaire contient au moins 10 caractères
+
+**Problème : Message "Vous avez déjà laissé un avis pour ce trajet"**
+- Explication : Impossible de laisser plusieurs avis pour le même trajet
+- Les avis sont définitifs et ne peuvent pas être modifiés
+
+**Problème : Le trajet n'apparaît pas dans "Trajets à évaluer"**
+- Vérifier que le trajet est bien terminé (statut = 'termine')
+- Vérifier que vous avez bien participé au trajet
+- Actualiser la page (Ctrl+F5)
+
+**Problème : Ma note moyenne ne s'affiche pas**
+- Explication : Il faut avoir reçu au moins 1 avis
+- Les nouveaux utilisateurs n'ont pas encore de note
+
 ---
 
 ## 8. DÉPANNAGE ET FAQ
