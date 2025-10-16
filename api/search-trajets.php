@@ -153,7 +153,7 @@ try {
                 covoiturage t
                 INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
                 INNER JOIN vehicule v ON t.id_vehicule = v.vehicule_id
-                LEFT JOIN avis a ON u.utilisateur_id = a.id_utilisateur_note AND a.statut = 'valide'
+                LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
             WHERE
                 " . implode(' AND ', $whereConditions) . "
             GROUP BY
