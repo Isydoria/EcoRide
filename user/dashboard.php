@@ -133,7 +133,7 @@ try {
         // Toutes les participations (passager) avec filtres de statut
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
-                SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
+                SELECT p.*, c.covoiturage_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
                        c.prix, (c.prix * p.nombre_places) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
                        c.statut as trip_status
                 FROM participation p
@@ -144,7 +144,7 @@ try {
             ");
         } else {
             $stmt = $pdo->prepare("
-                SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
+                SELECT p.*, c.covoiturage_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
                        c.prix_par_place, u.pseudo as conducteur, 'passager' as role,
                        c.statut as trip_status
                 FROM participation p
