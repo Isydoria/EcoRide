@@ -52,12 +52,12 @@ try {
     // Vérifier que le trajet appartient bien à l'utilisateur et qu'il peut être annulé
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT t.*, COUNT(r.id_reservation) as participants_count,
-                   COALESCE(SUM(CASE WHEN r.statut != 'annule' THEN r.credit_utilise ELSE 0 END), 0) as credits_to_refund
-            FROM trajet t
-            LEFT JOIN reservation r ON t.id_trajet = r.id_trajet
-            WHERE t.id_trajet = :trip_id AND t.id_conducteur = :user_id
-            GROUP BY t.id_trajet, t.id_conducteur, t.id_vehicule, t.ville_depart, t.ville_arrivee, t.date_depart, t.date_arrivee, t.places_disponibles, t.prix, t.is_active, t.date_inscription
+            SELECT c.*, COUNT(p.participation_id) as participants_count,
+                   COALESCE(SUM(CASE WHEN p.statut != 'annule' THEN (c.prix * p.nombre_places) ELSE 0 END), 0) as credits_to_refund
+            FROM covoiturage c
+            LEFT JOIN participation p ON c.covoiturage_id = p.id_trajet
+            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+            GROUP BY c.covoiturage_id
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -85,34 +85,30 @@ try {
         throw new Exception('Impossible d\'annuler un trajet déjà commencé ou passé');
     }
 
-    if ($isPostgreSQL) {
-        if (!$trip['is_active']) {
-            throw new Exception('Ce trajet est déjà annulé');
-        }
-    } else {
-        if ($trip['statut'] === 'annule') {
-            throw new Exception('Ce trajet est déjà annulé');
-        }
+    // Vérifier le statut du trajet
+    if ($trip['statut'] === 'annule') {
+        throw new Exception('Ce trajet est déjà annulé');
+    }
 
-        if (in_array($trip['statut'], ['en_cours', 'termine'])) {
-            throw new Exception('Impossible d\'annuler un trajet en cours ou terminé');
-        }
+    if (in_array($trip['statut'], ['en_cours', 'termine'])) {
+        throw new Exception('Impossible d\'annuler un trajet en cours ou terminé');
     }
 
     // Récupérer les participations actives pour remboursement
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT r.*, u.pseudo, u.credits as credit
-            FROM reservation r
-            JOIN utilisateur u ON r.id_passager = u.id_utilisateur
-            WHERE r.id_trajet = :trip_id AND r.statut IN ('reserve', 'confirme')
+            SELECT p.*, (c.prix * p.nombre_places) as credit_utilise, u.pseudo, u.credits as credit
+            FROM participation p
+            JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
+            JOIN utilisateur u ON p.id_passager = u.utilisateur_id
+            WHERE p.id_trajet = :trip_id AND p.statut IN ('en_attente', 'confirmee')
         ");
     } else {
         $stmt = $pdo->prepare("
             SELECT p.*, u.pseudo, u.credit
             FROM participation p
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-            WHERE p.covoiturage_id = :trip_id AND p.statut IN ('reserve', 'confirme')
+            WHERE p.covoiturage_id = :trip_id AND p.statut IN ('en_attente', 'confirmee')
         ");
     }
     $stmt->execute(['trip_id' => $trip_id]);
@@ -125,15 +121,15 @@ try {
         $new_credit = $participant['credit'] + $participant['credit_utilise'];
 
         if ($isPostgreSQL) {
-            $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE id_utilisateur = :user_id");
+            $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE utilisateur_id = :user_id");
             $stmt->execute([
                 'new_credit' => $new_credit,
                 'user_id' => $participant['id_passager']
             ]);
 
             // Marquer la participation comme annulée
-            $stmt = $pdo->prepare("UPDATE reservation SET statut = 'annule' WHERE id_reservation = :participation_id");
-            $stmt->execute(['participation_id' => $participant['id_reservation']]);
+            $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
+            $stmt->execute(['participation_id' => $participant['participation_id']]);
         } else {
             $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
             $stmt->execute([
@@ -150,11 +146,7 @@ try {
     }
 
     // Marquer le trajet comme annulé
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("UPDATE trajet SET is_active = false WHERE id_trajet = :trip_id");
-    } else {
-        $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'annule' WHERE covoiturage_id = :trip_id");
-    }
+    $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'annule' WHERE covoiturage_id = :trip_id");
     $stmt->execute(['trip_id' => $trip_id]);
 
     // Valider la transaction
