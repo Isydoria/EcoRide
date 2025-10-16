@@ -759,6 +759,277 @@ $active_section = $_GET['section'] ?? 'overview';
             gap: 15px;
         }
 
+        /* ========= AVIS ========= */
+        .avis-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .avis-card {
+            background: white;
+            border: 1px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .avis-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .avis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .avis-author {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .avis-date {
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+
+        .avis-rating {
+            display: flex;
+            gap: 4px;
+            font-size: 1.2em;
+        }
+
+        .star {
+            color: #ddd;
+        }
+
+        .star.filled {
+            color: #f39c12;
+        }
+
+        .avis-comment {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .avis-trip-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .avis-stats {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .avis-stats-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .avis-stats-label {
+            opacity: 0.9;
+        }
+
+        /* Modal pour laisser un avis */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #2c3e50;
+        }
+
+        .rating-input {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .rating-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stars-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            font-size: 2.5em;
+            cursor: pointer;
+        }
+
+        .stars-input .star {
+            transition: all 0.2s;
+        }
+
+        .stars-input .star:hover,
+        .stars-input .star.hover {
+            transform: scale(1.2);
+        }
+
+        .comment-input {
+            margin: 20px 0;
+        }
+
+        .comment-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .comment-input textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .comment-input textarea:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit-avis {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-submit-avis:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-submit-avis:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-cancel-avis {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-cancel-avis:hover {
+            background: #bdc3c7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
         @media (max-width: 768px) {
             .dashboard-container {
                 grid-template-columns: 1fr;
@@ -768,6 +1039,14 @@ $active_section = $_GET['section'] ?? 'overview';
             .header-content {
                 flex-direction: column;
                 gap: 15px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .stars-input {
+                font-size: 2em;
             }
         }
     </style>
@@ -803,6 +1082,7 @@ $active_section = $_GET['section'] ?? 'overview';
                 <li><a href="?section=my-trips" class="<?= $active_section === 'my-trips' ? 'active' : '' ?>">🚗 Mes trajets</a></li>
                 <li><a href="?section=my-bookings" class="<?= $active_section === 'my-bookings' ? 'active' : '' ?>">🎫 Mes réservations</a></li>
                 <li><a href="?section=history" class="<?= $active_section === 'history' ? 'active' : '' ?>">📋 Historique complet</a></li>
+                <li><a href="?section=avis" class="<?= $active_section === 'avis' ? 'active' : '' ?>">⭐ Mes avis</a></li>
                 <li><a href="?section=vehicles" class="<?= $active_section === 'vehicles' ? 'active' : '' ?>">🚙 Mes véhicules</a></li>
                 <li><a href="?section=profile" class="<?= $active_section === 'profile' ? 'active' : '' ?>">👤 Mon profil</a></li>
             </ul>
@@ -915,6 +1195,27 @@ $active_section = $_GET['section'] ?? 'overview';
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+            </div>
+
+            <!-- Mes avis -->
+            <div class="section <?= $active_section === 'avis' ? 'active' : '' ?>">
+                <h2>⭐ Mes avis</h2>
+
+                <!-- Avis reçus -->
+                <div id="avisReceived" style="margin-bottom: 40px;">
+                    <h3>Avis que j'ai reçus</h3>
+                    <div id="avisReceivedList" class="avis-list">
+                        <div class="loading">Chargement des avis...</div>
+                    </div>
+                </div>
+
+                <!-- Trajets à évaluer -->
+                <div id="avisToGive">
+                    <h3>Trajets à évaluer</h3>
+                    <div id="avisToGiveList" class="trips-list">
+                        <div class="loading">Chargement des trajets...</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Mes véhicules -->
@@ -1713,6 +2014,354 @@ $active_section = $_GET['section'] ?? 'overview';
             setupTripManagement();
             setupTripActions();
         }
+
+        // ========= SYSTÈME D'AVIS =========
+
+        let currentRating = 0;
+        let currentTripData = null;
+
+        // Charger les avis reçus
+        function loadReceivedAvis() {
+            const userId = <?= $user_id ?>;
+
+            fetch(`../api/get-avis.php?user_id=${userId}&limit=50`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayReceivedAvis(data);
+                    } else {
+                        document.getElementById('avisReceivedList').innerHTML =
+                            '<div class="empty-state"><p>Erreur lors du chargement des avis</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur chargement avis:', error);
+                    document.getElementById('avisReceivedList').innerHTML =
+                        '<div class="empty-state"><p>Erreur lors du chargement des avis</p></div>';
+                });
+        }
+
+        // Afficher les avis reçus
+        function displayReceivedAvis(data) {
+            const container = document.getElementById('avisReceivedList');
+
+            if (data.avis.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Vous n\'avez pas encore reçu d\'avis</p></div>';
+                return;
+            }
+
+            // Afficher les statistiques
+            let html = '';
+            if (data.stats.total > 0) {
+                html += `
+                    <div class="avis-stats">
+                        <div class="avis-stats-number">${data.stats.moyenne} ⭐</div>
+                        <div class="avis-stats-label">Note moyenne sur ${data.stats.total} avis</div>
+                    </div>
+                `;
+            }
+
+            // Afficher les avis
+            data.avis.forEach(avis => {
+                const stars = generateStars(avis.note);
+                const date = new Date(avis.date).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                html += `
+                    <div class="avis-card">
+                        <div class="avis-header">
+                            <div>
+                                <div class="avis-author">${escapeHtml(avis.evaluateur.pseudo)}</div>
+                                <div class="avis-rating">${stars}</div>
+                            </div>
+                            <div class="avis-date">${date}</div>
+                        </div>
+                        <div class="avis-comment">${escapeHtml(avis.commentaire)}</div>
+                        <div class="avis-trip-info">
+                            📍 Trajet: ${escapeHtml(avis.trajet.depart)} → ${escapeHtml(avis.trajet.arrivee)}
+                            (${new Date(avis.trajet.date).toLocaleDateString('fr-FR')})
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Charger les trajets à évaluer
+        function loadTripsToRate() {
+            const userId = <?= $user_id ?>;
+            const isPostgreSQL = <?= $isPostgreSQL ? 'true' : 'false' ?>;
+
+            // Récupérer les trajets terminés sans avis
+            fetch(`../api/get-trips-to-rate.php?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayTripsToRate(data.trips);
+                    } else {
+                        // Si l'API n'existe pas encore, on affiche un message
+                        document.getElementById('avisToGiveList').innerHTML =
+                            '<div class="empty-state"><p>Aucun trajet à évaluer pour le moment</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur chargement trajets à évaluer:', error);
+                    document.getElementById('avisToGiveList').innerHTML =
+                        '<div class="empty-state"><p>Aucun trajet à évaluer pour le moment</p></div>';
+                });
+        }
+
+        // Afficher les trajets à évaluer
+        function displayTripsToRate(trips) {
+            const container = document.getElementById('avisToGiveList');
+
+            if (trips.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Aucun trajet à évaluer pour le moment</p></div>';
+                return;
+            }
+
+            let html = '<div class="trips-list">';
+            trips.forEach(trip => {
+                const date = new Date(trip.date_depart).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                html += `
+                    <div class="trip-card">
+                        <div class="trip-route">
+                            ${escapeHtml(trip.ville_depart)} → ${escapeHtml(trip.ville_arrivee)}
+                        </div>
+                        <div class="trip-details">
+                            <div>📅 ${date}</div>
+                            <div>👤 ${trip.is_conductor ? 'Passager' : 'Conducteur'}: ${escapeHtml(trip.other_user_pseudo)}</div>
+                            <div>💰 ${trip.prix} crédits</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="openAvisModal(${trip.covoiturage_id}, ${trip.other_user_id}, '${escapeHtml(trip.other_user_pseudo)}', '${escapeHtml(trip.ville_depart)}', '${escapeHtml(trip.ville_arrivee)}')">
+                                ⭐ Laisser un avis
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        // Générer les étoiles pour l'affichage
+        function generateStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star ${i <= rating ? 'filled' : ''}">★</span>`;
+            }
+            return stars;
+        }
+
+        // Ouvrir le modal pour laisser un avis
+        function openAvisModal(tripId, evaluateId, evaluatePseudo, depart, arrivee) {
+            currentTripData = {
+                tripId: tripId,
+                evaluateId: evaluateId,
+                evaluatePseudo: evaluatePseudo,
+                depart: depart,
+                arrivee: arrivee
+            };
+
+            currentRating = 0;
+            document.getElementById('avisModal').classList.add('active');
+            document.getElementById('avisComment').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('modalTripInfo').textContent =
+                `${depart} → ${arrivee} avec ${evaluatePseudo}`;
+
+            updateStarDisplay();
+            updateSubmitButton();
+        }
+
+        // Fermer le modal
+        function closeAvisModal() {
+            document.getElementById('avisModal').classList.remove('active');
+            currentTripData = null;
+            currentRating = 0;
+        }
+
+        // Gérer les clics sur les étoiles
+        function handleStarClick(rating) {
+            currentRating = rating;
+            updateStarDisplay();
+            updateSubmitButton();
+        }
+
+        // Gérer le survol des étoiles
+        function handleStarHover(rating) {
+            document.querySelectorAll('.stars-input .star').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('hover');
+                } else {
+                    star.classList.remove('hover');
+                }
+            });
+        }
+
+        // Réinitialiser le survol
+        function resetStarHover() {
+            document.querySelectorAll('.stars-input .star').forEach(star => {
+                star.classList.remove('hover');
+            });
+        }
+
+        // Mettre à jour l'affichage des étoiles
+        function updateStarDisplay() {
+            document.querySelectorAll('.stars-input .star').forEach((star, index) => {
+                if (index < currentRating) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
+        }
+
+        // Mettre à jour le bouton de soumission
+        function updateSubmitButton() {
+            const comment = document.getElementById('avisComment').value.trim();
+            const submitBtn = document.getElementById('submitAvis');
+
+            if (currentRating > 0 && comment.length >= 10) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Soumettre l'avis
+        function submitAvis() {
+            if (!currentTripData || currentRating === 0) {
+                return;
+            }
+
+            const comment = document.getElementById('avisComment').value.trim();
+
+            if (comment.length < 10) {
+                alert('Le commentaire doit contenir au moins 10 caractères');
+                return;
+            }
+
+            if (comment.length > 500) {
+                alert('Le commentaire ne peut pas dépasser 500 caractères');
+                return;
+            }
+
+            // Désactiver le bouton pendant la soumission
+            const submitBtn = document.getElementById('submitAvis');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Publication...';
+
+            const formData = new FormData();
+            formData.append('evalue_id', currentTripData.evaluateId);
+            formData.append('covoiturage_id', currentTripData.tripId);
+            formData.append('note', currentRating);
+            formData.append('commentaire', comment);
+
+            fetch('../api/create-avis.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    closeAvisModal();
+                    // Recharger les listes
+                    loadReceivedAvis();
+                    loadTripsToRate();
+                } else {
+                    alert('❌ ' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Publier l\'avis';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur soumission avis:', error);
+                alert('Erreur lors de la publication de l\'avis. Veuillez réessayer.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Publier l\'avis';
+            });
+        }
+
+        // Escape HTML pour éviter les injections XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialiser le système d'avis quand on accède à la section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si on est sur la section avis
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('section') === 'avis') {
+                loadReceivedAvis();
+                loadTripsToRate();
+            }
+        });
+
+        // Compteur de caractères pour le commentaire
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentTextarea = document.getElementById('avisComment');
+            if (commentTextarea) {
+                commentTextarea.addEventListener('input', function() {
+                    const count = this.value.length;
+                    document.getElementById('charCount').textContent = count;
+                    updateSubmitButton();
+                });
+            }
+        });
     </script>
+
+    <!-- Modal pour laisser un avis -->
+    <div id="avisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Laisser un avis</h3>
+                <button class="modal-close" onclick="closeAvisModal()">×</button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px; color: #7f8c8d;">
+                <p id="modalTripInfo"></p>
+            </div>
+
+            <div class="rating-input">
+                <label>Votre note *</label>
+                <div class="stars-input" id="starsInput">
+                    <span class="star" onclick="handleStarClick(1)" onmouseover="handleStarHover(1)" onmouseout="resetStarHover()">★</span>
+                    <span class="star" onclick="handleStarClick(2)" onmouseover="handleStarHover(2)" onmouseout="resetStarHover()">★</span>
+                    <span class="star" onclick="handleStarClick(3)" onmouseover="handleStarHover(3)" onmouseout="resetStarHover()">★</span>
+                    <span class="star" onclick="handleStarClick(4)" onmouseover="handleStarHover(4)" onmouseout="resetStarHover()">★</span>
+                    <span class="star" onclick="handleStarClick(5)" onmouseover="handleStarHover(5)" onmouseout="resetStarHover()">★</span>
+                </div>
+            </div>
+
+            <div class="comment-input">
+                <label>Votre commentaire *</label>
+                <textarea id="avisComment" maxlength="500" placeholder="Partagez votre expérience de trajet... (minimum 10 caractères)"></textarea>
+                <div class="char-counter"><span id="charCount">0</span>/500</div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel-avis" onclick="closeAvisModal()">Annuler</button>
+                <button class="btn-submit-avis" id="submitAvis" onclick="submitAvis()" disabled>Publier l'avis</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
