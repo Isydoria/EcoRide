@@ -80,12 +80,12 @@ try {
     if ($isPostgreSQL) {
         // Vérifier si l'utilisateur était passager
         $stmt = $pdo->prepare("
-            SELECT p.*, c.id_conducteur, c.statut as trip_statut
+            SELECT p.*, c.conducteur_id, c.statut as trip_statut
             FROM participation p
-            JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
-            WHERE p.id_trajet = :trip_id
-            AND (p.id_passager = :user_id OR c.id_conducteur = :user_id)
-            AND p.statut = 'terminee'
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            WHERE p.covoiturage_id = :trip_id
+            AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
+            AND p.statut_reservation = 'confirmee'
         ");
     } else {
         // Vérifier si l'utilisateur était passager
@@ -121,8 +121,8 @@ try {
     }
 
     // Déterminer qui évalue qui
-    $conducteur_id = $isPostgreSQL ? $participation['id_conducteur'] : $participation['conducteur_id'];
-    $passager_id = $isPostgreSQL ? $participation['id_passager'] : $participation['passager_id'];
+    $conducteur_id = $participation['conducteur_id'];
+    $passager_id = $participation['passager_id'];
 
     // Vérifier que l'évaluateur veut bien évaluer quelqu'un du trajet
     if ($evaluateur_id === $conducteur_id) {
