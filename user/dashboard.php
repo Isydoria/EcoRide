@@ -783,6 +783,9 @@ $active_section = $_GET['section'] ?? 'overview';
             <div class="dashboard-nav">
                 <a href="../index.php">← Accueil</a>
                 <a href="../creer-trajet.php" class="create-trip-btn">🚗 Créer un trajet</a>
+                <?php if (($_SESSION['role'] ?? '') === 'employe'): ?>
+                    <a href="../employee/dashboard.php" style="background: #3498db; padding: 10px 15px; border-radius: 5px;">👔 Dashboard Employé</a>
+                <?php endif; ?>
                 <?php if (($_SESSION['role'] ?? '') === 'administrateur'): ?>
                     <a href="../admin/dashboard.php" style="background: #e74c3c; padding: 10px 15px; border-radius: 5px;">🛠️ Admin</a>
                 <?php endif; ?>

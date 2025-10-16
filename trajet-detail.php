@@ -106,6 +106,12 @@ error_log("DEBUG trajet-detail.php: userCredits RÉELS = " . $userCredits);
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <?php if ($isLoggedIn): ?>
                     <li><a href="user/dashboard.php" class="nav-link">Mon compte (<?php echo htmlspecialchars($userPseudo); ?>)</a></li>
+                    <?php if ($userRole === 'employe'): ?>
+                        <li><a href="employee/dashboard.php" class="nav-link" style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px;">👔 Dashboard Employé</a></li>
+                    <?php endif; ?>
+                    <?php if ($userRole === 'administrateur'): ?>
+                        <li><a href="admin/dashboard.php" class="nav-link" style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 20px;">🛠️ Admin</a></li>
+                    <?php endif; ?>
                     <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
                 <?php else: ?>
                     <li><a href="connexion.php" class="nav-link">Connexion</a></li>

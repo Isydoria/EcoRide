@@ -97,6 +97,9 @@ try {
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <?php if (isLoggedIn()): ?>
                     <li><a href="user/dashboard.php" class="nav-link">Mon espace</a></li>
+                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'employe'): ?>
+                        <li><a href="employee/dashboard.php" class="nav-link" style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px;">👔 Dashboard Employé</a></li>
+                    <?php endif; ?>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'administrateur'): ?>
                         <li><a href="admin/dashboard.php" class="nav-link" style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 20px;">🛠️ Admin</a></li>
                     <?php endif; ?>

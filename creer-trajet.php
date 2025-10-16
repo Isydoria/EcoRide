@@ -138,6 +138,12 @@ try {
                 <li><a href="index.php" class="nav-link">Accueil</a></li>
                 <li><a href="trajets.php" class="nav-link">Trajets</a></li>
                 <li><a href="user/dashboard.php" class="nav-link">Mon espace</a></li>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'employe'): ?>
+                    <li><a href="employee/dashboard.php" class="nav-link" style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px;">👔 Dashboard Employé</a></li>
+                <?php endif; ?>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'administrateur'): ?>
+                    <li><a href="admin/dashboard.php" class="nav-link" style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 20px;">🛠️ Admin</a></li>
+                <?php endif; ?>
                 <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
             </ul>
         </div>
