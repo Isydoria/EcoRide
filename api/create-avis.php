@@ -80,12 +80,12 @@ try {
     if ($isPostgreSQL) {
         // Vérifier si l'utilisateur était passager
         $stmt = $pdo->prepare("
-            SELECT p.*, c.conducteur_id, c.statut as trip_statut
+            SELECT p.*, c.id_conducteur as conducteur_id, c.statut as trip_statut
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
             WHERE p.covoiturage_id = :trip_id
-            AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
-            AND p.statut_reservation = 'confirmee'
+            AND (p.passager_id = :user_id OR c.id_conducteur = :user_id)
+            AND p.statut_reservation = 'terminee'
         ");
     } else {
         // Vérifier si l'utilisateur était passager
