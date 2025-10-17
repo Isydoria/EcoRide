@@ -81,7 +81,7 @@ try {
                 covoiturage c
                 INNER JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
                 LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
-                LEFT JOIN avis a ON u.utilisateur_id = a.id_utilisateur_note AND a.statut = 'valide'
+                LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
             WHERE
                 c.covoiturage_id = :trajet_id
             GROUP BY
@@ -194,16 +194,15 @@ try {
             SELECT
                 a.note,
                 a.commentaire,
-                a.date_avis as date_creation,
+                a.created_at as date_creation,
                 u.pseudo as auteur
             FROM
                 avis a
-                INNER JOIN utilisateur u ON a.id_auteur = u.utilisateur_id
+                INNER JOIN utilisateur u ON a.evaluateur_id = u.utilisateur_id
             WHERE
-                a.id_utilisateur_note = :conducteur_id
-                AND a.statut = 'valide'
+                a.evalue_id = :conducteur_id
             ORDER BY
-                a.date_avis DESC
+                a.created_at DESC
             LIMIT 10
         ";
     } else {
