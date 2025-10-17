@@ -1,0 +1,189 @@
+📋 RAPPORT D'AUDIT COMPLET - PROJET ECORIDE
+🎯 RÉSUMÉ EXÉCUTIF
+Projet : EcoRide - Plateforme de covoiturage écologique
+Date d'audit : 17 octobre 2025
+Scope : Analyse complète (Sécurité, Logique métier, Frontend, PostgreSQL)
+Synthèse des problèmes identifiés :
+Catégorie	Critique 🔴	Élevé 🟠	Moyen 🟡	Faible 🟢	Total
+Sécurité	4	5	4	2	15
+Logique métier	3	3	3	0	9
+JavaScript/Frontend	12	18	9	8	47
+PostgreSQL	1	0	0	0	1 (cancel-booking.php)
+TOTAL	20	26	16	10	72
+Niveau de risque global : ⚠️ MOYEN-ÉLEVÉ
+🚨 TOP 10 DES PROBLÈMES CRITIQUES
+1. 🔴 CSRF - Protection manquante sur 9 API sensibles
+Sévérité : CRITIQUE
+Fichiers : create-trajet.php, edit-trajet.php, delete-vehicle.php, add-vehicle.php, participer-trajet.php, create-avis.php, cancel-booking.php, manage-trip-status.php, toggle-user-status.php Impact : Un attaquant peut forcer un utilisateur authentifié à effectuer des actions (créer trajets, dépenser crédits, etc.) sans son consentement. Solution :
+// Ajouter dans TOUS les fichiers API POST :
+if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    die(json_encode(['success' => false, 'message' => 'Token CSRF invalide']));
+}
+2. 🔴 Réservation sur trajets passés possible
+Fichier : api/participer-trajet.php
+Lignes : 54-309 Impact : Utilisateurs peuvent perdre des crédits en réservant des trajets déjà passés. Solution :
+// Ajouter après ligne 109 :
+if (strtotime($trajet['date_depart']) < time()) {
+    $pdo->rollBack();
+    jsonResponse(false, 'Ce trajet est déjà passé');
+}
+3. 🔴 Variables JavaScript globales non vérifiées
+Fichier : js/trajet-detail.js
+Lignes : 8, 147, 232 Impact : ReferenceError → page blanche, trajet ne se charge pas. Solution :
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof trajetId === 'undefined') {
+        console.error('trajetId non défini');
+        return;
+    }
+    loadTrajetDetails();
+});
+4. 🔴 XSS - Vérification status HTTP manquante dans tous les fetch()
+Fichiers : Tous les fichiers .js et sections <script> PHP
+Impact : Erreurs HTTP silencieuses, messages d'erreur trompeurs pour l'utilisateur. Solution :
+fetch(url, options)
+.then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+})
+.then(data => {
+    if (!data.success) throw new Error(data.message);
+    // Traitement...
+})
+.catch(error => {
+    console.error('Erreur:', error);
+    showUserFriendlyError(error);
+});
+5. 🔴 Session non mise à jour après transfert de crédits
+Fichier : api/manage-trip-status.php
+Lignes : 189-214 Impact : Conducteur ne voit pas ses nouveaux crédits immédiatement → confusion utilisateur. Solution :
+// Ajouter après ligne 206 :
+$_SESSION['credits'] = ($_SESSION['credits'] ?? 0) + $total_credits;
+6. 🔴 XSS via innerHTML avec données utilisateur
+Fichier : js/trajet-detail.js
+Lignes : 69, 123-126, 177, 189, 214 Impact : Injection de code malveillant si un utilisateur insère du JavaScript dans son pseudo. Solution :
+// Utiliser textContent au lieu de innerHTML pour le texte
+document.getElementById('ecoIndicator').textContent = '🌱 Trajet écologique';
+
+// OU échapper les données
+document.getElementById('driverRating').innerHTML = `
+    ${stars} 
+    <span>${escapeHtml(trajet.note_moyenne)}/5</span>
+`;
+7. 🔴 Validation remboursement insuffisante
+Fichier : api/cancel-booking.php
+Lignes : 108-131 Impact : Double remboursement possible si credit_utilise est NULL ou négatif. Solution :
+$credit_utilise = floatval($participation['credit_utilise'] ?? 0);
+if ($credit_utilise <= 0) {
+    throw new Exception('Montant de crédit invalide');
+}
+$new_credit = $participation['user_credit'] + $credit_utilise;
+8. 🔴 Code mort avec variables non définies
+Fichier : api/create-trajet.php
+Lignes : 226-240 Impact : Erreurs PHP si le code est exécuté (actuellement dans un catch, donc jamais exécuté). Solution : Supprimer ou déplacer le code MongoDB avant le commit() dans le bloc try principal.
+9. 🔴 Arrondis de crédits manquants
+Fichier : api/manage-trip-status.php
+Lignes : 180-186 Impact : Crédits avec décimales infinies (0.333333...) → incohérences affichage/calculs. Solution :
+$total_credits += round(($prix_unitaire * $places), 2);
+10. 🔴 cancel-booking.php complètement cassé (PostgreSQL)
+Fichier : api/cancel-booking.php
+Lignes : Tout le fichier Impact : Le fichier utilise les tables reservation et trajet au lieu de participation et covoiturage pour PostgreSQL. Solution : Réécriture complète du fichier ou désactivation si non utilisé.
+📊 STATISTIQUES DÉTAILLÉES
+Sécurité (15 vulnérabilités)
+🔴 CSRF manquant : 9 fichiers
+🔴 Injection SQL : 1 fichier (toggle-user-status.php)
+🟠 XSS : 3 fichiers
+🟠 Session non régénérée : 1 fichier
+🟠 Race condition : 1 fichier
+Logique métier (9 bugs)
+🔴 Réservation trajets passés : 1
+🔴 Session crédits : 1
+🔴 Validation remboursement : 1
+🟠 Code mort MongoDB : 1
+🟠 Transaction manquante : 2
+🟡 Validation dates : 3
+JavaScript/Frontend (47 problèmes)
+🔴 Variables non vérifiées : 3
+🔴 XSS innerHTML : 6
+🔴 Status HTTP manquant : 12+ fichiers
+🟠 alert() partout : 18 occurrences
+🟠 Manipulation DOM : 15 occurrences
+🟡 Performance : 9 problèmes
+✅ POINTS POSITIFS
+✅ Requêtes préparées PDO (99% du code)
+✅ password_hash() avec PASSWORD_DEFAULT
+✅ Vérification $_SESSION['user_id'] sur toutes les API
+✅ htmlspecialchars() utilisé dans beaucoup d'endroits
+✅ Transactions SQL avec rollback
+✅ Fonctions CSRF déjà créées (juste pas utilisées)
+✅ Validation email avec filter_var()
+✅ FOR UPDATE pour éviter race conditions
+✅ Pas d'injection SQL directe
+✅ JavaScript moderne (ES6+, fetch API)
+🔧 PLAN D'ACTION PRIORITAIRE
+⏰ Semaine 1 - URGENT (20h)
+Ajouter vérification CSRF dans les 9 API (4h)
+Corriger injection SQL toggle-user-status.php (30min)
+Ajouter session_regenerate_id() après login (30min)
+Corriger réservation trajets passés (30min)
+Corriger session crédits après transfert (1h)
+Corriger XSS innerHTML (3h)
+Ajouter vérification status HTTP dans fetch() (4h)
+Corriger validation remboursement (1h)
+Supprimer/corriger code mort MongoDB (1h)
+Corriger arrondis crédits (30min)
+Corriger variables JS non vérifiées (2h)
+Réécrire ou désactiver cancel-booking.php (2h)
+⏰ Semaine 2 - IMPORTANT (24h)
+Remplacer tous les alert() par système toast (6h)
+Ajouter vérifications existence éléments DOM (4h)
+Implémenter event delegation (2h)
+Ajouter rate limiting login/register (4h)
+Renforcer validation mots de passe (2h)
+Ajouter headers sécurité HTTP (2h)
+Corriger race condition participations (2h)
+Supprimer logs debug production (1h)
+Messages génériques énumération users (1h)
+⏰ Semaine 3-4 - OPTIMISATIONS (20h)
+Throttle scroll event (2h)
+Combiner requêtes API dashboard (3h)
+Corriger IntersectionObserver memory leak (1h)
+Créer namespace global EcoRide (3h)
+Améliorer validation regex (2h)
+Améliorer accessibilité (boutons, ARIA) (4h)
+Ajouter tests unitaires JavaScript (5h)
+Temps total estimé : 64 heures
+📝 RECOMMANDATIONS STRATÉGIQUES
+1. Sécurité
+Effectuer un pentest professionnel
+Mettre en place un WAF (CloudFlare, AWS WAF)
+Activer HTTPS obligatoire
+Implémenter logging sécurisé centralisé
+Formation équipe OWASP Top 10
+2. Architecture
+Unifier schémas PostgreSQL/MySQL (éliminer les différences)
+Créer une couche d'abstraction API (EcoRide.API.call())
+Séparer logique métier / accès données
+Créer services réutilisables (credits, reservations, avis)
+3. Tests
+Tests automatisés sécurité (SAST/DAST)
+Tests unitaires JavaScript (Jest)
+Tests d'intégration API (PHPUnit)
+Tests E2E (Playwright, Cypress)
+4. Monitoring
+Logs structurés (JSON)
+Alertes temps réel (erreurs critiques)
+Métriques business (réservations, crédits)
+Performance monitoring (temps chargement)
+🎯 CONCLUSION
+Le projet EcoRide est fonctionnel mais présente 72 problèmes identifiés, dont 20 critiques. Forces :
+Architecture solide (MVC, PDO, transactions)
+Bonnes pratiques générales (requêtes préparées, hachage mots de passe)
+Code moderne et maintenable
+Faiblesses :
+Sécurité insuffisante (CSRF, XSS, validation)
+Logique métier incomplète (dates, remboursements)
+Frontend manque de robustesse (gestion erreurs, performance)
+Avec 64 heures de corrections ciblées, le projet peut atteindre un niveau de qualité production.
+Rapport généré le : 17/10/2025
+Auditeur : Claude (Anthropic)
+Version : 2.0 - Analyse complète

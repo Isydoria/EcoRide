@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Vérifier que les villes sont différentes
             if (departure.value.toLowerCase() === arrival.value.toLowerCase()) {
                 e.preventDefault();
-                alert('Les villes de départ et d\'arrivée doivent être différentes');
+                if (typeof Toast !== 'undefined') {
+                    Toast.warning('Les villes de départ et d\'arrivée doivent être différentes');
+                }
                 return false;
             }
             
@@ -25,7 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (selectedDate < today) {
                 e.preventDefault();
-                alert('Veuillez sélectionner une date future');
+                if (typeof Toast !== 'undefined') {
+                    Toast.warning('Veuillez sélectionner une date future');
+                }
                 return false;
             }
             

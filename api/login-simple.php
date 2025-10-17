@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Charger la configuration
 require_once '../config/init.php';
+require_once '../config/rate-limiter.php';
 
 // Headers JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -26,6 +27,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Vérifier le rate limiting
+    $conn = db();
+    $rateLimiter = new RateLimiter($conn);
+    $clientIP = RateLimiter::getClientIP();
+
+    $rateCheck = $rateLimiter->check($clientIP, 'login', 5, 900); // 5 tentatives, 15 min de blocage
+
+    if (!$rateCheck['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'success' => false,
+            'message' => $rateCheck['message'],
+            'retry_after' => $rateCheck['retry_after']
+        ]);
+        exit;
+    }
     // Récupérer les données POST
     $data = json_decode(file_get_contents('php://input'), true);
     
@@ -70,19 +87,24 @@ try {
     
     // Vérifier si l'utilisateur existe
     if (!$user) {
+        $rateLimiter->recordAttempt($clientIP, 'login');
         throw new Exception('Email ou mot de passe incorrect');
     }
-    
+
     // ==========================================
     // 🔐 VÉRIFICATION MOT DE PASSE
     // Compatible "password" ET "mot_de_passe"
     // ==========================================
     $passwordField = isset($user['mot_de_passe']) ? 'mot_de_passe' : 'password';
     $storedPassword = $user[$passwordField];
-    
+
     if (!password_verify($password, $storedPassword)) {
+        $rateLimiter->recordAttempt($clientIP, 'login');
         throw new Exception('Email ou mot de passe incorrect');
     }
+
+    // ✅ Connexion réussie - Réinitialiser le compteur
+    $rateLimiter->reset($clientIP, 'login');
     
     // ==========================================
     // ✅ CONNEXION RÉUSSIE - CRÉER LA SESSION

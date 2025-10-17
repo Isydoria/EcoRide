@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Vérifier que trajetId est défini
     if (typeof trajetId === 'undefined' || !trajetId) {
         console.error('trajetId non défini');
-        alert('Erreur : ID du trajet non trouvé');
+        if (typeof Toast !== 'undefined') {
+            Toast.error('ID du trajet non trouvé');
+        }
         return;
     }
 
@@ -53,8 +55,8 @@ function loadTrajetDetails() {
             const errorSection = document.getElementById('errorSection');
             if (errorSection) {
                 errorSection.style.display = 'block';
-            } else {
-                alert('Erreur : ' + data.message);
+            } else if (typeof Toast !== 'undefined') {
+                Toast.error(data.message || 'Erreur lors du chargement du trajet');
             }
         }
     })
@@ -64,8 +66,8 @@ function loadTrajetDetails() {
         const errorSection = document.getElementById('errorSection');
         if (errorSection) {
             errorSection.style.display = 'block';
-        } else {
-            alert('Erreur de chargement du trajet');
+        } else if (typeof Toast !== 'undefined') {
+            Toast.error('Erreur de chargement du trajet');
         }
     });
 }
@@ -345,7 +347,9 @@ function confirmerReservation() {
     
     // Vérifier que trajetId existe
     if (typeof trajetId === 'undefined' || !trajetId) {
-        alert('Erreur : ID du trajet non trouvé');
+        if (typeof Toast !== 'undefined') {
+            Toast.error('ID du trajet non trouvé');
+        }
         return;
     }
 
@@ -370,14 +374,16 @@ function confirmerReservation() {
         
         if (data.success) {
             // Réservation réussie
-            alert('✅ ' + data.message);
-            
+            if (typeof Toast !== 'undefined') {
+                Toast.success(data.message || 'Réservation confirmée !', 3000);
+            }
+
             if (btnParticiper) {
                 // Mettre à jour l'interface
                 btnParticiper.textContent = 'Réservé !';
                 btnParticiper.disabled = true;
             }
-            
+
             // Mettre à jour les crédits affichés
             if (data.nouveaux_credits !== undefined) {
                 const creditsElement = document.querySelector('.user-credits strong');
@@ -385,14 +391,16 @@ function confirmerReservation() {
                     creditsElement.textContent = data.nouveaux_credits;
                 }
             }
-            
+
             // Recharger la page après 2 secondes
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
         } else {
             // Erreur
-            alert('❌ ' + data.message);
+            if (typeof Toast !== 'undefined') {
+                Toast.error(data.message || 'Erreur lors de la réservation');
+            }
             if (btnParticiper) {
                 btnParticiper.disabled = false;
                 btnParticiper.textContent = 'Réserver ce trajet';
@@ -401,7 +409,9 @@ function confirmerReservation() {
     })
     .catch(error => {
         console.error('Erreur:', error);
-        alert('❌ Une erreur est survenue. Veuillez réessayer.');
+        if (typeof Toast !== 'undefined') {
+            Toast.error('Une erreur est survenue. Veuillez réessayer.');
+        }
         if (btnParticiper) {
             btnParticiper.disabled = false;
             btnParticiper.textContent = 'Réserver ce trajet';

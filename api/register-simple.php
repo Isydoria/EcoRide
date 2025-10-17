@@ -40,6 +40,7 @@ session_start();
 // ✅ ÉTAPE 1 : Connexion à la base de données
 try {
     require_once __DIR__ . '/../config/init.php';
+    require_once __DIR__ . '/../config/rate-limiter.php';
     $pdo = db();
 
     if (!$pdo) {
@@ -52,6 +53,16 @@ try {
 
 } catch(Exception $e) {
     jsonResponse(false, 'Erreur de connexion à la base de données', null, $e->getMessage());
+}
+
+// ✅ Rate Limiting - Protection anti-spam
+$rateLimiter = new RateLimiter($pdo);
+$clientIP = RateLimiter::getClientIP();
+
+$rateCheck = $rateLimiter->check($clientIP, 'register', 3, 900); // 3 inscriptions max par 15 min
+
+if (!$rateCheck['allowed']) {
+    jsonResponse(false, $rateCheck['message']);
 }
 
 // ✅ ÉTAPE 2 : Récupérer les données POST
@@ -80,11 +91,19 @@ if (empty($email)) {
     $errors[] = 'Format d\'email invalide';
 }
 
-// Validation mot de passe
+// Validation mot de passe renforcée
 if (empty($password)) {
     $errors[] = 'Le mot de passe est obligatoire';
-} elseif (strlen($password) < 8) {
-    $errors[] = 'Le mot de passe doit contenir au moins 8 caractères';
+} elseif (strlen($password) < 12) {
+    $errors[] = 'Le mot de passe doit contenir au moins 12 caractères';
+} elseif (!preg_match('/[A-Z]/', $password)) {
+    $errors[] = 'Le mot de passe doit contenir au moins une majuscule';
+} elseif (!preg_match('/[a-z]/', $password)) {
+    $errors[] = 'Le mot de passe doit contenir au moins une minuscule';
+} elseif (!preg_match('/[0-9]/', $password)) {
+    $errors[] = 'Le mot de passe doit contenir au moins un chiffre';
+} elseif (!preg_match('/[^A-Za-z0-9]/', $password)) {
+    $errors[] = 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...)';
 } elseif ($password !== $password_confirm) {
     $errors[] = 'Les mots de passe ne correspondent pas';
 }
@@ -206,6 +225,9 @@ try {
 } catch(PDOException $e) {
     jsonResponse(false, 'Erreur lors de l\'inscription', null, $e->getMessage());
 }
+
+// ✅ Inscription réussie - Réinitialiser le compteur rate limiting
+$rateLimiter->reset($clientIP, 'register');
 
 // ✅ ÉTAPE 8 : Créer la session utilisateur
 try {
