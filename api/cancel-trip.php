@@ -53,9 +53,9 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT c.*, COUNT(p.participation_id) as participants_count,
-                   COALESCE(SUM(CASE WHEN p.statut != 'annule' THEN (c.prix * p.nombre_places) ELSE 0 END), 0) as credits_to_refund
+                   COALESCE(SUM(CASE WHEN p.statut_reservation != 'annulee' THEN (c.prix * p.places_reservees) ELSE 0 END), 0) as credits_to_refund
             FROM covoiturage c
-            LEFT JOIN participation p ON c.covoiturage_id = p.id_trajet
+            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
             WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
             GROUP BY c.covoiturage_id
         ");
@@ -97,11 +97,12 @@ try {
     // Récupérer les participations actives pour remboursement
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT p.*, (c.prix * p.nombre_places) as credit_utilise, u.pseudo, u.credits as credit
+            SELECT p.*, (c.prix * p.places_reservees) as credit_utilise, u.pseudo, u.credits as credit,
+                   p.passager_id as id_passager
             FROM participation p
-            JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
-            JOIN utilisateur u ON p.id_passager = u.utilisateur_id
-            WHERE p.id_trajet = :trip_id AND p.statut IN ('en_attente', 'confirmee')
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+            WHERE p.covoiturage_id = :trip_id AND p.statut_reservation IN ('en_attente', 'confirmee')
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -128,7 +129,7 @@ try {
             ]);
 
             // Marquer la participation comme annulée
-            $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
+            $stmt = $pdo->prepare("UPDATE participation SET statut_reservation = 'annulee' WHERE participation_id = :participation_id");
             $stmt->execute(['participation_id' => $participant['participation_id']]);
         } else {
             $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
