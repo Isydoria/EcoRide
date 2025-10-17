@@ -1474,7 +1474,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                             <?php endif; ?>
 
                                             <?php if ($is_conductor): ?>
-                                                <?php if ($status === 'planifie' && $is_future): ?>
+                                                <?php if (in_array($status, ['planifie', 'en_attente', 'disponible']) && $is_future): ?>
                                                     <button class="btn btn-sm btn-success start-trip"
                                                             data-trip-id="<?= $trip['trip_id'] ?>">
                                                         🚀 Démarrer
