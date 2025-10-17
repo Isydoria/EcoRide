@@ -11,7 +11,8 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - 🚗 **Proposer des covoiturages** en tant que conducteur
 - 🌱 **Privilégier l'écologie** avec mise en avant des véhicules électriques
 - 💰 **Gérer un système de crédits** pour les réservations
-- ⭐ **Noter et évaluer** les conducteurs et trajets
+- ⭐ **Système d'avis bidirectionnel** : passagers et conducteurs s'évaluent mutuellement
+- 🎯 **Gestion statut trajets** : démarrer et terminer les trajets en temps réel
 - 👥 **Interface admin** complète avec statistiques
 
 ---
@@ -90,7 +91,12 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 3. **Fonctionnalités avancées :**
    - Création de trajet (conducteur)
    - Gestion des véhicules
-   - Système d'évaluation
+   - Démarrage/terminaison de trajets en temps réel
+   - Système d'évaluation bidirectionnel complet :
+     * Consulter ses avis reçus avec statistiques
+     * Laisser un avis sur un trajet terminé
+     * Modal interactif avec étoiles et commentaire
+     * Filtrage et tri des avis
 
 ---
 
@@ -113,8 +119,17 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 ### 🚗 **Gestion des Trajets**
 - ✅ Création de trajets par les conducteurs
 - ✅ Informations véhicule (marque, modèle, énergie, places)
-- ✅ Système d'avis et évaluations
-- ✅ Gestion des statuts (planifié, en cours, terminé)
+- ✅ Gestion des statuts temps réel (en attente, en cours, terminé)
+- ✅ Actions conducteur : démarrer/terminer trajets avec notifications
+
+### ⭐ **Système d'Avis et Évaluation**
+- ✅ Avis bidirectionnels : passagers ↔ conducteurs
+- ✅ Notation 1-5 étoiles avec commentaires (10-500 caractères)
+- ✅ Statistiques : note moyenne et nombre total d'avis
+- ✅ Modal interactif avec étoiles cliquables
+- ✅ Validations : trajet terminé + participation confirmée
+- ✅ Section dédiée "Mes avis" dans le dashboard utilisateur
+- ✅ Liste des trajets à évaluer après chaque trajet terminé
 
 ### 🛠️ **Administration**
 - ✅ Dashboard admin avec statistiques temps réel
@@ -139,7 +154,8 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - **PDO** avec requêtes préparées (sécurité SQL)
 - **Sessions PHP** sécurisées
 - **Architecture MVC** adaptée
-- **API RESTful** pour toutes les actions
+- **API RESTful** (18+ endpoints) pour toutes les actions
+- **Compatibilité multi-BDD** : détection automatique MySQL/PostgreSQL
 
 ### **Base de Données**
 - **PostgreSQL 15** (Production - Render.com)
@@ -248,7 +264,12 @@ Le code s'adapte automatiquement selon l'environnement :
 - **US4** : Filtres avancés des covoiturages (base fonctionnelle)
 - **US6** : Participation aux trajets (réservation opérationnelle)
 - **US10** : Historique des trajets (dans dashboard utilisateur)
-- **US11** : Évaluation des trajets (structure en place)
+
+### ✅ **Récemment Complétées**
+- **US11** : Système d'évaluation bidirectionnel complet (passagers ↔ conducteurs)
+  * 3 APIs : create-avis, get-avis, get-trips-to-rate
+  * Interface complète avec modal et statistiques
+  * Compatible MySQL/PostgreSQL
 
 ### 📋 **Planifiées**
 - **US12** : Espace employé avec modération avancée
