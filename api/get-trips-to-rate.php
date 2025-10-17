@@ -40,16 +40,16 @@ try {
                 c.ville_depart,
                 c.ville_arrivee,
                 c.date_depart,
-                c.prix_par_place as prix,
+                c.prix as prix,
                 p.passager_id as other_user_id,
                 u.pseudo as other_user_pseudo,
                 TRUE as is_conductor
             FROM covoiturage c
             JOIN participation p ON c.covoiturage_id = p.covoiturage_id
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-            WHERE c.conducteur_id = :user_id
+            WHERE c.id_conducteur = :user_id
             AND c.statut = 'termine'
-            AND p.statut_reservation = 'confirmee'
+            AND p.statut_reservation = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.evaluateur_id = :user_id
@@ -69,20 +69,20 @@ try {
                 c.ville_depart,
                 c.ville_arrivee,
                 c.date_depart,
-                c.prix_par_place as prix,
-                c.conducteur_id as other_user_id,
+                c.prix as prix,
+                c.id_conducteur as other_user_id,
                 u.pseudo as other_user_pseudo,
                 FALSE as is_conductor
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
             WHERE p.passager_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut_reservation = 'confirmee'
+            AND p.statut_reservation = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.evaluateur_id = :user_id
-                AND a.evalue_id = c.conducteur_id
+                AND a.evalue_id = c.id_conducteur
                 AND a.covoiturage_id = c.covoiturage_id
             )
             ORDER BY c.date_depart DESC
