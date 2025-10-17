@@ -126,9 +126,9 @@ try {
         $sqlCheck = "
             SELECT participation_id
             FROM participation
-            WHERE id_trajet = :trajet_id
-            AND id_passager = :user_id
-            AND statut IN ('en_attente', 'confirmee')
+            WHERE covoiturage_id = :trajet_id
+            AND passager_id = :user_id
+            AND statut_reservation IN ('en_attente', 'confirmee')
         ";
     } else {
         $sqlCheck = "
@@ -175,11 +175,11 @@ try {
     if ($isPostgreSQL) {
         $sqlReservation = "
             INSERT INTO participation (
-                id_trajet,
-                id_passager,
-                nombre_places,
-                statut,
-                date_reservation
+                covoiturage_id,
+                passager_id,
+                places_reservees,
+                statut_reservation,
+                created_at
             ) VALUES (
                 :trajet_id,
                 :user_id,
