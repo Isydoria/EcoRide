@@ -452,7 +452,7 @@ try {
                         <?= htmlspecialchars(($trip['marque'] ?? '') . ' ' . ($trip['modele'] ?? '')) ?>
                     </td>
                     <td><?= date('d/m/Y H:i', strtotime($trip['date_depart'])) ?></td>
-                    <td><?= number_format($trip['prix_par_place'] ?? $trip['prix'] ?? 0, 2) ?>€</td>
+                    <td><?= number_format($trip['prix_par_place'] ?? $trip['prix'] ?? 0, 2) ?> crédits</td>
                     <td><?= $trip['places_disponibles'] ?? 0 ?></td>
                     <td>
                         <span class="status-badge status-<?= $trip['statut'] ?? 'planifie' ?>">
