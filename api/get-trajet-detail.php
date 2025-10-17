@@ -236,9 +236,9 @@ try {
             $sqlReservation = "
                 SELECT participation_id
                 FROM participation
-                WHERE id_trajet = :trajet_id
-                AND id_passager = :user_id
-                AND statut IN ('en_attente', 'confirmee')
+                WHERE covoiturage_id = :trajet_id
+                AND passager_id = :user_id
+                AND statut_reservation IN ('en_attente', 'confirmee')
             ";
         } else {
             $sqlReservation = "
