@@ -2146,7 +2146,12 @@ $active_section = $_GET['section'] ?? 'overview';
                             <div>💰 ${trip.prix} crédits</div>
                         </div>
                         <div style="margin-top: 15px;">
-                            <button class="btn btn-primary" onclick="openAvisModal(${trip.covoiturage_id}, ${trip.other_user_id}, '${escapeHtml(trip.other_user_pseudo)}', '${escapeHtml(trip.ville_depart)}', '${escapeHtml(trip.ville_arrivee)}')">
+                            <button class="btn btn-primary btn-leave-avis"
+                                    data-trip-id="${trip.covoiturage_id}"
+                                    data-evaluate-id="${trip.other_user_id}"
+                                    data-evaluate-pseudo="${escapeHtml(trip.other_user_pseudo)}"
+                                    data-depart="${escapeHtml(trip.ville_depart)}"
+                                    data-arrivee="${escapeHtml(trip.ville_arrivee)}">
                                 ⭐ Laisser un avis
                             </button>
                         </div>
@@ -2156,6 +2161,19 @@ $active_section = $_GET['section'] ?? 'overview';
             html += '</div>';
 
             container.innerHTML = html;
+
+            // Attacher les événements aux boutons "Laisser un avis"
+            document.querySelectorAll('.btn-leave-avis').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tripId = parseInt(this.dataset.tripId);
+                    const evaluateId = parseInt(this.dataset.evaluateId);
+                    const evaluatePseudo = this.dataset.evaluatePseudo;
+                    const depart = this.dataset.depart;
+                    const arrivee = this.dataset.arrivee;
+
+                    openAvisModal(tripId, evaluateId, evaluatePseudo, depart, arrivee);
+                });
+            });
         }
 
         // Générer les étoiles pour l'affichage
