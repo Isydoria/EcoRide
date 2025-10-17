@@ -12,7 +12,8 @@
 - `logout.php` - Script de déconnexion
 
 ### Interfaces utilisateurs
-- `user/dashboard.php` - Interface utilisateur complète
+- `user/dashboard.php` - Interface utilisateur complète (avec système d'avis)
+- `employee/dashboard.php` - Interface employé
 - `admin/dashboard.php` - Interface d'administration
 
 ### API REST
@@ -23,6 +24,10 @@
 - `api/search-trajets.php` - Recherche de trajets
 - `api/get-trajet-detail.php` - Détails d'un trajet
 - `api/participer-trajet.php` - Réservation de trajets
+- `api/create-avis.php` - Création d'avis/évaluations
+- `api/get-avis.php` - Récupération des avis reçus
+- `api/get-trips-to-rate.php` - Liste des trajets à évaluer
+- `api/manage-trip-status.php` - Gestion statut trajets (démarrer/terminer)
 - `api/check-session.php` - Vérification de session
 - `api/test-db.php` - Test de connexion BDD
 - `api/test-direct.php` - Test direct BDD
@@ -89,8 +94,10 @@
 ✅ Code compatible MySQL/PostgreSQL avec détection automatique
 ✅ Interface utilisateur moderne avec dashboard
 ✅ Interface d'administration avec statistiques et graphiques
-✅ API REST fonctionnelle (15+ endpoints)
+✅ API REST fonctionnelle (18+ endpoints)
 ✅ Système d'authentification sécurisé (bcrypt, sessions)
+✅ Système d'avis et évaluation bidirectionnel complet
+✅ Gestion statut trajets (en attente, en cours, terminé)
 ✅ Gestion des véhicules et trajets (34 trajets de démo)
 ✅ Base de données relationnelle + NoSQL (MongoDB fake)
 ✅ 3 environnements supportés (WampServer, Docker, Render)
