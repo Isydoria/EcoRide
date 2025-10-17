@@ -79,11 +79,12 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix,
-                   (c.prix * p.nombre_places) as credit_utilise, u.pseudo as conducteur
+                   (c.prix * p.places_reservees) as credit_utilise, u.pseudo as conducteur,
+                   p.statut_reservation as statut
             FROM participation p
-            JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
             JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
-            WHERE p.id_passager = :user_id
+            WHERE p.passager_id = :user_id
             ORDER BY c.date_depart DESC
             LIMIT 10
         ");
@@ -110,7 +111,7 @@ try {
                        COUNT(p.participation_id) as participants
                 FROM covoiturage c
                 LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
-                LEFT JOIN participation p ON c.covoiturage_id = p.id_trajet AND p.statut != 'annule'
+                LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut_reservation != 'annulee'
                 WHERE c.id_conducteur = :user_id
                 GROUP BY c.covoiturage_id, v.marque, v.modele
                 ORDER BY c.date_depart DESC
@@ -134,12 +135,12 @@ try {
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
                 SELECT p.*, c.covoiturage_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
-                       c.prix, (c.prix * p.nombre_places) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
-                       c.statut as trip_status
+                       c.prix, (c.prix * p.places_reservees) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
+                       c.statut as trip_status, p.statut_reservation as statut
                 FROM participation p
-                JOIN covoiturage c ON p.id_trajet = c.covoiturage_id
+                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
                 JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
-                WHERE p.id_passager = :user_id
+                WHERE p.passager_id = :user_id
                 ORDER BY c.date_depart DESC
             ");
         } else {
@@ -1187,7 +1188,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                 <div class="trip-details">
                                     <div>📅 <?= date('d/m/Y à H:i', strtotime($booking['date_depart'])) ?></div>
                                     <div>👨‍✈️ Conducteur: <?= htmlspecialchars($booking['conducteur'] ?? '') ?></div>
-                                    <div>🎫 <?= $booking['nombre_places'] ?> place(s)</div>
+                                    <div>🎫 <?= $booking['places_reservees'] ?? $booking['nombre_places'] ?? 0 ?> place(s)</div>
                                     <div>💳 <?= $booking['credit_utilise'] ?> crédits</div>
                                     <div>📊 <?= ucfirst($booking['statut']) ?></div>
                                 </div>
@@ -1456,7 +1457,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                                 <div>🚗 <?= htmlspecialchars(($trip['marque'] ?? '') . ' ' . ($trip['modele'] ?? '')) ?></div>
                                             <?php else: ?>
                                                 <div>👨‍✈️ <?= htmlspecialchars($trip['conducteur'] ?? '') ?></div>
-                                                <div>🎫 <?= $trip['nombre_places'] ?> place(s)</div>
+                                                <div>🎫 <?= $trip['places_reservees'] ?? $trip['nombre_places'] ?? 0 ?> place(s)</div>
                                                 <div>💳 <?= $trip['credit_utilise'] ?? 0 ?> crédits</div>
                                             <?php endif; ?>
                                         </div>
