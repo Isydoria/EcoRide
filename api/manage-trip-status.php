@@ -156,28 +156,62 @@ try {
         }
         $stmt->execute(['trip_id' => $trip_id]);
 
-        // Récupérer les participants pour notification
+        // Récupérer les participants pour notification et calcul des crédits
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
-                SELECT p.*, u.pseudo, u.email
+                SELECT p.*, u.pseudo, u.email, c.prix
                 FROM participation p
                 JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
                 WHERE p.covoiturage_id = :trip_id AND p.statut_reservation = 'terminee'
             ");
         } else {
             $stmt = $pdo->prepare("
-                SELECT p.*, u.pseudo, u.email
+                SELECT p.*, u.pseudo, u.email, c.prix_par_place as prix
                 FROM participation p
                 JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
                 WHERE p.covoiturage_id = :trip_id AND p.statut = 'terminee'
             ");
         }
         $stmt->execute(['trip_id' => $trip_id]);
         $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Calculer le total des crédits à transférer au conducteur
+        $total_credits = 0;
+        foreach ($participants as $participant) {
+            $places = $participant['places_reservees'] ?? $participant['nombre_places'] ?? 1;
+            $prix_unitaire = floatval($participant['prix']);
+            $total_credits += ($prix_unitaire * $places);
+        }
+
+        // Transférer les crédits au conducteur
+        if ($total_credits > 0) {
+            if ($isPostgreSQL) {
+                $stmt = $pdo->prepare("
+                    UPDATE utilisateur
+                    SET credits = credits + :amount
+                    WHERE utilisateur_id = :user_id
+                ");
+            } else {
+                $stmt = $pdo->prepare("
+                    UPDATE utilisateur
+                    SET credit = credit + :amount
+                    WHERE utilisateur_id = :user_id
+                ");
+            }
+            $stmt->execute([
+                'amount' => $total_credits,
+                'user_id' => $user_id
+            ]);
+        }
+
         $message = "Trajet terminé avec succès !";
         if (count($participants) > 0) {
             $message .= " " . count($participants) . " passager(s) vont recevoir une demande d'évaluation.";
+            if ($total_credits > 0) {
+                $message .= " Vous avez reçu " . number_format($total_credits, 2) . " crédits.";
+            }
 
             // TODO: Ici on pourrait envoyer des emails aux participants
             // pour leur demander de valider le trajet et laisser un avis
