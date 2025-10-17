@@ -20,6 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once '../config/init.php';
 
+// Vérifier le token CSRF
+if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    die(json_encode([
+        'success' => false,
+        'message' => 'Token CSRF invalide. Veuillez recharger la page.'
+    ]));
+}
+
 try {
     $pdo = db();
 

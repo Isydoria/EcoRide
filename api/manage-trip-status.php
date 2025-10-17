@@ -20,6 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once '../config/init.php';
 
+// Vérifier le token CSRF
+if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    die(json_encode([
+        'success' => false,
+        'message' => 'Token CSRF invalide. Veuillez recharger la page.'
+    ]));
+}
+
 try {
     $pdo = db();
 
@@ -184,6 +192,8 @@ try {
             $prix_unitaire = floatval($participant['prix']);
             $total_credits += ($prix_unitaire * $places);
         }
+        // Arrondir à 2 décimales
+        $total_credits = round($total_credits, 2);
 
         // Transférer les crédits au conducteur
         if ($total_credits > 0) {
@@ -204,6 +214,11 @@ try {
                 'amount' => $total_credits,
                 'user_id' => $user_id
             ]);
+
+            // Mettre à jour les crédits en session
+            if (isset($_SESSION['credits'])) {
+                $_SESSION['credits'] = floatval($_SESSION['credits']) + $total_credits;
+            }
         }
 
         $message = "Trajet terminé avec succès !";

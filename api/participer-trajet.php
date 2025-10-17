@@ -11,6 +11,11 @@ session_start();
 require_once __DIR__ . '/../config/init.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Vérifier le token CSRF
+if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    jsonResponse(false, 'Token CSRF invalide. Veuillez recharger la page.');
+}
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ob_start();
@@ -102,13 +107,19 @@ try {
     }
     
     // ✅ 2. Vérifications diverses
-    
+
     // Vérifier que le trajet est encore planifié
     if ($trajet['statut'] !== 'planifie') {
         $pdo->rollBack();
         jsonResponse(false, 'Ce trajet n\'est plus disponible à la réservation');
     }
-    
+
+    // Vérifier que le trajet n'est pas dans le passé
+    if (strtotime($trajet['date_depart']) <= time()) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Impossible de réserver un trajet dont la date de départ est passée');
+    }
+
     // Vérifier que l'utilisateur n'est pas le conducteur
     if ($trajet['conducteur_id'] == $user_id) {
         $pdo->rollBack();
@@ -154,7 +165,7 @@ try {
     // ✅ 3. Calculer le coût total (prix + 2 crédits de commission)
     $prix_place = floatval($trajet['prix_par_place']);
     $commission = 2;
-    $cout_total = ($prix_place * $nombre_places) + $commission;
+    $cout_total = round(($prix_place * $nombre_places) + $commission, 2);
     
     // ✅ 4. Vérifier que l'utilisateur a assez de crédits
     if ($isPostgreSQL) {

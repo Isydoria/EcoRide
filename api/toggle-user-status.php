@@ -10,6 +10,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrateur')
 require_once '../config/init.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
+
+// Vérifier le token CSRF
+if (!isset($data['csrf_token']) || !verifyCSRFToken($data['csrf_token'])) {
+    die(json_encode([
+        'success' => false,
+        'message' => 'Token CSRF invalide. Veuillez recharger la page.'
+    ]));
+}
 $user_id = $data['user_id'] ?? null;
 $action = $data['action'] ?? null;
 

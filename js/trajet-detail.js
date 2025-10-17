@@ -5,8 +5,15 @@ let trajetDetails = null;
 
 // Fonction appelée au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier que trajetId est défini
+    if (typeof trajetId === 'undefined' || !trajetId) {
+        console.error('trajetId non défini');
+        alert('Erreur : ID du trajet non trouvé');
+        return;
+    }
+
     console.log('Page de détail chargée pour le trajet ID:', trajetId);
-    
+
     // Charger les détails du trajet
     loadTrajetDetails();
 });
@@ -24,7 +31,12 @@ function loadTrajetDetails() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur HTTP: ' + response.status);
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Données reçues:', data);
         
@@ -66,7 +78,7 @@ function displayTrajetDetails(trajet) {
                   trajet.type_carburant === 'hydrogene';
     
     if (isEco) {
-        document.getElementById('ecoIndicator').innerHTML = '🌱 Trajet écologique';
+        document.getElementById('ecoIndicator').textContent = '🌱 Trajet écologique';
         document.getElementById('ecoIndicator').classList.remove('hidden');
     }
     
@@ -120,10 +132,12 @@ function displayTrajetDetails(trajet) {
     
     // Note et étoiles
     const stars = createStarRating(trajet.note_moyenne || 0);
-    document.getElementById('driverRating').innerHTML = `
-        ${stars} 
-        <span>${trajet.note_moyenne || 0}/5 (${trajet.nb_avis || 0} avis)</span>
-    `;
+    const ratingElement = document.getElementById('driverRating');
+    ratingElement.textContent = ''; // Vider d'abord
+    ratingElement.textContent = stars + ' ';
+    const spanElement = document.createElement('span');
+    spanElement.textContent = `${trajet.note_moyenne || 0}/5 (${trajet.nb_avis || 0} avis)`;
+    ratingElement.appendChild(spanElement);
     
     // Statistiques du conducteur
     document.getElementById('totalTrajets').textContent = trajet.total_trajets || 0;
@@ -154,10 +168,13 @@ function displayPreferences(preferences) {
     const container = document.getElementById('preferencesContainer');
     if (!container) return;
     
-    container.innerHTML = '';
-    
+    container.textContent = ''; // Vider avec textContent pour éviter XSS
+
     if (!preferences) {
-        container.innerHTML = '<p class="no-avis">Aucune préférence spécifiée</p>';
+        const p = document.createElement('p');
+        p.className = 'no-avis';
+        p.textContent = 'Aucune préférence spécifiée';
+        container.appendChild(p);
         return;
     }
     
@@ -174,11 +191,7 @@ function displayPreferences(preferences) {
         if (value !== undefined) {
             const div = document.createElement('div');
             div.className = `preference-item ${value == 1 ? 'yes' : 'no'}`;
-            div.innerHTML = `
-                ${pref.label} 
-                ${value == 1 ? '✅' : '❌'} 
-                ${value == 1 ? pref.yes : pref.no}
-            `;
+            div.textContent = `${pref.label} ${value == 1 ? '✅' : '❌'} ${value == 1 ? pref.yes : pref.no}`;
             container.appendChild(div);
         }
     });
@@ -188,7 +201,7 @@ function displayPreferences(preferences) {
         const div = document.createElement('div');
         div.className = 'preference-item';
         div.style.gridColumn = '1 / -1';
-        div.innerHTML = `📝 ${preferences.preferences_autres}`;
+        div.textContent = `📝 ${preferences.preferences_autres}`;
         container.appendChild(div);
     }
 }
@@ -197,28 +210,44 @@ function displayPreferences(preferences) {
 function displayAvis(avis) {
     const container = document.getElementById('avisContainer');
     if (!container) return;
-    
-    container.innerHTML = '';
-    
+
+    container.textContent = ''; // Vider avec textContent
+
     if (!avis || avis.length === 0) {
-        container.innerHTML = '<p class="no-avis">Aucun avis pour le moment</p>';
+        const p = document.createElement('p');
+        p.className = 'no-avis';
+        p.textContent = 'Aucun avis pour le moment';
+        container.appendChild(p);
         return;
     }
-    
+
     avis.forEach(item => {
         const div = document.createElement('div');
         div.className = 'avis-item';
-        
+
         const stars = '⭐'.repeat(item.note);
-        
-        div.innerHTML = `
-            <div class="avis-header">
-                <span class="avis-author">${item.auteur}</span>
-                <span class="avis-rating">${stars}</span>
-            </div>
-            <p class="avis-comment">${item.commentaire || 'Aucun commentaire'}</p>
-        `;
-        
+
+        // Créer les éléments de manière sécurisée
+        const header = document.createElement('div');
+        header.className = 'avis-header';
+
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'avis-author';
+        authorSpan.textContent = item.auteur;
+
+        const ratingSpan = document.createElement('span');
+        ratingSpan.className = 'avis-rating';
+        ratingSpan.textContent = stars;
+
+        header.appendChild(authorSpan);
+        header.appendChild(ratingSpan);
+
+        const commentP = document.createElement('p');
+        commentP.className = 'avis-comment';
+        commentP.textContent = item.commentaire || 'Aucun commentaire';
+
+        div.appendChild(header);
+        div.appendChild(commentP);
         container.appendChild(div);
     });
 }
@@ -229,7 +258,7 @@ function checkBookingAvailability(trajet, coutTotal) {
     if (!btnParticiper) return;
     
     // Vérifier si l'utilisateur est le conducteur
-    if (typeof userId !== 'undefined' && parseInt(trajet.id_conducteur) === userId) {
+    if (typeof userId !== 'undefined' && userId && parseInt(trajet.id_conducteur) === parseInt(userId)) {
         btnParticiper.textContent = 'Vous êtes le conducteur';
         btnParticiper.disabled = true;
         return;
@@ -243,7 +272,7 @@ function checkBookingAvailability(trajet, coutTotal) {
     }
     
     // Vérifier les crédits
-    if (typeof userCredits !== 'undefined' && userCredits < coutTotal) {
+    if (typeof userCredits !== 'undefined' && userCredits !== null && parseFloat(userCredits) < coutTotal) {
         btnParticiper.textContent = 'Crédits insuffisants';
         btnParticiper.disabled = true;
         return;
@@ -314,6 +343,12 @@ function confirmerReservation() {
         btnParticiper.textContent = 'Réservation en cours...';
     }
     
+    // Vérifier que trajetId existe
+    if (typeof trajetId === 'undefined' || !trajetId) {
+        alert('Erreur : ID du trajet non trouvé');
+        return;
+    }
+
     // Créer les données à envoyer
     const formData = new FormData();
     formData.append('trajet_id', trajetId);
@@ -324,7 +359,12 @@ function confirmerReservation() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur HTTP: ' + response.status);
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Réponse de réservation:', data);
         

@@ -20,6 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once '../config/init.php';
 
+// Vérifier le token CSRF
+if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    die(json_encode([
+        'success' => false,
+        'message' => 'Token CSRF invalide. Veuillez recharger la page.'
+    ]));
+}
+
 try {
     $pdo = db();
 
@@ -52,12 +60,14 @@ try {
     // Vérifier que la participation existe et peut être annulée
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT r.*, t.date_depart, t.ville_depart, t.ville_arrivee, t.is_active as trip_status,
+            SELECT p.participation_id, p.passager_id, p.covoiturage_id, p.places_reservees as nombre_places,
+                   p.statut_reservation as statut, p.created_at,
+                   c.date_depart, c.ville_depart, c.ville_arrivee, c.statut as trip_status, c.prix as credit_utilise,
                    u.pseudo as conducteur, u.credits as user_credit
-            FROM reservation r
-            JOIN trajet t ON r.id_trajet = t.id_trajet
-            JOIN utilisateur u ON r.id_passager = u.id_utilisateur
-            WHERE r.id_trajet = :trip_id AND r.id_passager = :user_id
+            FROM participation p
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+            WHERE p.covoiturage_id = :trip_id AND p.passager_id = :user_id
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -81,11 +91,15 @@ try {
     }
 
     // Vérifier si la réservation peut être annulée
-    if ($participation['statut'] === 'annule') {
+    $statut_actual = $isPostgreSQL ?
+        ($participation['statut'] === 'annulee' ? 'annule' : $participation['statut']) :
+        $participation['statut'];
+
+    if ($statut_actual === 'annule' || $statut_actual === 'annulee') {
         throw new Exception('Cette réservation est déjà annulée');
     }
 
-    if ($participation['statut'] === 'termine') {
+    if ($statut_actual === 'termine' || $statut_actual === 'terminee') {
         throw new Exception('Impossible d\'annuler une réservation terminée');
     }
 
@@ -105,19 +119,25 @@ try {
         }
     }
 
+    // Valider le montant du remboursement
+    $credit_a_rembourser = floatval($participation['credit_utilise']);
+    if ($credit_a_rembourser < 0) {
+        throw new Exception('Montant de remboursement invalide');
+    }
+
     // Rembourser les crédits à l'utilisateur
-    $new_credit = $participation['user_credit'] + $participation['credit_utilise'];
+    $new_credit = floatval($participation['user_credit']) + $credit_a_rembourser;
 
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE id_utilisateur = :user_id");
+        $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE utilisateur_id = :user_id");
         $stmt->execute([
             'new_credit' => $new_credit,
             'user_id' => $user_id
         ]);
 
         // Marquer la participation comme annulée
-        $stmt = $pdo->prepare("UPDATE reservation SET statut = 'annule' WHERE id_reservation = :participation_id");
-        $stmt->execute(['participation_id' => $participation['id_reservation']]);
+        $stmt = $pdo->prepare("UPDATE participation SET statut_reservation = 'annulee' WHERE participation_id = :participation_id");
+        $stmt->execute(['participation_id' => $participation['participation_id']]);
     } else {
         $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
         $stmt->execute([
@@ -131,44 +151,25 @@ try {
     }
 
     // Augmenter le nombre de places disponibles dans le covoiturage
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            UPDATE trajet
-            SET places_disponibles = places_disponibles + :places_liberated
-            WHERE id_trajet = :trip_id
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            UPDATE covoiturage
-            SET places_disponibles = places_disponibles + :places_liberated
-            WHERE covoiturage_id = :trip_id
-        ");
-    }
+    $stmt = $pdo->prepare("
+        UPDATE covoiturage
+        SET places_disponibles = places_disponibles + :places_liberated
+        WHERE covoiturage_id = :trip_id
+    ");
     $stmt->execute([
         'places_liberated' => $participation['nombre_places'],
         'trip_id' => $trip_id
     ]);
 
-    // Créer une transaction de crédit pour la traçabilité
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            INSERT INTO transaction_credit (id_utilisateur, montant, type, description, reference_id, reference_type, date_inscription)
-            VALUES (:user_id, :montant, 'credit', :description, :ref_id, 'remboursement', CURRENT_TIMESTAMP)
-        ");
-        $stmt->execute([
-            'user_id' => $user_id,
-            'montant' => $participation['credit_utilise'],
-            'description' => 'Remboursement annulation trajet ' . $participation['ville_depart'] . ' → ' . $participation['ville_arrivee'],
-            'ref_id' => $participation['id_reservation']
-        ]);
-    } else {
+    // Créer une transaction de crédit pour la traçabilité (seulement pour MySQL car PostgreSQL n'a pas cette table)
+    if (!$isPostgreSQL) {
         $stmt = $pdo->prepare("
             INSERT INTO transaction_credit (utilisateur_id, montant, type, description, reference_id, reference_type, created_at)
             VALUES (:user_id, :montant, 'credit', :description, :ref_id, 'remboursement', NOW())
         ");
         $stmt->execute([
             'user_id' => $user_id,
-            'montant' => $participation['credit_utilise'],
+            'montant' => $credit_a_rembourser,
             'description' => 'Remboursement annulation trajet ' . $participation['ville_depart'] . ' → ' . $participation['ville_arrivee'],
             'ref_id' => $participation['participation_id']
         ]);
@@ -182,12 +183,12 @@ try {
     $date = date('d/m/Y à H:i', strtotime($participation['date_depart']));
 
     $message = "Réservation annulée avec succès ! ";
-    $message .= $participation['credit_utilise'] . " crédits ont été remboursés sur votre compte.";
+    $message .= $credit_a_rembourser . " crédits ont été remboursés sur votre compte.";
 
     echo json_encode([
         'success' => true,
         'message' => $message,
-        'credits_refunded' => $participation['credit_utilise'],
+        'credits_refunded' => $credit_a_rembourser,
         'places_liberated' => $participation['nombre_places'],
         'new_credit_balance' => $new_credit,
         'trip_info' => [
