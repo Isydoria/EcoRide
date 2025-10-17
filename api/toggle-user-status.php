@@ -34,9 +34,12 @@ try {
     }
     
     $new_status = ($action === 'suspend') ? 'suspendu' : 'actif';
-    
-    $stmt = $pdo->prepare("UPDATE utilisateur SET statut = ? WHERE utilisateur_id = ?");
-    $stmt->execute([$new_status, $user_id]);
+
+    $stmt = $pdo->prepare("UPDATE utilisateur SET statut = :statut WHERE utilisateur_id = :user_id");
+    $stmt->execute([
+        'statut' => $new_status,
+        'user_id' => $user_id
+    ]);
     
     echo json_encode([
         'success' => true,

@@ -87,16 +87,19 @@ try {
     // ==========================================
     // ✅ CONNEXION RÉUSSIE - CRÉER LA SESSION
     // ==========================================
-    
+
+    // Régénérer l'ID de session pour éviter la fixation de session
+    session_regenerate_id(true);
+
     // ID utilisateur (compatible utilisateur_id OU id)
     $userId = $user['id'] ?? $user['utilisateur_id'];
-    
+
     // Crédits (compatible credit OU credits)
     $userCredits = $user['credits'] ?? $user['credit'] ?? 50;
-    
+
     // is_conducteur (peut ne pas exister)
     $isConducteur = isset($user['is_conducteur']) ? (bool)$user['is_conducteur'] : false;
-    
+
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_pseudo'] = $user['pseudo'];

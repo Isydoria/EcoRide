@@ -209,13 +209,16 @@ try {
 
 // ✅ ÉTAPE 8 : Créer la session utilisateur
 try {
+    // Régénérer l'ID de session pour éviter la fixation de session
+    session_regenerate_id(true);
+
     $_SESSION['user_id'] = $user_id;
     $_SESSION['pseudo'] = $pseudo;
     $_SESSION['email'] = $email;
     $_SESSION['role'] = 'utilisateur';
     $_SESSION['credits'] = 20;
     $_SESSION['logged_in'] = true;
-    
+
 } catch(Exception $e) {
     jsonResponse(false, 'Erreur lors de la création de la session', null, $e->getMessage());
 }
