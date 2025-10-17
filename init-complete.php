@@ -141,11 +141,11 @@ try {
     $db->exec("
         CREATE TABLE participation (
             participation_id SERIAL PRIMARY KEY,
-            id_trajet INTEGER REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
-            id_passager INTEGER REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-            nombre_places INTEGER DEFAULT 1,
-            statut VARCHAR(20) DEFAULT 'en_attente',
-            date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            covoiturage_id INTEGER NOT NULL REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
+            passager_id INTEGER NOT NULL REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+            places_reservees INTEGER NOT NULL DEFAULT 1,
+            statut_reservation VARCHAR(50) DEFAULT 'en_attente' CHECK (statut_reservation IN ('en_attente', 'confirmee', 'annulee', 'terminee')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ");
     echo "<p class='ok'>✓ participation</p>";
@@ -168,12 +168,12 @@ try {
     $db->exec("
         CREATE TABLE avis (
             avis_id SERIAL PRIMARY KEY,
-            id_trajet INTEGER REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
-            id_auteur INTEGER REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-            id_utilisateur_note INTEGER REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-            note INTEGER CHECK (note >= 1 AND note <= 5),
+            evaluateur_id INTEGER NOT NULL REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+            evalue_id INTEGER NOT NULL REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+            covoiturage_id INTEGER NOT NULL REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
+            note INTEGER NOT NULL CHECK (note >= 1 AND note <= 5),
             commentaire TEXT,
-            date_avis TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ");
     echo "<p class='ok'>✓ avis</p>";

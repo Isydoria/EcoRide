@@ -130,7 +130,7 @@ try {
 
     // 4. PARTICIPATIONS
     echo "<br><h2>🎫 Participations</h2>";
-    $stmt = $db->prepare("INSERT INTO participation (id_trajet, id_passager, nombre_places, statut) VALUES (?, ?, 1, ?)");
+    $stmt = $db->prepare("INSERT INTO participation (covoiturage_id, passager_id, places_reservees, statut_reservation) VALUES (?, ?, 1, ?)");
 
     $count = 0;
     foreach ($trajetIds as $i => $tid) {
@@ -158,7 +158,7 @@ try {
         "Conduite sûre"
     ];
 
-    $stmt = $db->prepare("INSERT INTO avis (id_auteur, id_utilisateur_note, id_trajet, note, commentaire) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $db->prepare("INSERT INTO avis (evaluateur_id, evalue_id, covoiturage_id, note, commentaire) VALUES (?, ?, ?, ?, ?)");
 
     $avisCount = 0;
     foreach ($trajetIds as $i => $tid) {
