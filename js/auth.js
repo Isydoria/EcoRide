@@ -135,8 +135,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            if (password.length < 8) {
-                showMessage('error', 'Le mot de passe doit contenir au moins 8 caractères', 'errorMessage');
+            if (password.length < 12) {
+                showMessage('error', 'Le mot de passe doit contenir au moins 12 caractères', 'errorMessage');
+                return;
+            }
+
+            if (!/[A-Z]/.test(password)) {
+                showMessage('error', 'Le mot de passe doit contenir au moins une majuscule', 'errorMessage');
+                return;
+            }
+
+            if (!/[a-z]/.test(password)) {
+                showMessage('error', 'Le mot de passe doit contenir au moins une minuscule', 'errorMessage');
+                return;
+            }
+
+            if (!/[0-9]/.test(password)) {
+                showMessage('error', 'Le mot de passe doit contenir au moins un chiffre', 'errorMessage');
+                return;
+            }
+
+            if (!/[^A-Za-z0-9]/.test(password)) {
+                showMessage('error', 'Le mot de passe doit contenir au moins un caractère spécial', 'errorMessage');
                 return;
             }
             

@@ -97,20 +97,20 @@ $csrfToken = generateCSRFToken();
                     <label for="password" class="form-label">
                         Mot de passe <span class="required">*</span>
                     </label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        class="form-input" 
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
                         placeholder="••••••••"
                         required
-                        minlength="8"
+                        minlength="12"
                     >
                     <div class="password-strength">
                         <div class="password-strength-bar" id="passwordStrength"></div>
                     </div>
                     <p class="password-hint">
-                        Minimum 8 caractères, incluez des chiffres et des majuscules pour plus de sécurité
+                        Minimum 12 caractères : au moins 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial
                     </p>
                 </div>
 
