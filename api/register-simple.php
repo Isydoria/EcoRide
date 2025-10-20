@@ -12,28 +12,6 @@ ob_start();
 // Headers JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// Fonction helper pour les réponses JSON
-function jsonResponse($success, $message, $data = null, $debug = null) {
-    ob_clean();
-    $response = [
-        'success' => $success,
-        'message' => $message
-    ];
-    if ($data !== null) {
-        $response['data'] = $data;
-    }
-    if ($debug !== null) {
-        $response['debug'] = $debug;
-    }
-    echo json_encode($response);
-    exit;
-}
-
-// Vérifier méthode POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    jsonResponse(false, 'Méthode non autorisée');
-}
-
 // Démarrer session
 session_start();
 
@@ -41,6 +19,12 @@ session_start();
 try {
     require_once __DIR__ . '/../config/init.php';
     require_once __DIR__ . '/../config/rate-limiter.php';
+
+    // Vérifier méthode POST
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonResponse(false, 'Méthode non autorisée');
+    }
+
     $pdo = db();
 
     if (!$pdo) {
