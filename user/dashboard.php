@@ -1271,6 +1271,7 @@ $active_section = $_GET['section'] ?? 'overview';
                 <div class="add-vehicle-form">
                     <h3>Ajouter un véhicule</h3>
                     <form id="addVehicleForm" method="POST" action="../api/add-vehicle.php">
+                        <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Marque *</label>
