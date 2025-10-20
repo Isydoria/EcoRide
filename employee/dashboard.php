@@ -553,15 +553,24 @@ $success_message = $_GET['success'] ?? '';
 
         <!-- Section principale -->
         <div class="review-section">
-            <h2 style="margin-bottom: 25px; color: #2c3e50;">📝 Avis en attente de modération</h2>
-            
-            <?php if (empty($pending_reviews)): ?>
+            <?php if ($isPostgreSQL): ?>
+                <!-- Message pour PostgreSQL -->
                 <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <h3>Aucun avis en attente</h3>
-                    <p>Tous les avis ont été traités. Excellent travail !</p>
+                    <div class="empty-icon">ℹ️</div>
+                    <h3>Modération automatique</h3>
+                    <p>Sur cette plateforme, tous les avis sont automatiquement publiés sans modération préalable.</p>
+                    <p style="margin-top: 10px;">Les avis inappropriés peuvent être signalés par les utilisateurs.</p>
                 </div>
             <?php else: ?>
+                <h2 style="margin-bottom: 25px; color: #2c3e50;">📝 Avis en attente de modération</h2>
+
+                <?php if (empty($pending_reviews)): ?>
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>Aucun avis en attente</h3>
+                        <p>Tous les avis ont été traités. Excellent travail !</p>
+                    </div>
+                <?php else: ?>
                 <?php foreach ($pending_reviews as $review): ?>
                     <div class="review-card">
                         <div class="review-header">
@@ -619,6 +628,7 @@ $success_message = $_GET['success'] ?? '';
                         </div>
                     </div>
                 <?php endforeach; ?>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
