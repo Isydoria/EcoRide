@@ -94,29 +94,43 @@ try {
     $error_message = "Erreur de base de données : " . $e->getMessage();
 }
 
-// Gestion des actions POST - Compatible MySQL/PostgreSQL après ajout colonnes
+// Gestion des actions POST - UNIQUEMENT pour MySQL (PostgreSQL n'a pas de système de modération)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['avis_id'])) {
     $action = $_POST['action'];
     $avis_id = intval($_POST['avis_id']);
     $nouveau_statut = ($action === 'approve') ? 'valide' : 'refuse';
 
     try {
-        $stmt = $pdo->prepare("
-            UPDATE avis
-            SET statut = :statut,
-                valide_par = :employe_id,
-                date_validation = NOW()
-            WHERE avis_id = :avis_id
-        ");
-        $stmt->execute([
-            'statut' => $nouveau_statut,
-            'employe_id' => $user_id,
-            'avis_id' => $avis_id
-        ]);
+        // PostgreSQL n'a pas de système de modération (pas de colonnes statut, valide_par, date_validation)
+        if (!$isPostgreSQL) {
+            $stmt = $pdo->prepare("
+                UPDATE avis
+                SET statut = :statut,
+                    valide_par = :employe_id,
+                    date_validation = NOW()
+                WHERE avis_id = :avis_id
+            ");
+            $stmt->execute([
+                'statut' => $nouveau_statut,
+                'employe_id' => $user_id,
+                'avis_id' => $avis_id
+            ]);
 
-        $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
-        header("Location: dashboard.php?success=" . urlencode($message));
-        exit();
+            $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
+            header("Location: dashboard.php?success=" . urlencode($message));
+            exit();
+        } else {
+            // Sur PostgreSQL, on peut supprimer l'avis si refusé
+            if ($action === 'reject') {
+                $stmt = $pdo->prepare("DELETE FROM avis WHERE avis_id = :avis_id");
+                $stmt->execute(['avis_id' => $avis_id]);
+                $message = 'Avis supprimé avec succès';
+            } else {
+                $message = 'Sur PostgreSQL, tous les avis sont automatiquement publiés';
+            }
+            header("Location: dashboard.php?success=" . urlencode($message));
+            exit();
+        }
     } catch (PDOException $e) {
         $error_message = "Erreur lors de la mise à jour : " . $e->getMessage();
     }
