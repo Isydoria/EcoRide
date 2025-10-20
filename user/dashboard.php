@@ -1587,6 +1587,7 @@ $active_section = $_GET['section'] ?? 'overview';
 
     <script>
         // Variables globales
+        const csrfToken = '<?php echo generateCSRFToken(); ?>';
         let editingVehicle = null;
 
         // Gestion du formulaire d'ajout/modification de véhicule
@@ -1695,6 +1696,7 @@ $active_section = $_GET['section'] ?? 'overview';
 
                 const formData = new FormData();
                 formData.append('vehicle_id', vehicleId);
+                formData.append('csrf_token', csrfToken);
 
                 fetch('../api/delete-vehicle.php', {
                     method: 'POST',
@@ -1836,6 +1838,7 @@ $active_section = $_GET['section'] ?? 'overview';
                     const formData = new FormData();
                     formData.append('trip_id', tripId);
                     formData.append('role', role);
+                    formData.append('csrf_token', csrfToken);
 
                     const apiUrl = role === 'conducteur' ? '../api/cancel-trip.php' : '../api/cancel-booking.php';
 
@@ -1882,6 +1885,7 @@ $active_section = $_GET['section'] ?? 'overview';
                     const formData = new FormData();
                     formData.append('trip_id', tripId);
                     formData.append('action', 'start');
+                    formData.append('csrf_token', csrfToken);
 
                     fetch('../api/manage-trip-status.php', {
                         method: 'POST',
@@ -1923,6 +1927,7 @@ $active_section = $_GET['section'] ?? 'overview';
                     const formData = new FormData();
                     formData.append('trip_id', tripId);
                     formData.append('action', 'finish');
+                    formData.append('csrf_token', csrfToken);
 
                     fetch('../api/manage-trip-status.php', {
                         method: 'POST',
@@ -2290,6 +2295,7 @@ $active_section = $_GET['section'] ?? 'overview';
             formData.append('covoiturage_id', currentTripData.tripId);
             formData.append('note', currentRating);
             formData.append('commentaire', comment);
+            formData.append('csrf_token', csrfToken);
 
             fetch('../api/create-avis.php', {
                 method: 'POST',

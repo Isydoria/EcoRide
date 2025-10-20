@@ -175,6 +175,7 @@ try {
             <?php else: ?>
 
                 <form id="createTripForm" method="POST" action="api/create-trajet.php">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 
                     <div class="form-row">
                         <div class="form-group">

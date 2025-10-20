@@ -467,23 +467,26 @@ try {
     </div>
 
     <script>
+        // Token CSRF pour les requêtes
+        const csrfToken = '<?php echo generateCSRFToken(); ?>';
+
         // Protection contre le rechargement infini
         if (window.performance && window.performance.navigation.type === 1) {
             console.log('Page rechargée');
         }
-        
+
         // Fonction pour suspendre/activer
         function toggleUserStatus(userId, currentStatus) {
             const action = currentStatus === 'actif' ? 'suspend' : 'activate';
-            const confirmMessage = currentStatus === 'actif' 
-                ? 'Voulez-vous vraiment suspendre cet utilisateur ?' 
+            const confirmMessage = currentStatus === 'actif'
+                ? 'Voulez-vous vraiment suspendre cet utilisateur ?'
                 : 'Voulez-vous vraiment réactiver cet utilisateur ?';
-            
+
             if (confirm(confirmMessage)) {
                 fetch('../api/toggle-user-status.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({user_id: userId, action: action})
+                    body: JSON.stringify({user_id: userId, action: action, csrf_token: csrfToken})
                 })
                 .then(response => response.json())
                 .then(data => {

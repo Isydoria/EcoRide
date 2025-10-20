@@ -222,6 +222,7 @@ try {
 
                 <form id="editTripForm" method="POST" action="api/edit-trajet.php">
                     <input type="hidden" name="trip_id" value="<?= $trip_id ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 
                     <div class="form-row">
                         <div class="form-group">
