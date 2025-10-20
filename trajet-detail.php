@@ -357,6 +357,9 @@ error_log("DEBUG trajet-detail.php: userCredits RÉELS = " . $userCredits);
         const isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
         const userCredits = <?php echo $userCredits; ?>;
         const userId = <?php echo $userId ? $userId : 'null'; ?>;
+        <?php if ($isLoggedIn): ?>
+        const csrfToken = '<?php echo generateCSRFToken(); ?>';
+        <?php endif; ?>
     </script>
 
     <!-- Scripts JavaScript -->

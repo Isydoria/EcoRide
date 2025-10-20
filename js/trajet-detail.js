@@ -357,7 +357,12 @@ function confirmerReservation() {
     const formData = new FormData();
     formData.append('trajet_id', trajetId);
     formData.append('nombre_places', 1); // Pour l'instant, on réserve toujours 1 place
-    
+
+    // Ajouter le token CSRF si disponible
+    if (typeof csrfToken !== 'undefined') {
+        formData.append('csrf_token', csrfToken);
+    }
+
     // Appeler l'API
     fetch('api/participer-trajet.php', {
         method: 'POST',
