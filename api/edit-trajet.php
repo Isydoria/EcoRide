@@ -118,11 +118,11 @@ try {
     // Vérifier que le trajet appartient bien à l'utilisateur et peut être modifié
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT t.*, COUNT(r.id_reservation) as participants
-            FROM trajet t
-            LEFT JOIN reservation r ON t.id_trajet = :trip_id AND r.id_trajet = t.id_trajet AND r.statut = 'confirme'
-            WHERE t.id_trajet = :trip_id AND t.id_conducteur = :user_id
-            GROUP BY t.id_trajet, t.id_conducteur, t.id_vehicule, t.ville_depart, t.ville_arrivee, t.date_depart, t.date_arrivee, t.places_disponibles, t.prix, t.is_active, t.date_inscription
+            SELECT c.*, COUNT(p.participation_id) as participants
+            FROM covoiturage c
+            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut_reservation = 'confirmee'
+            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+            GROUP BY c.covoiturage_id, c.id_conducteur, c.id_vehicule, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee, c.places_disponibles, c.prix, c.statut, c.created_at
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -148,7 +148,7 @@ try {
 
     // Vérifier que le trajet peut être modifié (statut "planifie")
     if ($isPostgreSQL) {
-        if (!$trip['is_active']) {
+        if ($trip['statut'] !== 'planifie') {
             die(json_encode([
                 'success' => false,
                 'message' => 'Ce trajet ne peut plus être modifié car il a déjà commencé ou est terminé'
@@ -173,7 +173,7 @@ try {
 
     // Vérifier que le véhicule appartient bien à l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT places FROM vehicule WHERE id_vehicule = :voiture_id AND id_conducteur = :user_id");
+        $stmt = $pdo->prepare("SELECT places FROM vehicule WHERE vehicule_id = :voiture_id AND id_conducteur = :user_id");
     } else {
         $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
     }
@@ -204,7 +204,7 @@ try {
     // Mettre à jour le trajet
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            UPDATE trajet SET
+            UPDATE covoiturage SET
                 id_vehicule = :voiture_id,
                 ville_depart = :ville_depart,
                 ville_arrivee = :ville_arrivee,
@@ -212,7 +212,7 @@ try {
                 date_arrivee = :date_arrivee,
                 places_disponibles = :places_disponibles,
                 prix = :prix_par_place
-            WHERE id_trajet = :trip_id AND id_conducteur = :user_id
+            WHERE covoiturage_id = :trip_id AND id_conducteur = :user_id
         ");
     } else {
         $stmt = $pdo->prepare("
