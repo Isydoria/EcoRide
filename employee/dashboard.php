@@ -23,9 +23,9 @@ try {
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     $isPostgreSQL = ($driver === 'pgsql');
 
-    // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL
+    // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL (après migration)
     if ($isPostgreSQL) {
-        // PostgreSQL : evaluateur_id, evalue_id, covoiturage_id, created_at
+        // PostgreSQL : evaluateur_id, evalue_id (après migration, colonnes statut ajoutées)
         $stmt = $pdo->prepare("
             SELECT a.*,
                    u1.pseudo as auteur_pseudo,
@@ -35,17 +35,16 @@ try {
                    c.ville_depart,
                    c.ville_arrivee,
                    c.date_depart,
-                   c.covoiturage_id as trajet_id,
-                   a.created_at
+                   c.covoiturage_id as trajet_id
             FROM avis a
             JOIN utilisateur u1 ON a.evaluateur_id = u1.utilisateur_id
             JOIN utilisateur u2 ON a.evalue_id = u2.utilisateur_id
             LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
+            WHERE a.statut = 'en_attente'
             ORDER BY a.created_at DESC
-            LIMIT 50
         ");
     } else {
-        // MySQL : auteur_id, destinataire_id, covoiturage_id, created_at
+        // MySQL : auteur_id, destinataire_id
         $stmt = $pdo->prepare("
             SELECT a.*,
                    u1.pseudo as auteur_pseudo,
@@ -67,26 +66,14 @@ try {
     $stmt->execute();
     $pending_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Récupérer les statistiques - Compatible MySQL/PostgreSQL
-    if ($isPostgreSQL) {
-        // PostgreSQL : Pas de système de modération, tous les avis sont publiés directement
-        $stmt = $pdo->prepare("
-            SELECT
-                0 as avis_en_attente,
-                COUNT(*) as avis_valides,
-                0 as avis_refuses
-            FROM avis
-        ");
-    } else {
-        // MySQL : Système de modération avec statuts
-        $stmt = $pdo->prepare("
-            SELECT
-                COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
-                COUNT(CASE WHEN statut = 'valide' OR statut = 'publie' THEN 1 END) as avis_valides,
-                COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
-            FROM avis
-        ");
-    }
+    // Récupérer les statistiques - Compatible MySQL/PostgreSQL (après migration, même structure)
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(CASE WHEN statut = 'en_attente' THEN 1 END) as avis_en_attente,
+            COUNT(CASE WHEN statut = 'valide' OR statut = 'publie' THEN 1 END) as avis_valides,
+            COUNT(CASE WHEN statut = 'refuse' THEN 1 END) as avis_refuses
+        FROM avis
+    ");
     $stmt->execute();
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -94,43 +81,29 @@ try {
     $error_message = "Erreur de base de données : " . $e->getMessage();
 }
 
-// Gestion des actions POST - UNIQUEMENT pour MySQL (PostgreSQL n'a pas de système de modération)
+// Gestion des actions POST - Compatible MySQL/PostgreSQL (après migration)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['avis_id'])) {
     $action = $_POST['action'];
     $avis_id = intval($_POST['avis_id']);
     $nouveau_statut = ($action === 'approve') ? 'valide' : 'refuse';
 
     try {
-        // PostgreSQL n'a pas de système de modération (pas de colonnes statut, valide_par, date_validation)
-        if (!$isPostgreSQL) {
-            $stmt = $pdo->prepare("
-                UPDATE avis
-                SET statut = :statut,
-                    valide_par = :employe_id,
-                    date_validation = NOW()
-                WHERE avis_id = :avis_id
-            ");
-            $stmt->execute([
-                'statut' => $nouveau_statut,
-                'employe_id' => $user_id,
-                'avis_id' => $avis_id
-            ]);
+        $stmt = $pdo->prepare("
+            UPDATE avis
+            SET statut = :statut,
+                valide_par = :employe_id,
+                date_validation = NOW()
+            WHERE avis_id = :avis_id
+        ");
+        $stmt->execute([
+            'statut' => $nouveau_statut,
+            'employe_id' => $user_id,
+            'avis_id' => $avis_id
+        ]);
 
-            $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
-            header("Location: dashboard.php?success=" . urlencode($message));
-            exit();
-        } else {
-            // Sur PostgreSQL, on peut supprimer l'avis si refusé
-            if ($action === 'reject') {
-                $stmt = $pdo->prepare("DELETE FROM avis WHERE avis_id = :avis_id");
-                $stmt->execute(['avis_id' => $avis_id]);
-                $message = 'Avis supprimé avec succès';
-            } else {
-                $message = 'Sur PostgreSQL, tous les avis sont automatiquement publiés';
-            }
-            header("Location: dashboard.php?success=" . urlencode($message));
-            exit();
-        }
+        $message = ($action === 'approve') ? 'Avis approuvé avec succès' : 'Avis refusé';
+        header("Location: dashboard.php?success=" . urlencode($message));
+        exit();
     } catch (PDOException $e) {
         $error_message = "Erreur lors de la mise à jour : " . $e->getMessage();
     }
@@ -553,24 +526,15 @@ $success_message = $_GET['success'] ?? '';
 
         <!-- Section principale -->
         <div class="review-section">
-            <?php if ($isPostgreSQL): ?>
-                <!-- Message pour PostgreSQL -->
+            <h2 style="margin-bottom: 25px; color: #2c3e50;">📝 Avis en attente de modération</h2>
+
+            <?php if (empty($pending_reviews)): ?>
                 <div class="empty-state">
-                    <div class="empty-icon">ℹ️</div>
-                    <h3>Modération automatique</h3>
-                    <p>Sur cette plateforme, tous les avis sont automatiquement publiés sans modération préalable.</p>
-                    <p style="margin-top: 10px;">Les avis inappropriés peuvent être signalés par les utilisateurs.</p>
+                    <div class="empty-icon">📝</div>
+                    <h3>Aucun avis en attente</h3>
+                    <p>Tous les avis ont été traités. Excellent travail !</p>
                 </div>
             <?php else: ?>
-                <h2 style="margin-bottom: 25px; color: #2c3e50;">📝 Avis en attente de modération</h2>
-
-                <?php if (empty($pending_reviews)): ?>
-                    <div class="empty-state">
-                        <div class="empty-icon">📝</div>
-                        <h3>Aucun avis en attente</h3>
-                        <p>Tous les avis ont été traités. Excellent travail !</p>
-                    </div>
-                <?php else: ?>
                 <?php foreach ($pending_reviews as $review): ?>
                     <div class="review-card">
                         <div class="review-header">
@@ -628,7 +592,6 @@ $success_message = $_GET['success'] ?? '';
                         </div>
                     </div>
                 <?php endforeach; ?>
-                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

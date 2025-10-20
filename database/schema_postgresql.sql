@@ -111,10 +111,14 @@ CREATE TABLE avis (
     covoiturage_id INT NOT NULL,
     note INT NOT NULL CHECK (note BETWEEN 1 AND 5),
     commentaire TEXT,
+    statut VARCHAR(20) DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'valide', 'refuse', 'publie')),
+    valide_par INT NULL,
+    date_validation TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (evaluateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
     FOREIGN KEY (evalue_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-    FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE
+    FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
+    FOREIGN KEY (valide_par) REFERENCES utilisateur(utilisateur_id) ON DELETE SET NULL
 );
 
 -- ========================================
@@ -157,3 +161,4 @@ $$ LANGUAGE plpgsql;
 -- ========================================
 CREATE INDEX idx_covoiturage_depart ON covoiturage(ville_depart, date_depart);
 CREATE INDEX idx_utilisateur_email ON utilisateur(email);
+CREATE INDEX idx_avis_statut ON avis(statut);
