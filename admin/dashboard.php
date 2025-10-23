@@ -298,84 +298,151 @@ try {
             margin: 20px 0;
         }
 
+        /* Liste employés dans action-section */
+        .action-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+
+        .action-section ul li {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Wrapper pour scroll horizontal des tableaux */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
         /* ========== RESPONSIVE MOBILE ========== */
         @media (max-width: 768px) {
             .admin-container {
                 padding: 10px;
             }
 
+            .admin-header {
+                padding: 15px 0;
+                margin-bottom: 15px;
+            }
+
             .admin-nav {
                 flex-direction: column;
                 gap: 10px;
                 padding: 0 10px;
+                align-items: stretch;
             }
 
             .admin-nav h1 {
-                font-size: 20px;
+                font-size: 18px;
                 margin: 0;
+                text-align: center;
             }
 
             .admin-nav div {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
                 justify-content: center;
             }
 
             .admin-nav a {
-                padding: 8px 12px;
-                font-size: 13px;
+                padding: 8px 10px;
+                font-size: 12px;
+                flex: 1 1 auto;
+                text-align: center;
+                white-space: nowrap;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 15px;
+                gap: 12px;
             }
 
             .stat-card {
-                padding: 15px;
+                padding: 15px 10px;
             }
 
             .stat-number {
-                font-size: 24px;
+                font-size: 28px;
+            }
+
+            .stat-label {
+                font-size: 13px;
             }
 
             .charts-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
 
             .chart-container {
                 height: 250px;
+                padding: 15px;
             }
 
-            /* Tableau responsive */
+            .chart-container h3 {
+                font-size: 16px;
+                margin-top: 0;
+            }
+
+            /* Tableau responsive avec wrapper */
+            .table-wrapper {
+                margin: 15px -10px;
+            }
+
             .users-table {
-                font-size: 12px;
+                font-size: 11px;
+                min-width: 600px;
             }
 
             .users-table th,
             .users-table td {
-                padding: 8px 6px;
-            }
-
-            /* Masquer certaines colonnes sur mobile */
-            .users-table th:nth-child(2),
-            .users-table td:nth-child(2),
-            .users-table th:nth-child(4),
-            .users-table td:nth-child(4) {
-                display: none;
+                padding: 8px 4px;
+                white-space: nowrap;
             }
 
             .action-section {
-                padding: 15px;
+                padding: 12px;
+                margin: 15px 0;
+            }
+
+            .action-section h3 {
+                font-size: 16px;
+                margin-top: 0;
+            }
+
+            .action-section ul li {
+                padding: 8px;
+                font-size: 12px;
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .btn {
-                font-size: 13px;
-                padding: 8px 15px;
-                display: block;
-                text-align: center;
-                margin: 10px 0;
+                font-size: 12px;
+                padding: 6px 12px;
+                white-space: nowrap;
+            }
+
+            .status-badge,
+            .role-badge {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin: 15px 0 10px 0;
             }
         }
 
@@ -487,6 +554,7 @@ try {
         <!-- Utilisateurs récents -->
         <?php if (count($recent_users) > 0): ?>
         <h2>👥 Derniers utilisateurs inscrits</h2>
+        <div class="table-wrapper">
         <table class="users-table">
             <thead>
                 <tr>
@@ -529,11 +597,13 @@ try {
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
         <?php endif; ?>
 
         <!-- Derniers trajets -->
         <?php if (count($recent_trips) > 0): ?>
         <h2>🚗 Derniers trajets créés</h2>
+        <div class="table-wrapper">
         <table class="users-table">
             <thead>
                 <tr>
@@ -571,6 +641,7 @@ try {
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
         <?php endif; ?>
     </div>
 
