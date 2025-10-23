@@ -80,7 +80,7 @@ h4 {
 }
 
 .nav-wrapper {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 1rem 2rem;
     display: flex;
@@ -101,7 +101,7 @@ h4 {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 1rem;
+    gap: 0.6rem;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -110,6 +110,7 @@ h4 {
     color: var(--gris-fonce);
     text-decoration: none;
     font-weight: 500;
+    font-size: 15px;
     transition: color 0.3s ease;
 }
 
@@ -135,15 +136,31 @@ h4 {
 
 /* Styles pour boutons spéciaux dans la nav (Admin/Employé) */
 .nav-link[style*="background"] {
-    font-size: 14px;
+    font-size: 13px;
     white-space: nowrap;
-    padding: 6px 12px !important;
+    padding: 6px 10px !important;
+}
+
+/* Optimisation pour grands écrans */
+@media (min-width: 1400px) {
+    .nav-menu {
+        gap: 1rem;
+    }
+
+    .nav-link {
+        font-size: 16px;
+    }
+
+    .nav-link[style*="background"] {
+        font-size: 14px;
+        padding: 6px 12px !important;
+    }
 }
 
 /* Responsive navigation - écrans moyens */
 @media (max-width: 1200px) {
     .nav-menu {
-        gap: 0.8rem;
+        gap: 0.5rem;
     }
 
     .nav-link {
@@ -151,14 +168,14 @@ h4 {
     }
 
     .nav-link[style*="background"] {
-        font-size: 13px;
-        padding: 5px 10px !important;
+        font-size: 12px;
+        padding: 5px 8px !important;
     }
 }
 
 @media (max-width: 1024px) {
     .nav-menu {
-        gap: 0.6rem;
+        gap: 0.4rem;
     }
 
     .nav-link {
