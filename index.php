@@ -106,10 +106,24 @@ try {
                     <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
                 <?php else: ?>
                     <li><a href="connexion.php" class="nav-link">Connexion</a></li>
+                    <li><a href="inscription.php" class="btn btn-primary" style="padding: 8px 20px; border-radius: 20px;">Inscription</a></li>
                 <?php endif; ?>
             </ul>
         </div>
     </nav>
+
+    <!-- Bandeau promotionnel 20 crédits offerts (uniquement si non connecté) -->
+    <?php if (!isLoggedIn()): ?>
+    <div class="promo-banner">
+        <div class="promo-content">
+            <span class="promo-icon">🎁</span>
+            <span class="promo-text">
+                <strong>Nouveaux membres :</strong> Recevez 20 crédits gratuits à l'inscription !
+            </span>
+            <a href="inscription.php" class="promo-btn">Inscrivez-vous maintenant</a>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Hero Section -->
     <section class="hero">

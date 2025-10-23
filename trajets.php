@@ -57,6 +57,7 @@ $userPseudo = $_SESSION['user_pseudo'] ?? '';
                     <li><a href="logout.php" class="nav-link">Déconnexion</a></li>
                 <?php else: ?>
                     <li><a href="connexion.php" class="nav-link">Connexion</a></li>
+                    <li><a href="inscription.php" class="btn btn-primary" style="padding: 8px 20px; border-radius: 20px;">Inscription</a></li>
                 <?php endif; ?>
             </ul>
         </div>
