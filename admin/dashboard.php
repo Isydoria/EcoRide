@@ -290,6 +290,114 @@ try {
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             height: 300px;
         }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* ========== RESPONSIVE MOBILE ========== */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+
+            .admin-nav {
+                flex-direction: column;
+                gap: 10px;
+                padding: 0 10px;
+            }
+
+            .admin-nav h1 {
+                font-size: 20px;
+                margin: 0;
+            }
+
+            .admin-nav div {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .admin-nav a {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            /* Tableau responsive */
+            .users-table {
+                font-size: 12px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 8px 6px;
+            }
+
+            /* Masquer certaines colonnes sur mobile */
+            .users-table th:nth-child(2),
+            .users-table td:nth-child(2),
+            .users-table th:nth-child(4),
+            .users-table td:nth-child(4) {
+                display: none;
+            }
+
+            .action-section {
+                padding: 15px;
+            }
+
+            .btn {
+                font-size: 13px;
+                padding: 8px 15px;
+                display: block;
+                text-align: center;
+                margin: 10px 0;
+            }
+        }
+
+        /* ========== TABLETTES ========== */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .admin-container {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .users-table {
+                font-size: 13px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 10px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -361,7 +469,7 @@ try {
         </div>
 
         <!-- Graphiques côte à côte -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+        <div class="charts-grid">
             <div class="chart-container">
                 <h3>📊 Répartition des trajets</h3>
                 <div style="position: relative; height: 200px;">
