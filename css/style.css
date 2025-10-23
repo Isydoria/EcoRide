@@ -101,7 +101,9 @@ h4 {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .nav-link {
@@ -129,6 +131,39 @@ h4 {
 .nav-menu li:last-child .nav-link:hover {
     background-color: var(--vert-principal);
     color: var(--blanc);
+}
+
+/* Styles pour boutons spéciaux dans la nav (Admin/Employé) */
+.nav-link[style*="background"] {
+    font-size: 14px;
+    white-space: nowrap;
+    padding: 6px 12px !important;
+}
+
+/* Responsive navigation - écrans moyens */
+@media (max-width: 1200px) {
+    .nav-menu {
+        gap: 0.8rem;
+    }
+
+    .nav-link {
+        font-size: 14px;
+    }
+
+    .nav-link[style*="background"] {
+        font-size: 13px;
+        padding: 5px 10px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .nav-menu {
+        gap: 0.6rem;
+    }
+
+    .nav-link {
+        font-size: 13px;
+    }
 }
 
 /* Menu burger mobile */

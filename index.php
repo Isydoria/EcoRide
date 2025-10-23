@@ -96,7 +96,7 @@ try {
                 <li><a href="comment-ca-marche.php" class="nav-link">Comment ça marche</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <?php if (isLoggedIn()): ?>
-                    <li><a href="user/dashboard.php" class="nav-link">Mon espace</a></li>
+                    <li><a href="user/dashboard.php" class="nav-link">Mon espace (<?php echo htmlspecialchars($_SESSION['user_pseudo'] ?? 'Utilisateur'); ?>)</a></li>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'employe'): ?>
                         <li><a href="employee/dashboard.php" class="nav-link" style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px;">👔 Dashboard Employé</a></li>
                     <?php endif; ?>
