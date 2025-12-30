@@ -32,7 +32,7 @@ try {
         ['Emma Bernard', 'emma.bernard@ecoride.fr', 'Emma2025!']
     ];
 
-    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits, is_active) VALUES (?, ?, ?, 'employe', 50, true) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
+    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits) VALUES (?, ?, ?, 'employe', 50) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
 
     foreach ($employees as $emp) {
         $stmt->execute([$emp[0], $emp[1], password_hash($emp[2], PASSWORD_DEFAULT)]);
@@ -54,13 +54,13 @@ try {
         ['Fiat', '500', 'CD-234-EF', 4, 'Essence']
     ];
 
-    $stmt = $db->prepare("INSERT INTO vehicule (id_conducteur, marque, modele, immatriculation, places, type_carburant) VALUES (?, ?, ?, ?, ?, ?) RETURNING vehicule_id");
+    $stmt = $db->prepare("INSERT INTO voiture (utilisateur_id, marque, modele, immatriculation, places_disponibles, type_vehicule) VALUES (?, ?, ?, ?, ?, ?) RETURNING voiture_id");
 
     $vehicleIds = [];
     foreach ($vehicles as $i => $v) {
         $userId = $users[$i % count($users)]['utilisateur_id'];
-        $stmt->execute([$userId, $v[0], $v[1], $v[2], $v[3], $v[4]]);
-        $vehicleIds[$userId] = $stmt->fetch()['vehicule_id'];
+        $stmt->execute([$userId, $v[0], $v[1], $v[2], $v[3], strtolower($v[4])]);
+        $vehicleIds[$userId] = $stmt->fetch()['voiture_id'];
         echo "✓ {$v[0]} {$v[1]} ({$v[2]})<br>";
     }
 
@@ -117,15 +117,21 @@ try {
         ['Paris', 'Reims', '2026-02-28 09:00:00', '2026-02-28 10:30:00', 12, 2]
     ];
 
-    $stmt = $db->prepare("INSERT INTO covoiturage (id_conducteur, id_vehicule, ville_depart, ville_arrivee, date_depart, date_arrivee, prix, places_disponibles, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'planifie') RETURNING covoiturage_id");
+    $stmt = $db->prepare("INSERT INTO covoiturage (conducteur_id, voiture_id, ville_depart, ville_arrivee, date_depart, heure_depart, prix_par_place, places_disponibles, statut) VALUES (?, ?, ?, ?, ?::date, ?::time, ?, ?, 'disponible') RETURNING covoiturage_id");
 
     $trajetIds = [];
     foreach ($trajets as $i => $t) {
         $userId = $users[$i % count($users)]['utilisateur_id'];
         $vehicleId = $vehicleIds[$userId] ?? array_values($vehicleIds)[0];
-        $stmt->execute([$userId, $vehicleId, $t[0], $t[1], $t[2], $t[3], $t[4], $t[5]]);
+
+        // Extraire date et heure
+        $dateTime = new DateTime($t[2]);
+        $date = $dateTime->format('Y-m-d');
+        $heure = $dateTime->format('H:i:s');
+
+        $stmt->execute([$userId, $vehicleId, $t[0], $t[1], $date, $heure, $t[4], $t[5]]);
         $trajetIds[] = $stmt->fetch()['covoiturage_id'];
-        echo "✓ {$t[0]} → {$t[1]} ({$t[2]})<br>";
+        echo "✓ {$t[0]} → {$t[1]} ({$date} {$heure})<br>";
     }
 
     // 4. PARTICIPATIONS
