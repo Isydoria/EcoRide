@@ -50,7 +50,7 @@ CREATE TABLE voiture (
     couleur VARCHAR(50),
     places_disponibles INT NOT NULL,
     photo_vehicule VARCHAR(255),
-    type_vehicule VARCHAR(50) CHECK (type_vehicule IN ('electrique', 'hybride', 'essence', 'diesel')),
+    type_vehicule VARCHAR(50) CHECK (type_vehicule IN ('electrique', 'hybride', 'essence', 'diesel', 'gpl')),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
 );
 
