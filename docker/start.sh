@@ -24,6 +24,16 @@ grep -E "VirtualHost|ServerName" /etc/apache2/sites-available/000-default.conf
 
 echo "✅ Apache configuré pour le port $PORT"
 
+# ==========================================
+# 🗄️ INITIALISATION BASE DE DONNÉES
+# ==========================================
+echo "🔍 Vérification de la base de données..."
+
+# Exécuter le script d'initialisation PHP
+php /var/www/html/docker/init_database.php
+
+echo "✅ Base de données vérifiée"
+
 # Démarrer Apache en premier plan
 echo "🌐 Démarrage d'Apache..."
 exec apache2-foreground
