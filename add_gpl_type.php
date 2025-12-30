@@ -26,7 +26,18 @@ try {
     ");
 
     echo "✅ Type 'gpl' ajouté avec succès au type_vehicule !<br>";
-    echo "<br>Vous pouvez maintenant exécuter init-demo-data.php";
+    echo "<br>Vous pouvez maintenant exécuter init-demo-data.php<br><br>";
+
+    // Vérifier la contrainte
+    $result = $db->query("
+        SELECT con.conname, pg_get_constraintdef(con.oid) as definition
+        FROM pg_constraint con
+        JOIN pg_class rel ON rel.oid = con.conrelid
+        WHERE rel.relname = 'voiture' AND con.conname = 'voiture_type_vehicule_check'
+    ")->fetch();
+
+    echo "<h3>Contrainte actuelle :</h3>";
+    echo "<pre>" . htmlspecialchars($result['definition']) . "</pre>";
 
 } catch (PDOException $e) {
     echo "❌ Erreur: " . $e->getMessage();
