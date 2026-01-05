@@ -78,9 +78,9 @@ try {
     // Récupérer les participations (passager)
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix,
-                   (c.prix * p.places_reservees) as credit_utilise, u.pseudo as conducteur,
-                   p.statut_reservation as statut
+            SELECT p.*, c.ville_depart, c.ville_arrivee, c.date_depart, c.prix_par_place,
+                   (c.prix_par_place * p.nombre_places) as credit_utilise, u.pseudo as conducteur,
+                   p.statut as statut
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
             JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
@@ -111,7 +111,7 @@ try {
                        COUNT(p.participation_id) as participants
                 FROM covoiturage c
                 LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-                LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut_reservation != 'annulee'
+                LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut != 'annule'
                 WHERE c.conducteur_id = :user_id
                 GROUP BY c.covoiturage_id, v.marque, v.modele
                 ORDER BY c.date_depart DESC
@@ -135,8 +135,8 @@ try {
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
                 SELECT p.*, c.covoiturage_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee,
-                       c.prix, (c.prix * p.places_reservees) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
-                       c.statut as trip_status, p.statut_reservation as statut
+                       c.prix_par_place, (c.prix_par_place * p.nombre_places) as credit_utilise, u.pseudo as conducteur, 'passager' as role,
+                       c.statut as trip_status, p.statut as statut
                 FROM participation p
                 JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
                 JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
