@@ -33,12 +33,8 @@ if ($isLoggedIn) {
         $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
         $isPostgreSQL = ($driver === 'pgsql');
 
-        // Récupérer les crédits actuels depuis la base avec la bonne colonne
-        if ($isPostgreSQL) {
-            $stmt = $pdo->prepare("SELECT credits FROM utilisateur WHERE utilisateur_id = :user_id");
-        } else {
-            $stmt = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
-        }
+        // Récupérer les crédits actuels depuis la base - Unifié après migration
+        $stmt = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
 
         $stmt->execute(['user_id' => $userId]);
         $userCredits = $stmt->fetchColumn();

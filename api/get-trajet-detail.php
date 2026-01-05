@@ -61,7 +61,7 @@ try {
                 c.date_depart,
                 c.date_arrivee,
                 c.places_disponibles,
-                c.prix as prix,
+                c.prix_par_place as prix,
                 c.statut,
                 -- Info du conducteur
                 u.pseudo as conducteur_pseudo,
@@ -87,7 +87,7 @@ try {
             GROUP BY
                 c.covoiturage_id, c.conducteur_id, c.ville_depart, c.ville_arrivee,
                 c.adresse_depart, c.adresse_arrivee, c.date_depart, c.date_arrivee,
-                c.places_disponibles, c.prix, c.statut,
+                c.places_disponibles, c.prix_par_place, c.statut,
                 u.pseudo, u.date_inscription, u.utilisateur_id,
                 v.marque, v.modele, v.couleur, v.places, v.type_carburant
         ";

@@ -167,13 +167,8 @@ try {
     $commission = 2;
     $cout_total = round(($prix_place * $nombre_places) + $commission, 2);
     
-    // ✅ 4. Vérifier que l'utilisateur a assez de crédits
-    if ($isPostgreSQL) {
-        $sqlCredits = "SELECT credits FROM utilisateur WHERE utilisateur_id = :user_id";
-    } else {
-        $sqlCredits = "SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id";
-    }
-    $stmtCredits = $pdo->prepare($sqlCredits);
+    // ✅ 4. Vérifier que l'utilisateur a assez de crédits - Unifié après migration
+    $stmtCredits = $pdo->prepare("SELECT credit FROM utilisateur WHERE utilisateur_id = :user_id");
     $stmtCredits->execute(['user_id' => $user_id]);
     $credits_actuels = $stmtCredits->fetchColumn();
     
@@ -253,22 +248,12 @@ try {
         'trajet_id' => $trajet_id
     ]);
     
-    // ✅ 7. Débiter les crédits de l'utilisateur
-    if ($isPostgreSQL) {
-        $sqlUpdateCredits = "
-            UPDATE utilisateur
-            SET credits = credits - :cout_total
-            WHERE utilisateur_id = :user_id
-        ";
-    } else {
-        $sqlUpdateCredits = "
-            UPDATE utilisateur
-            SET credit = credit - :cout_total
-            WHERE utilisateur_id = :user_id
-        ";
-    }
-
-    $stmtUpdateCredits = $pdo->prepare($sqlUpdateCredits);
+    // ✅ 7. Débiter les crédits de l'utilisateur - Unifié après migration
+    $stmtUpdateCredits = $pdo->prepare("
+        UPDATE utilisateur
+        SET credit = credit - :cout_total
+        WHERE utilisateur_id = :user_id
+    ");
     $stmtUpdateCredits->execute([
         'cout_total' => $cout_total,
         'user_id' => $user_id
