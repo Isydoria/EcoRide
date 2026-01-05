@@ -85,7 +85,7 @@ if (!empty($errors)) {
 
 try {
     // Vérifier que l'utilisateur a bien participé à ce trajet - Unifié après migration
-    $statutField = $isPostgreSQL ? 'statut_reservation' : 'statut';
+    $statutField = $isPostgreSQL ? 'statut' : 'statut';
 
     $stmt = $pdo->prepare("
         SELECT p.*, c.conducteur_id, c.statut as trip_statut

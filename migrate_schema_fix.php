@@ -250,7 +250,7 @@ try {
         UPDATE participation
         SET statut = CASE
             WHEN statut = 'en_attente' THEN 'reserve'
-            WHEN statut = 'confirmee' THEN 'confirme'
+            WHEN statut = 'confirme' THEN 'confirme'
             WHEN statut = 'annulee' THEN 'annule'
             ELSE statut
         END

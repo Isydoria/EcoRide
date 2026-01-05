@@ -240,7 +240,7 @@ try {
                 FROM participation
                 WHERE covoiturage_id = :trajet_id
                 AND passager_id = :user_id
-                AND statut_reservation IN ('en_attente', 'confirmee')
+                AND statut IN ('reserve', 'confirme')
             ";
         } else {
             $sqlReservation = "

@@ -53,7 +53,7 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT c.*, COUNT(p.participation_id) as participants_count,
-                   COALESCE(SUM(CASE WHEN p.statut_reservation != 'annulee' THEN (c.prix * p.places_reservees) ELSE 0 END), 0) as credits_to_refund
+                   COALESCE(SUM(CASE WHEN p.statut != 'annulee' THEN (c.prix * p.places_reservees) ELSE 0 END), 0) as credits_to_refund
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
@@ -102,14 +102,14 @@ try {
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-            WHERE p.covoiturage_id = :trip_id AND p.statut_reservation IN ('en_attente', 'confirmee')
+            WHERE p.covoiturage_id = :trip_id AND p.statut IN ('reserve', 'confirme')
         ");
     } else {
         $stmt = $pdo->prepare("
             SELECT p.*, u.pseudo, u.credit
             FROM participation p
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-            WHERE p.covoiturage_id = :trip_id AND p.statut IN ('en_attente', 'confirmee')
+            WHERE p.covoiturage_id = :trip_id AND p.statut IN ('reserve', 'confirme')
         ");
     }
     $stmt->execute(['trip_id' => $trip_id]);
@@ -129,7 +129,7 @@ try {
             ]);
 
             // Marquer la participation comme annulée
-            $stmt = $pdo->prepare("UPDATE participation SET statut_reservation = 'annulee' WHERE participation_id = :participation_id");
+            $stmt = $pdo->prepare("UPDATE participation SET statut = 'annulee' WHERE participation_id = :participation_id");
             $stmt->execute(['participation_id' => $participant['participation_id']]);
         } else {
             $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");

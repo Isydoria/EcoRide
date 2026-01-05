@@ -49,7 +49,7 @@ try {
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
             WHERE c.conducteur_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut_reservation = 'terminee'
+            AND p.statut = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id
@@ -78,7 +78,7 @@ try {
             JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
             WHERE p.passager_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut_reservation = 'terminee'
+            AND p.statut = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id

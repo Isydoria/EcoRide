@@ -139,7 +139,7 @@ try {
             FROM participation
             WHERE covoiturage_id = :trajet_id
             AND passager_id = :user_id
-            AND statut_reservation IN ('en_attente', 'confirmee')
+            AND statut IN ('reserve', 'confirme')
         ";
     } else {
         $sqlCheck = "
@@ -184,7 +184,7 @@ try {
                 covoiturage_id,
                 passager_id,
                 places_reservees,
-                statut_reservation,
+                statut,
                 created_at
             ) VALUES (
                 :trajet_id,

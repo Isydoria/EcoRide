@@ -120,7 +120,7 @@ try {
         $stmt = $pdo->prepare("
             SELECT c.*, COUNT(p.participation_id) as participants
             FROM covoiturage c
-            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut_reservation = 'confirmee'
+            LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut = 'confirme'
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
             GROUP BY c.covoiturage_id, c.conducteur_id, c.voiture_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee, c.places_disponibles, c.prix, c.statut, c.created_at
         ");

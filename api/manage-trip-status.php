@@ -71,7 +71,7 @@ try {
             SELECT c.*, COUNT(p.participation_id) as participants_count
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
-                AND p.statut_reservation IN ('en_attente', 'confirmee')
+                AND p.statut IN ('reserve', 'confirme')
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
             GROUP BY c.covoiturage_id
         ");
@@ -80,7 +80,7 @@ try {
             SELECT c.*, COUNT(p.participation_id) as participants_count
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
-                AND p.statut IN ('en_attente', 'confirmee')
+                AND p.statut IN ('reserve', 'confirme')
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
             GROUP BY c.covoiturage_id
         ");
@@ -121,13 +121,13 @@ try {
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
                 UPDATE participation
-                SET statut_reservation = 'confirmee'
-                WHERE covoiturage_id = :trip_id AND statut_reservation = 'en_attente'
+                SET statut = 'confirme'
+                WHERE covoiturage_id = :trip_id AND statut = 'en_attente'
             ");
         } else {
             $stmt = $pdo->prepare("
                 UPDATE participation
-                SET statut = 'confirmee'
+                SET statut = 'confirme'
                 WHERE covoiturage_id = :trip_id AND statut = 'en_attente'
             ");
         }
@@ -152,14 +152,14 @@ try {
         if ($isPostgreSQL) {
             $stmt = $pdo->prepare("
                 UPDATE participation
-                SET statut_reservation = 'terminee'
-                WHERE covoiturage_id = :trip_id AND statut_reservation = 'confirmee'
+                SET statut = 'terminee'
+                WHERE covoiturage_id = :trip_id AND statut = 'confirme'
             ");
         } else {
             $stmt = $pdo->prepare("
                 UPDATE participation
                 SET statut = 'terminee'
-                WHERE covoiturage_id = :trip_id AND statut = 'confirmee'
+                WHERE covoiturage_id = :trip_id AND statut = 'confirme'
             ");
         }
         $stmt->execute(['trip_id' => $trip_id]);
@@ -171,7 +171,7 @@ try {
                 FROM participation p
                 JOIN utilisateur u ON p.passager_id = u.utilisateur_id
                 JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-                WHERE p.covoiturage_id = :trip_id AND p.statut_reservation = 'terminee'
+                WHERE p.covoiturage_id = :trip_id AND p.statut = 'terminee'
             ");
         } else {
             $stmt = $pdo->prepare("
