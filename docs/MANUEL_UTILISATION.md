@@ -59,7 +59,7 @@
 **Avantages :**
 - ✅ Toujours accessible 24h/24
 - ✅ Base PostgreSQL 15 professionnelle
-- ✅ Données de démonstration complètes (34 trajets, 3 employés)
+- ✅ Données de démonstration complètes (1 admin + 3 employés + 5 utilisateurs, 11 véhicules écologiques, 33 trajets)
 - ✅ Performance optimisée
 - ✅ Sécurité HTTPS avec certificats Let's Encrypt
 
@@ -85,7 +85,7 @@
 | **En ligne & Local** | `admin@ecoride.fr` | `Ec0R1de!` | [Interface Admin](https://ecoride-om7c.onrender.com/admin/dashboard.php) |
 
 **Fonctionnalités :**
-- Statistiques générales de la plateforme (9 utilisateurs, 34 trajets)
+- Statistiques générales de la plateforme (9 utilisateurs : 1 admin + 3 employés + 5 utilisateurs, 33 trajets)
 - Gestion des utilisateurs (3 employés visibles)
 - Monitoring des trajets et réservations
 - Graphiques interactifs Chart.js
@@ -109,6 +109,8 @@
 | **Jean Dupont** | `jean.dupont@ecoride.fr` | `Jean2025!` | 100 | Utilisateur |
 | **Marie Martin** | `marie.martin@ecoride.fr` | `Marie2025!` | 75 | Utilisateur |
 | **Paul Durand** | `paul.durand@ecoride.fr` | `Paul2025!` | 60 | Utilisateur |
+| **Alice Bernard** | `alice.bernard@ecoride.fr` | `Alice2025!` | 80 | Utilisateur |
+| **Thomas Petit** | `thomas.petit@ecoride.fr` | `Thomas2025!` | 90 | Utilisateur |
 
 **Fonctionnalités :**
 - Recherche et réservation de trajets
@@ -147,30 +149,30 @@
    ```
 
 2. **Vérifier la création des données**
-   - ✅ 3 employés créés (Sophie, Lucas, Emma)
-   - ✅ 8 véhicules variés (électrique, hybride, essence, diesel)
-   - ✅ 34 trajets jusqu'à fin février 2026
+   - ✅ 1 administrateur + 3 employés + 5 utilisateurs
+   - ✅ 11 véhicules écologiques (4 électriques, 3 hybrides, 2 GPL, 1 essence, 1 diesel)
+   - ✅ 33 trajets de janvier à février 2026
    - ✅ Trajets multiples mêmes dates pour tester les filtres :
-     - Paris → Lyon : 3 trajets le 15/10/2025 (8h, 14h, 19h)
-     - Marseille → Nice : 2 trajets le 18/10/2025
-     - Toulouse → Bordeaux : 2 trajets le 25/10/2025
+     - Paris → Lyon : 3 trajets le 15/01/2026 (8h, 14h, 19h)
+     - Marseille → Nice : 2 trajets le 18/01/2026
+     - Toulouse → Bordeaux : 2 trajets le 25/01/2026
    - ✅ Participations et avis générés
 
 ### **Étape 2 : Connexion**
 
 1. **Accéder à la page de connexion**
    ```
-   https://ecoride-production-2631.up.render.app/connexion.php
+   https://ecoride-om7c.onrender.com/connexion.php
    ```
 
 2. **Se connecter avec un compte de test**
-   - Email : `demo@ecoride.fr`
-   - Mot de passe : `demo123`
+   - Email : `jean.dupont@ecoride.fr`
+   - Mot de passe : `Jean2025!`
 
 3. **Vérifier la connexion réussie**
    - Redirection automatique vers le dashboard
    - Affichage du nom d'utilisateur en haut à droite
-   - Crédits disponibles : 50
+   - Crédits disponibles : 100
 
 ### **Étape 3 : Recherche de trajets**
 
@@ -220,7 +222,7 @@
 
 1. **Accéder au dashboard utilisateur**
    ```
-   https://ecoride-production-2631.up.render.app/user/dashboard.php
+   https://ecoride-om7c.onrender.com/user/dashboard.php
    ```
 
 2. **Vérifier les informations**
@@ -255,7 +257,7 @@
 
 1. **Accéder à la création de trajet**
    ```
-   https://ecoride-production-2631.up.render.app/creer-trajet.php
+   https://ecoride-om7c.onrender.com/creer-trajet.php
    ```
 
 2. **Remplir les informations du trajet**
@@ -299,11 +301,11 @@
 
 1. **Se connecter avec le compte admin**
    - Email : `admin@ecoride.fr`
-   - Mot de passe : `Ec0R1de!` (en ligne) / `Test123!` (local)
+   - Mot de passe : `Ec0R1de!` (identique en ligne et en local)
 
 2. **Accéder au dashboard admin**
    ```
-   https://ecoride-production-2631.up.render.app/admin/dashboard.php
+   https://ecoride-om7c.onrender.com/admin/dashboard.php
    ```
 
 ### **Étape 2 : Consultation des statistiques**
@@ -664,9 +666,9 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 - Vider le cache du navigateur
 
 **Problème : Recherche sans résultats**
-- Exécuter le script d'initialisation : `/init-trajets-demo.php`
+- Exécuter le script d'initialisation : `/init-demo-data.php` (Render) ou `/init-demo-data-local.php` (Local)
 - Vérifier l'orthographe des villes
-- Essayer avec les trajets de test (Lyon → Marseille)
+- Essayer avec les trajets de test (Paris → Lyon le 15/01/2026)
 
 **Problème : Erreur lors de la réservation**
 - Vérifier le solde de crédits suffisant
@@ -692,9 +694,9 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 
 ### ⚡ **Test Rapide (5 minutes)**
 
-1. ✅ Accéder à : https://ecoride-production-2631.up.render.app
-2. ✅ Initialiser : `/init-trajets-demo.php`
-3. ✅ Rechercher : Lyon → Marseille
+1. ✅ Accéder à : https://ecoride-om7c.onrender.com
+2. ✅ Initialiser : `/init-demo-data.php`
+3. ✅ Rechercher : Paris → Lyon le 15/01/2026
 4. ✅ Admin : `admin@ecoride.fr` / `Ec0R1de!`
 
 ### 📋 **Test Complet (15 minutes)**
@@ -708,9 +710,9 @@ R : Oui, l'interface est entièrement responsive et s'adapte aux smartphones et 
 ---
 
 **📅 Manuel créé le :** 22 septembre 2025
-**🔄 Version :** 1.0
+**🔄 Version :** 1.1 - Mise à jour janvier 2026
 **🎓 Contexte :** Évaluation RNCP Développeur Web et Web Mobile
-**🚀 Application :** https://ecoride-production-2631.up.render.app
+**🚀 Application :** https://ecoride-om7c.onrender.com
 
 ---
 
