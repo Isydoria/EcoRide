@@ -1,6 +1,7 @@
 <?php
 /**
- * Script d'initialisation des données de démonstration
+ * Script d'initialisation des données de démonstration - PostgreSQL
+ * Compatible avec le nouveau schéma harmonisé MySQL/PostgreSQL
  * - Véhicules, trajets, participations, avis
  * - Dates jusqu'à fin février 2026
  * - Trajets multiples avec mêmes départs/arrivées pour tester les filtres
@@ -26,7 +27,7 @@ try {
 
     // 1. ADMINISTRATEUR
     echo "<h2>👨‍💼 Création de l'administrateur</h2>";
-    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits) VALUES (?, ?, ?, 'administrateur', 100) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
+    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credit) VALUES (?, ?, ?, 'administrateur', 100) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
     $stmt->execute(['Admin EcoRide', 'admin@ecoride.fr', password_hash('Ec0R1de!', PASSWORD_DEFAULT)]);
     echo "✓ Admin EcoRide (admin@ecoride.fr)<br>";
 
@@ -38,7 +39,7 @@ try {
         ['Emma Bernard', 'emma.bernard@ecoride.fr', 'Emma2025!']
     ];
 
-    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits) VALUES (?, ?, ?, 'employe', 50) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
+    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credit) VALUES (?, ?, ?, 'employe', 50) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
 
     foreach ($employees as $emp) {
         $stmt->execute([$emp[0], $emp[1], password_hash($emp[2], PASSWORD_DEFAULT)]);
@@ -55,7 +56,7 @@ try {
         ['Thomas Petit', 'thomas.petit@ecoride.fr', 'Thomas2025!', 90]
     ];
 
-    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credits) VALUES (?, ?, ?, 'utilisateur', ?) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
+    $stmt = $db->prepare("INSERT INTO utilisateur (pseudo, email, password, role, credit) VALUES (?, ?, ?, 'utilisateur', ?) ON CONFLICT (email) DO NOTHING RETURNING utilisateur_id");
 
     foreach ($users_data as $user) {
         $stmt->execute([$user[0], $user[1], password_hash($user[2], PASSWORD_DEFAULT), $user[3]]);
@@ -80,7 +81,8 @@ try {
         ['VW', 'Golf', 'OP-123-QR', 5, 'diesel', 'Noire']
     ];
 
-    $stmt = $db->prepare("INSERT INTO voiture (utilisateur_id, marque, modele, immatriculation, places_disponibles, type_vehicule, couleur) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING voiture_id");
+    // ✅ Utilise 'places' et 'energie' (colonnes harmonisées)
+    $stmt = $db->prepare("INSERT INTO voiture (utilisateur_id, marque, modele, immatriculation, places, energie, couleur) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING voiture_id");
 
     $vehicleIds = [];
     $vehicleCount = 0;
@@ -146,7 +148,8 @@ try {
         ['Paris', 'Reims', '2026-02-28 09:00:00', '2026-02-28 10:30:00', 12, 2]
     ];
 
-    $stmt = $db->prepare("INSERT INTO covoiturage (conducteur_id, voiture_id, ville_depart, ville_arrivee, date_depart, heure_depart, prix_par_place, places_disponibles, statut) VALUES (?, ?, ?, ?, ?::date, ?::time, ?, ?, 'disponible') RETURNING covoiturage_id");
+    // ✅ Utilise TIMESTAMP unifié (date_depart et date_arrivee) et statut 'planifie'
+    $stmt = $db->prepare("INSERT INTO covoiturage (conducteur_id, voiture_id, ville_depart, ville_arrivee, date_depart, date_arrivee, prix_par_place, places_disponibles, statut) VALUES (?, ?, ?, ?, ?::timestamp, ?::timestamp, ?, ?, 'planifie') RETURNING covoiturage_id");
 
     $trajetIds = [];
     $trajetsByUser = [];
@@ -155,12 +158,7 @@ try {
         $userId = $users[$i % count($users)]['utilisateur_id'];
         $vehicleId = $vehicleIds[$userId] ?? array_values($vehicleIds)[0];
 
-        // Extraire date et heure
-        $dateTime = new DateTime($t[2]);
-        $date = $dateTime->format('Y-m-d');
-        $heure = $dateTime->format('H:i:s');
-
-        $stmt->execute([$userId, $vehicleId, $t[0], $t[1], $date, $heure, $t[4], $t[5]]);
+        $stmt->execute([$userId, $vehicleId, $t[0], $t[1], $t[2], $t[3], $t[4], $t[5]]);
         $trajetId = $stmt->fetch()['covoiturage_id'];
         $trajetIds[] = $trajetId;
 
@@ -171,7 +169,7 @@ try {
         $trajetsByUser[$userId]++;
 
         $pseudo = $users[$i % count($users)]['pseudo'];
-        echo "✓ {$pseudo}: {$t[0]} → {$t[1]} ({$date} {$heure})<br>";
+        echo "✓ {$pseudo}: {$t[0]} → {$t[1]} ({$t[2]})<br>";
     }
 
     // Afficher statistiques par utilisateur
@@ -183,13 +181,15 @@ try {
 
     // 6. PARTICIPATIONS
     echo "<br><h2>🎫 Participations</h2>";
-    $stmt = $db->prepare("INSERT INTO participation (covoiturage_id, passager_id, places_reservees, statut_reservation) VALUES (?, ?, 1, ?)");
+    // ✅ Utilise 'nombre_places' et 'statut' (au lieu de places_reservees et statut_reservation)
+    $stmt = $db->prepare("INSERT INTO participation (covoiturage_id, passager_id, nombre_places, credit_utilise, statut) VALUES (?, ?, 1, 10, ?)");
 
     $count = 0;
     foreach ($trajetIds as $i => $tid) {
         if ($i % 3 < 2) {
             $passengerId = $users[($i + 2) % count($users)]['utilisateur_id'];
-            $statut = ($i % 4 == 0) ? 'en_attente' : 'confirmee';
+            // ✅ Utilise 'reserve' et 'confirme' (au lieu de en_attente et confirmee)
+            $statut = ($i % 4 == 0) ? 'reserve' : 'confirme';
             try {
                 $stmt->execute([$tid, $passengerId, $statut]);
                 $count++;
@@ -211,16 +211,17 @@ try {
         "Conduite sûre"
     ];
 
-    $stmt = $db->prepare("INSERT INTO avis (evaluateur_id, evalue_id, covoiturage_id, note, commentaire) VALUES (?, ?, ?, ?, ?)");
+    // ✅ Utilise 'auteur_id' et 'destinataire_id' (au lieu de evaluateur_id et evalue_id)
+    $stmt = $db->prepare("INSERT INTO avis (covoiturage_id, auteur_id, destinataire_id, note, commentaire, statut) VALUES (?, ?, ?, ?, ?, 'valide')");
 
     $avisCount = 0;
     foreach ($trajetIds as $i => $tid) {
         if ($i % 4 < 2) {
-            $evaluateurId = $users[($i + 1) % count($users)]['utilisateur_id'];
-            $evalueId = $users[$i % count($users)]['utilisateur_id'];
+            $auteurId = $users[($i + 1) % count($users)]['utilisateur_id'];
+            $destinataireId = $users[$i % count($users)]['utilisateur_id'];
             $note = rand(3, 5);
             try {
-                $stmt->execute([$evaluateurId, $evalueId, $tid, $note, $comments[array_rand($comments)]]);
+                $stmt->execute([$tid, $auteurId, $destinataireId, $note, $comments[array_rand($comments)]]);
                 $avisCount++;
             } catch (Exception $e) {}
         }
@@ -248,14 +249,20 @@ try {
 
     echo "<h3>🎯 Tests filtres :</h3>";
     echo "<ul>";
-    echo "<li>Paris→Lyon : 3 trajets le 15/01/2026</li>";
-    echo "<li>Marseille→Nice : 2 trajets le 18/01/2026</li>";
-    echo "<li>Toulouse→Bordeaux : 2 trajets le 25/01/2026</li>";
+    echo "<li>Paris→Lyon : 4 trajets en janvier 2026 (dont 3 le 15/01)</li>";
+    echo "<li>Marseille→Nice : 3 trajets (dont 2 le 18/01)</li>";
+    echo "<li>Toulouse→Bordeaux : 2 trajets le 25/01</li>";
     echo "</ul>";
 
+    echo "<br><h2>✅ Schéma PostgreSQL harmonisé avec MySQL !</h2>";
+    echo "<p>Toutes les colonnes utilisent maintenant les mêmes noms dans les deux bases de données.</p>";
+
     echo "<br><h2>🎉 Terminé !</h2>";
+    echo "<p><a href='/'>← Retour à l'accueil</a></p>";
 
 } catch (PDOException $e) {
     echo "<h2>❌ Erreur</h2>";
     echo "<p>" . $e->getMessage() . "</p>";
+    echo "<pre>" . $e->getTraceAsString() . "</pre>";
 }
+?>
