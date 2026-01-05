@@ -2,6 +2,7 @@
 /**
  * Script de diagnostic pour vérifier les données de Sophie Martin sur Render PostgreSQL
  */
+header('Content-Type: text/plain; charset=utf-8');
 
 // Connexion directe PostgreSQL Render
 $db_host = getenv('PGHOST') ?: 'dpg-cu1dllm8ii6s73bvj6j0-a.frankfurt-postgres.render.com';
@@ -10,13 +11,19 @@ $db_user = getenv('PGUSER') ?: 'ecoride_user';
 $db_password = getenv('PGPASSWORD') ?: 'EtD7sX8r9RWXVmkXpAxPAXZrh8NkA4jw';
 $db_port = getenv('PGPORT') ?: '5432';
 
+echo "=== CONNEXION EN COURS ===\n";
+echo "Host: $db_host\n";
+echo "Database: $db_name\n";
+echo "Port: $db_port\n\n";
+
 try {
     $dsn = "pgsql:host=$db_host;port=$db_port;dbname=$db_name;sslmode=require";
     $pdo = new PDO($dsn, $db_user, $db_password, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
-    
+
+    echo "✅ Connexion réussie!\n\n";
     echo "=== DIAGNOSTIC SOPHIE MARTIN (Render PostgreSQL) ===\n\n";
     
     // 1. Trouver Sophie Martin
@@ -126,8 +133,14 @@ try {
     }
     
     echo "\n=== FIN DU DIAGNOSTIC ===\n";
-    
+
+} catch (PDOException $e) {
+    echo "❌ ERREUR PDO: " . $e->getMessage() . "\n";
+    echo "Code: " . $e->getCode() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
 } catch (Exception $e) {
     echo "❌ ERREUR: " . $e->getMessage() . "\n";
     echo "Trace: " . $e->getTraceAsString() . "\n";
 }
+
+echo "\n=== Script terminé ===\n";
