@@ -85,7 +85,7 @@ try {
     // Filtre écologique (US4)
     if ($ecologique) {
         if ($isPostgreSQL) {
-            $whereConditions[] = "v.type_carburant = 'Électrique'";
+            $whereConditions[] = "v.energie = 'electrique'";
         } else {
             $whereConditions[] = "v.energie = 'electrique'";
         }
@@ -94,7 +94,7 @@ try {
     // Filtre prix maximum (US4)
     if ($prix_max !== null) {
         if ($isPostgreSQL) {
-            $whereConditions[] = "t.prix <= :prix_max";
+            $whereConditions[] = "t.prix_par_place <= :prix_max";
         } else {
             $whereConditions[] = "t.prix_par_place <= :prix_max";
         }
@@ -134,17 +134,17 @@ try {
                 t.date_depart as heure_depart,
                 t.date_arrivee as heure_arrivee,
                 t.places_disponibles,
-                t.prix as prix,
+                t.prix_par_place as prix,
                 t.statut,
                 -- Durée calculée
                 EXTRACT(EPOCH FROM (t.date_arrivee - t.date_depart))/3600 as duree_heures,
                 -- Info du conducteur
                 u.pseudo as conducteur_pseudo,
-                '' as conducteur_photo,
+                u.photo as conducteur_photo,
                 -- Info du véhicule
                 v.marque,
                 v.modele,
-                v.type_carburant,
+                v.energie as type_carburant,
                 v.couleur,
                 -- Note moyenne du conducteur
                 COALESCE(AVG(a.note), 0) as note_moyenne,
@@ -153,13 +153,13 @@ try {
                 covoiturage t
                 INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
                 INNER JOIN voiture v ON t.voiture_id = v.voiture_id
-                LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
+                LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
             WHERE
                 " . implode(' AND ', $whereConditions) . "
             GROUP BY
                 t.covoiturage_id, t.ville_depart, t.ville_arrivee, t.date_depart,
-                t.date_arrivee, t.places_disponibles, t.prix, t.statut,
-                u.pseudo, v.marque, v.modele, v.type_carburant, v.couleur
+                t.date_arrivee, t.places_disponibles, t.prix_par_place, t.statut,
+                u.pseudo, u.photo, v.marque, v.modele, v.energie, v.couleur
             " . (empty($havingConditionsPG) ? "" : "HAVING " . implode(' AND ', $havingConditionsPG)) . "
             ORDER BY
                 t.date_depart ASC
