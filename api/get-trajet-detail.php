@@ -200,7 +200,7 @@ try {
                 u.pseudo as auteur
             FROM
                 avis a
-                INNER JOIN utilisateur u ON a.evaluateur_id = u.utilisateur_id
+                INNER JOIN utilisateur u ON a.auteur_id = u.utilisateur_id
             WHERE
                 a.destinataire_id = :conducteur_id AND a.statut = 'valide'
             ORDER BY
