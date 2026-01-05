@@ -1188,7 +1188,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                 <div class="trip-details">
                                     <div>📅 <?= date('d/m/Y à H:i', strtotime($booking['date_depart'])) ?></div>
                                     <div>👨‍✈️ Conducteur: <?= htmlspecialchars($booking['conducteur'] ?? '') ?></div>
-                                    <div>🎫 <?= $booking['places_reservees'] ?? $booking['nombre_places'] ?? 0 ?> place(s)</div>
+                                    <div>🎫 <?= $booking['nombre_places'] ?? 0 ?> place(s)</div>
                                     <div>💳 <?= $booking['credit_utilise'] ?> crédits</div>
                                     <div>📊 <?= ucfirst($booking['statut']) ?></div>
                                 </div>
@@ -1458,7 +1458,7 @@ $active_section = $_GET['section'] ?? 'overview';
                                                 <div>🚗 <?= htmlspecialchars(($trip['marque'] ?? '') . ' ' . ($trip['modele'] ?? '')) ?></div>
                                             <?php else: ?>
                                                 <div>👨‍✈️ <?= htmlspecialchars($trip['conducteur'] ?? '') ?></div>
-                                                <div>🎫 <?= $trip['places_reservees'] ?? $trip['nombre_places'] ?? 0 ?> place(s)</div>
+                                                <div>🎫 <?= $trip['nombre_places'] ?? 0 ?> place(s)</div>
                                                 <div>💳 <?= $trip['credit_utilise'] ?? 0 ?> crédits</div>
                                             <?php endif; ?>
                                         </div>

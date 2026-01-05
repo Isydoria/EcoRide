@@ -53,7 +53,7 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             SELECT c.*, COUNT(p.participation_id) as participants_count,
-                   COALESCE(SUM(CASE WHEN p.statut != 'annulee' THEN (c.prix * p.places_reservees) ELSE 0 END), 0) as credits_to_refund
+                   COALESCE(SUM(CASE WHEN p.statut != 'annule' THEN (c.prix_par_place * p.nombre_places) ELSE 0 END), 0) as credits_to_refund
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
@@ -97,7 +97,7 @@ try {
     // Récupérer les participations actives pour remboursement
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT p.*, (c.prix * p.places_reservees) as credit_utilise, u.pseudo, u.credits as credit,
+            SELECT p.*, (c.prix_par_place * p.nombre_places) as credit_utilise, u.pseudo, u.credit,
                    p.passager_id as id_passager
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
@@ -121,27 +121,17 @@ try {
         // Rembourser les crédits
         $new_credit = $participant['credit'] + $participant['credit_utilise'];
 
-        if ($isPostgreSQL) {
-            $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE utilisateur_id = :user_id");
-            $stmt->execute([
-                'new_credit' => $new_credit,
-                'user_id' => $participant['id_passager']
-            ]);
+        $user_to_refund = $isPostgreSQL ? $participant['id_passager'] : $participant['passager_id'];
 
-            // Marquer la participation comme annulée
-            $stmt = $pdo->prepare("UPDATE participation SET statut = 'annulee' WHERE participation_id = :participation_id");
-            $stmt->execute(['participation_id' => $participant['participation_id']]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
-            $stmt->execute([
-                'new_credit' => $new_credit,
-                'user_id' => $participant['passager_id']
-            ]);
+        $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
+        $stmt->execute([
+            'new_credit' => $new_credit,
+            'user_id' => $user_to_refund
+        ]);
 
-            // Marquer la participation comme annulée
-            $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
-            $stmt->execute(['participation_id' => $participant['participation_id']]);
-        }
+        // Marquer la participation comme annulée
+        $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
+        $stmt->execute(['participation_id' => $participant['participation_id']]);
 
         $total_refunded += $participant['credit_utilise'];
     }

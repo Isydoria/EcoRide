@@ -60,10 +60,10 @@ try {
     // Vérifier que la participation existe et peut être annulée
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT p.participation_id, p.passager_id, p.covoiturage_id, p.places_reservees as nombre_places,
+            SELECT p.participation_id, p.passager_id, p.covoiturage_id, p.nombre_places,
                    p.statut as statut, p.created_at,
-                   c.date_depart, c.ville_depart, c.ville_arrivee, c.statut as trip_status, c.prix as credit_utilise,
-                   u.pseudo as conducteur, u.credits as user_credit
+                   c.date_depart, c.ville_depart, c.ville_arrivee, c.statut as trip_status, c.prix_par_place as credit_utilise,
+                   u.pseudo as conducteur, u.credit as user_credit
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
@@ -91,15 +91,11 @@ try {
     }
 
     // Vérifier si la réservation peut être annulée
-    $statut_actual = $isPostgreSQL ?
-        ($participation['statut'] === 'annulee' ? 'annule' : $participation['statut']) :
-        $participation['statut'];
-
-    if ($statut_actual === 'annule' || $statut_actual === 'annulee') {
+    if ($participation['statut'] === 'annule') {
         throw new Exception('Cette réservation est déjà annulée');
     }
 
-    if ($statut_actual === 'termine' || $statut_actual === 'terminee') {
+    if ($participation['statut'] === 'termine') {
         throw new Exception('Impossible d\'annuler une réservation terminée');
     }
 
@@ -128,27 +124,15 @@ try {
     // Rembourser les crédits à l'utilisateur
     $new_credit = floatval($participation['user_credit']) + $credit_a_rembourser;
 
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("UPDATE utilisateur SET credits = :new_credit WHERE utilisateur_id = :user_id");
-        $stmt->execute([
-            'new_credit' => $new_credit,
-            'user_id' => $user_id
-        ]);
+    $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
+    $stmt->execute([
+        'new_credit' => $new_credit,
+        'user_id' => $user_id
+    ]);
 
-        // Marquer la participation comme annulée
-        $stmt = $pdo->prepare("UPDATE participation SET statut = 'annulee' WHERE participation_id = :participation_id");
-        $stmt->execute(['participation_id' => $participation['participation_id']]);
-    } else {
-        $stmt = $pdo->prepare("UPDATE utilisateur SET credit = :new_credit WHERE utilisateur_id = :user_id");
-        $stmt->execute([
-            'new_credit' => $new_credit,
-            'user_id' => $user_id
-        ]);
-
-        // Marquer la participation comme annulée
-        $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
-        $stmt->execute(['participation_id' => $participation['participation_id']]);
-    }
+    // Marquer la participation comme annulée
+    $stmt = $pdo->prepare("UPDATE participation SET statut = 'annule' WHERE participation_id = :participation_id");
+    $stmt->execute(['participation_id' => $participation['participation_id']]);
 
     // Augmenter le nombre de places disponibles dans le covoiturage
     $stmt = $pdo->prepare("

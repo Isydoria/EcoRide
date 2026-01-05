@@ -93,7 +93,7 @@ try {
         JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
         WHERE p.covoiturage_id = :trip_id
         AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
-        AND p.{$statutField} = 'terminee'
+        AND p.{$statutField} = 'termine'
     ");
     $stmt->execute([
         'trip_id' => $covoiturage_id,

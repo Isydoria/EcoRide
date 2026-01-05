@@ -122,7 +122,7 @@ try {
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut = 'confirme'
             WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
-            GROUP BY c.covoiturage_id, c.conducteur_id, c.voiture_id, c.ville_depart, c.ville_arrivee, c.date_depart, c.date_arrivee, c.places_disponibles, c.prix, c.statut, c.created_at
+            GROUP BY c.covoiturage_id, c.conducteur_id, c.voiture_id, c.ville_depart, c.adresse_depart, c.ville_arrivee, c.adresse_arrivee, c.date_depart, c.date_arrivee, c.places_disponibles, c.prix_par_place, c.statut, c.created_at
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -198,31 +198,17 @@ try {
     $pdo->beginTransaction();
 
     // Mettre à jour le trajet
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            UPDATE covoiturage SET
-                voiture_id = :voiture_id,
-                ville_depart = :ville_depart,
-                ville_arrivee = :ville_arrivee,
-                date_depart = :date_depart,
-                date_arrivee = :date_arrivee,
-                places_disponibles = :places_disponibles,
-                prix = :prix_par_place
-            WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            UPDATE covoiturage SET
-                voiture_id = :voiture_id,
-                ville_depart = :ville_depart,
-                ville_arrivee = :ville_arrivee,
-                date_depart = :date_depart,
-                date_arrivee = :date_arrivee,
-                places_disponibles = :places_disponibles,
-                prix_par_place = :prix_par_place
-            WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
-        ");
-    }
+    $stmt = $pdo->prepare("
+        UPDATE covoiturage SET
+            voiture_id = :voiture_id,
+            ville_depart = :ville_depart,
+            ville_arrivee = :ville_arrivee,
+            date_depart = :date_depart,
+            date_arrivee = :date_arrivee,
+            places_disponibles = :places_disponibles,
+            prix_par_place = :prix_par_place
+        WHERE covoiturage_id = :trip_id AND conducteur_id = :user_id
+    ");
 
     $result = $stmt->execute([
         'voiture_id' => $voiture_id,

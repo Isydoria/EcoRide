@@ -40,7 +40,7 @@ try {
                 c.ville_depart,
                 c.ville_arrivee,
                 c.date_depart,
-                c.prix as prix,
+                c.prix_par_place as prix,
                 p.passager_id as other_user_id,
                 u.pseudo as other_user_pseudo,
                 TRUE as is_conductor
@@ -49,7 +49,7 @@ try {
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
             WHERE c.conducteur_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut = 'terminee'
+            AND p.statut = 'termine'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id
@@ -69,7 +69,7 @@ try {
                 c.ville_depart,
                 c.ville_arrivee,
                 c.date_depart,
-                c.prix as prix,
+                c.prix_par_place as prix,
                 c.conducteur_id as other_user_id,
                 u.pseudo as other_user_pseudo,
                 FALSE as is_conductor
@@ -78,7 +78,7 @@ try {
             JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
             WHERE p.passager_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut = 'terminee'
+            AND p.statut = 'termine'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id
@@ -110,7 +110,7 @@ try {
             JOIN utilisateur u ON p.passager_id = u.utilisateur_id
             WHERE c.conducteur_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut = 'terminee'
+            AND p.statut = 'termine'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id
@@ -139,7 +139,7 @@ try {
             JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
             WHERE p.passager_id = :user_id
             AND c.statut = 'termine'
-            AND p.statut = 'terminee'
+            AND p.statut = 'termine'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
                 WHERE a.auteur_id = :user_id

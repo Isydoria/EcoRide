@@ -183,14 +183,16 @@ try {
             INSERT INTO participation (
                 covoiturage_id,
                 passager_id,
-                places_reservees,
+                nombre_places,
+                credit_utilise,
                 statut,
-                created_at
+                date_reservation
             ) VALUES (
                 :trajet_id,
                 :user_id,
                 :nombre_places,
-                'en_attente',
+                :credits_utilises,
+                'reserve',
                 CURRENT_TIMESTAMP
             )
             RETURNING participation_id
@@ -221,7 +223,8 @@ try {
         $stmtReservation->execute([
             'trajet_id' => $trajet_id,
             'user_id' => $user_id,
-            'nombre_places' => $nombre_places
+            'nombre_places' => $nombre_places,
+            'credits_utilises' => $cout_total
         ]);
         $result = $stmtReservation->fetch(PDO::FETCH_ASSOC);
         $reservation_id = $result['participation_id'];

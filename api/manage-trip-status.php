@@ -149,46 +149,28 @@ try {
         $stmt->execute(['trip_id' => $trip_id]);
 
         // Mettre à jour le statut des participations
-        if ($isPostgreSQL) {
-            $stmt = $pdo->prepare("
-                UPDATE participation
-                SET statut = 'terminee'
-                WHERE covoiturage_id = :trip_id AND statut = 'confirme'
-            ");
-        } else {
-            $stmt = $pdo->prepare("
-                UPDATE participation
-                SET statut = 'terminee'
-                WHERE covoiturage_id = :trip_id AND statut = 'confirme'
-            ");
-        }
+        $stmt = $pdo->prepare("
+            UPDATE participation
+            SET statut = 'termine'
+            WHERE covoiturage_id = :trip_id AND statut = 'confirme'
+        ");
         $stmt->execute(['trip_id' => $trip_id]);
 
         // Récupérer les participants pour notification et calcul des crédits
-        if ($isPostgreSQL) {
-            $stmt = $pdo->prepare("
-                SELECT p.*, u.pseudo, u.email, c.prix
-                FROM participation p
-                JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-                WHERE p.covoiturage_id = :trip_id AND p.statut = 'terminee'
-            ");
-        } else {
-            $stmt = $pdo->prepare("
-                SELECT p.*, u.pseudo, u.email, c.prix_par_place as prix
-                FROM participation p
-                JOIN utilisateur u ON p.passager_id = u.utilisateur_id
-                JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-                WHERE p.covoiturage_id = :trip_id AND p.statut = 'terminee'
-            ");
-        }
+        $stmt = $pdo->prepare("
+            SELECT p.*, u.pseudo, u.email, c.prix_par_place as prix
+            FROM participation p
+            JOIN utilisateur u ON p.passager_id = u.utilisateur_id
+            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+            WHERE p.covoiturage_id = :trip_id AND p.statut = 'termine'
+        ");
         $stmt->execute(['trip_id' => $trip_id]);
         $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Calculer le total des crédits à transférer au conducteur
         $total_credits = 0;
         foreach ($participants as $participant) {
-            $places = $participant['places_reservees'] ?? $participant['nombre_places'] ?? 1;
+            $places = $participant['nombre_places'];
             $prix_unitaire = floatval($participant['prix']);
             $total_credits += ($prix_unitaire * $places);
         }
@@ -197,19 +179,11 @@ try {
 
         // Transférer les crédits au conducteur
         if ($total_credits > 0) {
-            if ($isPostgreSQL) {
-                $stmt = $pdo->prepare("
-                    UPDATE utilisateur
-                    SET credits = credits + :amount
-                    WHERE utilisateur_id = :user_id
-                ");
-            } else {
-                $stmt = $pdo->prepare("
-                    UPDATE utilisateur
-                    SET credit = credit + :amount
-                    WHERE utilisateur_id = :user_id
-                ");
-            }
+            $stmt = $pdo->prepare("
+                UPDATE utilisateur
+                SET credit = credit + :amount
+                WHERE utilisateur_id = :user_id
+            ");
             $stmt->execute([
                 'amount' => $total_credits,
                 'user_id' => $user_id
