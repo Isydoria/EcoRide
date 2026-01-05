@@ -4,27 +4,20 @@
  */
 header('Content-Type: text/plain; charset=utf-8');
 
-// Connexion directe PostgreSQL Render
-$db_host = getenv('PGHOST') ?: 'dpg-cu1dllm8ii6s73bvj6j0-a.frankfurt-postgres.render.com';
-$db_name = getenv('PGDATABASE') ?: 'ecoride_db_g15s';
-$db_user = getenv('PGUSER') ?: 'ecoride_user';
-$db_password = getenv('PGPASSWORD') ?: 'EtD7sX8r9RWXVmkXpAxPAXZrh8NkA4jw';
-$db_port = getenv('PGPORT') ?: '5432';
-
 echo "=== CONNEXION EN COURS ===\n";
-echo "Host: $db_host\n";
-echo "Database: $db_name\n";
-echo "Port: $db_port\n\n";
+
+// Utiliser la connexion existante via config/init.php
+require_once 'config/init.php';
 
 try {
-    $dsn = "pgsql:host=$db_host;port=$db_port;dbname=$db_name;sslmode=require";
-    $pdo = new PDO($dsn, $db_user, $db_password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
+    $pdo = db();
+
+    // Détecter le type de base de données
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    echo "Driver détecté: $driver\n\n";
 
     echo "✅ Connexion réussie!\n\n";
-    echo "=== DIAGNOSTIC SOPHIE MARTIN (Render PostgreSQL) ===\n\n";
+    echo "=== DIAGNOSTIC SOPHIE MARTIN ===\n\n";
     
     // 1. Trouver Sophie Martin
     $stmt = $pdo->prepare("SELECT utilisateur_id, pseudo, email, credit, created_at FROM utilisateur WHERE pseudo LIKE '%Sophie%'");
