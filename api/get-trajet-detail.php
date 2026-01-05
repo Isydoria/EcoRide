@@ -49,6 +49,8 @@ try {
     $isPostgreSQL = ($driver === 'pgsql');
 
     // ✅ Requête principale avec compatibilité MySQL/PostgreSQL
+    $dateInscriptionField = $isPostgreSQL ? 'created_at' : 'date_inscription';
+
     if ($isPostgreSQL) {
         $sql = "
             SELECT
@@ -65,7 +67,7 @@ try {
                 c.statut,
                 -- Info du conducteur
                 u.pseudo as conducteur_pseudo,
-                u.date_inscription as membre_depuis,
+                u.{$dateInscriptionField} as membre_depuis,
                 -- Info du véhicule
                 v.marque,
                 v.modele,
@@ -88,7 +90,7 @@ try {
                 c.covoiturage_id, c.conducteur_id, c.ville_depart, c.ville_arrivee,
                 c.adresse_depart, c.adresse_arrivee, c.date_depart, c.date_arrivee,
                 c.places_disponibles, c.prix_par_place, c.statut,
-                u.pseudo, u.date_inscription, u.utilisateur_id,
+                u.pseudo, u.{$dateInscriptionField}, u.utilisateur_id,
                 v.marque, v.modele, v.couleur, v.places, v.type_carburant
         ";
     } else {
