@@ -111,20 +111,15 @@ try {
         echo "<p>ℹ️ Colonnes adresse déjà existantes</p>";
     }
 
-    // Modifier les contraintes de statut
+    // Supprimer l'ancienne contrainte de statut d'abord
     try {
         $pdo->exec("ALTER TABLE covoiturage DROP CONSTRAINT IF EXISTS covoiturage_statut_check");
-        $pdo->exec("
-            ALTER TABLE covoiturage
-            ADD CONSTRAINT covoiturage_statut_check
-            CHECK (statut IN ('planifie', 'en_cours', 'termine', 'annule'))
-        ");
-        echo "<p class='success'>✅ Contrainte statut mise à jour (planifie, en_cours, termine, annule)</p>";
+        echo "<p class='success'>✅ Ancienne contrainte statut supprimée</p>";
     } catch (PDOException $e) {
-        echo "<p>ℹ️ Contrainte statut: " . htmlspecialchars($e->getMessage()) . "</p>";
+        echo "<p>ℹ️ Suppression contrainte: " . htmlspecialchars($e->getMessage()) . "</p>";
     }
 
-    // Mettre à jour les statuts existants
+    // Mettre à jour les statuts existants AVANT d'ajouter la nouvelle contrainte
     $updated = $pdo->exec("
         UPDATE covoiturage
         SET statut = CASE
@@ -134,6 +129,18 @@ try {
         END
     ");
     echo "<p class='success'>✅ {$updated} trajets mis à jour (disponible/complet → planifie)</p>";
+
+    // Ajouter la nouvelle contrainte de statut APRÈS la mise à jour
+    try {
+        $pdo->exec("
+            ALTER TABLE covoiturage
+            ADD CONSTRAINT covoiturage_statut_check
+            CHECK (statut IN ('planifie', 'en_cours', 'termine', 'annule'))
+        ");
+        echo "<p class='success'>✅ Nouvelle contrainte statut ajoutée (planifie, en_cours, termine, annule)</p>";
+    } catch (PDOException $e) {
+        echo "<p>ℹ️ Ajout contrainte: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
 
     // ==================================================
     // ÉTAPE 3: MODIFIER LA TABLE UTILISATEUR
@@ -193,21 +200,16 @@ try {
         echo "<p>ℹ️ Colonne credit_utilise: " . htmlspecialchars($e->getMessage()) . "</p>";
     }
 
-    // Mettre à jour les contraintes de statut pour participation
+    // Supprimer les anciennes contraintes de statut pour participation
     try {
         $pdo->exec("ALTER TABLE participation DROP CONSTRAINT IF EXISTS participation_statut_check");
         $pdo->exec("ALTER TABLE participation DROP CONSTRAINT IF EXISTS participation_statut_reservation_check");
-        $pdo->exec("
-            ALTER TABLE participation
-            ADD CONSTRAINT participation_statut_check
-            CHECK (statut IN ('reserve', 'confirme', 'annule', 'termine'))
-        ");
-        echo "<p class='success'>✅ Contrainte statut participation mise à jour</p>";
+        echo "<p class='success'>✅ Anciennes contraintes statut participation supprimées</p>";
     } catch (PDOException $e) {
-        echo "<p>ℹ️ Contrainte statut participation: " . htmlspecialchars($e->getMessage()) . "</p>";
+        echo "<p>ℹ️ Suppression contraintes participation: " . htmlspecialchars($e->getMessage()) . "</p>";
     }
 
-    // Mettre à jour les statuts existants de participation
+    // Mettre à jour les statuts existants de participation AVANT d'ajouter la nouvelle contrainte
     $updatedPart = $pdo->exec("
         UPDATE participation
         SET statut = CASE
@@ -218,6 +220,18 @@ try {
         END
     ");
     echo "<p class='success'>✅ {$updatedPart} participations mises à jour</p>";
+
+    // Ajouter la nouvelle contrainte de statut APRÈS la mise à jour
+    try {
+        $pdo->exec("
+            ALTER TABLE participation
+            ADD CONSTRAINT participation_statut_check
+            CHECK (statut IN ('reserve', 'confirme', 'annule', 'termine'))
+        ");
+        echo "<p class='success'>✅ Nouvelle contrainte statut participation ajoutée</p>";
+    } catch (PDOException $e) {
+        echo "<p>ℹ️ Ajout contrainte participation: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
 
     // ==================================================
     // FINALISATION
