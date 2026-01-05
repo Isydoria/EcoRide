@@ -234,6 +234,60 @@ try {
     }
 
     // ==================================================
+    // ÉTAPE 5: MODIFIER LA TABLE AVIS
+    // ==================================================
+    echo "<h2>⭐ Étape 5: Modification table avis</h2>";
+
+    // Vérifier si les anciennes colonnes existent
+    $checkEvaluateur = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'avis' AND column_name = 'evaluateur_id'
+    ")->fetch();
+
+    if ($checkEvaluateur) {
+        echo "<p>🔄 Migration des colonnes evaluateur_id/evalue_id → auteur_id/destinataire_id</p>";
+
+        // Renommer evaluateur_id en auteur_id
+        try {
+            $pdo->exec("ALTER TABLE avis RENAME COLUMN evaluateur_id TO auteur_id");
+            echo "<p class='success'>✅ Colonne 'evaluateur_id' renommée en 'auteur_id'</p>";
+        } catch (PDOException $e) {
+            echo "<p>ℹ️ Colonne auteur_id: " . htmlspecialchars($e->getMessage()) . "</p>";
+        }
+
+        // Renommer evalue_id en destinataire_id
+        try {
+            $pdo->exec("ALTER TABLE avis RENAME COLUMN evalue_id TO destinataire_id");
+            echo "<p class='success'>✅ Colonne 'evalue_id' renommée en 'destinataire_id'</p>";
+        } catch (PDOException $e) {
+            echo "<p>ℹ️ Colonne destinataire_id: " . htmlspecialchars($e->getMessage()) . "</p>";
+        }
+    } else {
+        echo "<p>✅ Colonnes avis déjà à jour</p>";
+    }
+
+    // Ajouter covoiturage_id si manquant
+    try {
+        $pdo->exec("ALTER TABLE avis ADD COLUMN IF NOT EXISTS covoiturage_id INT");
+        echo "<p class='success'>✅ Colonne 'covoiturage_id' ajoutée</p>";
+    } catch (PDOException $e) {
+        echo "<p>ℹ️ Colonne covoiturage_id: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
+
+    // Ajouter la colonne statut si elle n'existe pas
+    try {
+        $pdo->exec("ALTER TABLE avis ADD COLUMN IF NOT EXISTS statut VARCHAR(20) DEFAULT 'valide'");
+        echo "<p class='success'>✅ Colonne 'statut' ajoutée à avis</p>";
+    } catch (PDOException $e) {
+        echo "<p>ℹ️ Colonne statut avis: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
+
+    // Mettre tous les avis existants à 'valide' par défaut
+    $updatedAvis = $pdo->exec("UPDATE avis SET statut = 'valide' WHERE statut IS NULL");
+    echo "<p class='success'>✅ {$updatedAvis} avis mis à jour avec statut='valide'</p>";
+
+    // ==================================================
     // FINALISATION
     // ==================================================
     $pdo->commit();
@@ -245,6 +299,7 @@ try {
     echo "<li>✅ Table covoiturage : DATE+TIME → TIMESTAMP, statut harmonisé</li>";
     echo "<li>✅ Table utilisateur : photo_profil → photo, credits → credit</li>";
     echo "<li>✅ Table participation : statut_reservation → statut, places_reservees → nombre_places</li>";
+    echo "<li>✅ Table avis : evaluateur_id → auteur_id, evalue_id → destinataire_id, ajout statut et covoiturage_id</li>";
     echo "</ul>";
     echo "<p><a href='/'>← Retour à l'accueil</a></p>";
 
