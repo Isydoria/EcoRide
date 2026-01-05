@@ -72,7 +72,7 @@ try {
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
                 AND p.statut_reservation IN ('en_attente', 'confirmee')
-            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
             GROUP BY c.covoiturage_id
         ");
     } else {

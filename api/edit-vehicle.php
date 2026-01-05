@@ -85,7 +85,7 @@ if (!empty($errors)) {
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id");
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id");
     }
@@ -103,7 +103,7 @@ try {
 
     // Vérifier si l'immatriculation existe déjà (sauf pour ce véhicule)
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE immatriculation = :immatriculation AND vehicule_id != :vehicle_id");
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation AND voiture_id != :vehicle_id");
     }
@@ -120,29 +120,16 @@ try {
     }
 
     // Mettre à jour le véhicule
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            UPDATE vehicule SET
-                marque = :marque,
-                modele = :modele,
-                immatriculation = :immatriculation,
-                couleur = :couleur,
-                places = :places,
-                type_carburant = :energie
-            WHERE vehicule_id = :vehicle_id AND id_conducteur = :user_id
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            UPDATE voiture SET
-                marque = :marque,
-                modele = :modele,
-                immatriculation = :immatriculation,
-                couleur = :couleur,
-                places = :places,
-                energie = :energie
-            WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id
-        ");
-    }
+    $stmt = $pdo->prepare("
+        UPDATE voiture SET
+            marque = :marque,
+            modele = :modele,
+            immatriculation = :immatriculation,
+            couleur = :couleur,
+            places = :places,
+            energie = :energie
+        WHERE voiture_id = :vehicle_id AND utilisateur_id = :user_id
+    ");
 
     $result = $stmt->execute([
         'marque' => $marque,

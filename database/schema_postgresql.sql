@@ -1,10 +1,11 @@
 
 -- ========================================
 -- SCHÉMA POSTGRESQL POUR ECORIDE
+-- Compatible 100% avec le schéma MySQL
 -- ========================================
 
 -- Suppression des tables existantes (ordre inversé pour les contraintes)
-DROP TABLE IF EXISTS transaction CASCADE;
+DROP TABLE IF EXISTS transaction_credit CASCADE;
 DROP TABLE IF EXISTS avis CASCADE;
 DROP TABLE IF EXISTS participation CASCADE;
 DROP TABLE IF EXISTS covoiturage CASCADE;
@@ -19,7 +20,8 @@ DROP TABLE IF EXISTS configuration CASCADE;
 CREATE TABLE configuration (
     id_configuration SERIAL PRIMARY KEY,
     cle VARCHAR(100) NOT NULL UNIQUE,
-    valeur TEXT
+    valeur TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ========================================
@@ -31,12 +33,14 @@ CREATE TABLE utilisateur (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     telephone VARCHAR(20),
-    photo_profil VARCHAR(255),
-    biographie TEXT,
-    credits INT DEFAULT 0,
-    role VARCHAR(50) DEFAULT 'utilisateur' CHECK (role IN ('utilisateur', 'employe', 'administrateur')),
+    adresse VARCHAR(255),
+    date_naissance DATE,
+    photo VARCHAR(255) DEFAULT 'default.jpg',
+    credit INT DEFAULT 20,
+    role VARCHAR(20) DEFAULT 'utilisateur' CHECK (role IN ('utilisateur', 'employe', 'administrateur')),
     statut VARCHAR(20) DEFAULT 'actif' CHECK (statut IN ('actif', 'suspendu')),
-    date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ========================================
@@ -49,9 +53,10 @@ CREATE TABLE voiture (
     marque VARCHAR(100) NOT NULL,
     immatriculation VARCHAR(20) NOT NULL,
     couleur VARCHAR(50),
-    places_disponibles INT NOT NULL,
-    photo_vehicule VARCHAR(255),
-    type_vehicule VARCHAR(50) CHECK (type_vehicule IN ('electrique', 'hybride', 'essence', 'diesel', 'gpl')),
+    energie VARCHAR(20) NOT NULL CHECK (energie IN ('essence', 'diesel', 'electrique', 'hybride', 'gpl')),
+    places INT NOT NULL,
+    date_premiere_immatriculation DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
 );
 
@@ -63,9 +68,10 @@ CREATE TABLE parametre (
     utilisateur_id INT NOT NULL,
     fumeur BOOLEAN DEFAULT FALSE,
     animaux BOOLEAN DEFAULT FALSE,
-    discussion BOOLEAN DEFAULT TRUE,
     musique BOOLEAN DEFAULT TRUE,
-    preferences_supplementaires TEXT,
+    discussion BOOLEAN DEFAULT TRUE,
+    preferences_custom TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
 );
 
@@ -77,15 +83,17 @@ CREATE TABLE covoiturage (
     conducteur_id INT NOT NULL,
     voiture_id INT NOT NULL,
     ville_depart VARCHAR(100) NOT NULL,
+    adresse_depart VARCHAR(255),
     ville_arrivee VARCHAR(100) NOT NULL,
-    date_depart DATE NOT NULL,
-    heure_depart TIME NOT NULL,
+    adresse_arrivee VARCHAR(255),
+    date_depart TIMESTAMP NOT NULL,
+    date_arrivee TIMESTAMP NOT NULL,
     places_disponibles INT NOT NULL,
     prix_par_place DECIMAL(10, 2) NOT NULL,
-    statut VARCHAR(50) DEFAULT 'disponible' CHECK (statut IN ('disponible', 'complet', 'annule', 'termine')),
+    statut VARCHAR(20) DEFAULT 'planifie' CHECK (statut IN ('planifie', 'en_cours', 'termine', 'annule')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (conducteur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-    FOREIGN KEY (voiture_id) REFERENCES voiture(voiture_id) ON DELETE CASCADE
+    FOREIGN KEY (conducteur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE RESTRICT,
+    FOREIGN KEY (voiture_id) REFERENCES voiture(voiture_id) ON DELETE RESTRICT
 );
 
 -- ========================================
@@ -95,11 +103,13 @@ CREATE TABLE participation (
     participation_id SERIAL PRIMARY KEY,
     covoiturage_id INT NOT NULL,
     passager_id INT NOT NULL,
-    places_reservees INT NOT NULL,
-    statut_reservation VARCHAR(50) DEFAULT 'en_attente' CHECK (statut_reservation IN ('en_attente', 'confirmee', 'annulee')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    nombre_places INT DEFAULT 1,
+    credit_utilise INT NOT NULL,
+    statut VARCHAR(20) DEFAULT 'reserve' CHECK (statut IN ('reserve', 'confirme', 'annule', 'termine')),
+    date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
-    FOREIGN KEY (passager_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
+    FOREIGN KEY (passager_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+    UNIQUE (covoiturage_id, passager_id)
 );
 
 -- ========================================
@@ -107,29 +117,31 @@ CREATE TABLE participation (
 -- ========================================
 CREATE TABLE avis (
     avis_id SERIAL PRIMARY KEY,
-    evaluateur_id INT NOT NULL,
-    evalue_id INT NOT NULL,
     covoiturage_id INT NOT NULL,
-    note INT NOT NULL CHECK (note BETWEEN 1 AND 5),
+    auteur_id INT NOT NULL,
+    destinataire_id INT NOT NULL,
     commentaire TEXT,
-    statut VARCHAR(20) DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'valide', 'refuse', 'publie')),
-    valide_par INT NULL,
-    date_validation TIMESTAMP NULL,
+    note INT CHECK (note >= 1 AND note <= 5),
+    statut VARCHAR(20) DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'valide', 'refuse')),
+    valide_par INT,
+    date_validation TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (evaluateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
-    FOREIGN KEY (evalue_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
     FOREIGN KEY (covoiturage_id) REFERENCES covoiturage(covoiturage_id) ON DELETE CASCADE,
-    FOREIGN KEY (valide_par) REFERENCES utilisateur(utilisateur_id) ON DELETE SET NULL
+    FOREIGN KEY (auteur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE,
+    FOREIGN KEY (destinataire_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
 );
 
 -- ========================================
--- TABLE : transaction
+-- TABLE : transaction_credit
 -- ========================================
-CREATE TABLE transaction (
+CREATE TABLE transaction_credit (
     transaction_id SERIAL PRIMARY KEY,
     utilisateur_id INT NOT NULL,
     montant INT NOT NULL,
-    type_transaction VARCHAR(50) CHECK (type_transaction IN ('achat', 'reservation', 'remboursement')),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('credit', 'debit')),
+    description VARCHAR(255),
+    reference_id INT,
+    reference_type VARCHAR(50) CHECK (reference_type IN ('participation', 'remboursement', 'bonus', 'commission')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(utilisateur_id) ON DELETE CASCADE
 );
@@ -138,28 +150,20 @@ CREATE TABLE transaction (
 -- INSERTION DES DONNÉES DE CONFIGURATION
 -- ========================================
 INSERT INTO configuration (cle, valeur) VALUES
-('credits_inscription', '50'),
-('prix_credit', '1.00'),
-('credits_covoiturage_complet', '10');
-
--- ========================================
--- MESSAGE DE SUCCÈS
--- ========================================
-SELECT 'Base de données créée avec succès!' as message;
-
--- ========================================
--- FONCTION : Calculer les crédits gagnés
--- ========================================
-CREATE OR REPLACE FUNCTION calculer_credits_gagnes(places INT)
-RETURNS INT AS $$
-BEGIN
-    RETURN places * 5;
-END;
-$$ LANGUAGE plpgsql;
+('commission_credit', '2'),
+('credit_inscription', '20'),
+('email_contact', 'contact@ecoride.fr');
 
 -- ========================================
 -- INDEX POUR OPTIMISATION
 -- ========================================
 CREATE INDEX idx_covoiturage_depart ON covoiturage(ville_depart, date_depart);
+CREATE INDEX idx_covoiturage_statut ON covoiturage(statut);
 CREATE INDEX idx_utilisateur_email ON utilisateur(email);
 CREATE INDEX idx_avis_statut ON avis(statut);
+CREATE INDEX idx_participation_statut ON participation(statut);
+
+-- ========================================
+-- MESSAGE DE SUCCÈS
+-- ========================================
+SELECT 'Base de données PostgreSQL créée avec succès - Compatible avec MySQL!' as message;

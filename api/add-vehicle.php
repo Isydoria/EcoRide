@@ -88,7 +88,7 @@ if (!empty($errors)) {
 try {
     // Vérifier si l'immatriculation existe déjà
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT vehicule_id FROM vehicule WHERE immatriculation = :immatriculation");
+        $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation");
     } else {
         $stmt = $pdo->prepare("SELECT voiture_id FROM voiture WHERE immatriculation = :immatriculation");
     }
@@ -104,14 +104,14 @@ try {
     // Insérer le nouveau véhicule
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            INSERT INTO vehicule (
-                id_conducteur, marque, modele, immatriculation,
-                couleur, places, type_carburant, created_at
+            INSERT INTO voiture (
+                utilisateur_id, marque, modele, immatriculation,
+                couleur, places, energie
             ) VALUES (
                 :utilisateur_id, :marque, :modele, :immatriculation,
-                :couleur, :places, :energie, CURRENT_TIMESTAMP
+                :couleur, :places, :energie
             )
-            RETURNING vehicule_id
+            RETURNING voiture_id
         ");
 
         $result = $stmt->execute([
@@ -129,15 +129,15 @@ try {
         }
 
         $vehicleRow = $stmt->fetch(PDO::FETCH_ASSOC);
-        $vehicle_id = $vehicleRow['vehicule_id'];
+        $vehicle_id = $vehicleRow['voiture_id'];
     } else {
         $stmt = $pdo->prepare("
             INSERT INTO voiture (
                 utilisateur_id, marque, modele, immatriculation,
-                couleur, places, energie, created_at
+                couleur, places, energie
             ) VALUES (
                 :utilisateur_id, :marque, :modele, :immatriculation,
-                :couleur, :places, :energie, NOW()
+                :couleur, :places, :energie
             )
         ");
 

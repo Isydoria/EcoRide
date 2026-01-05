@@ -30,8 +30,8 @@ try {
         $stmt = $pdo->prepare("
             SELECT c.*, v.marque, v.modele
             FROM covoiturage c
-            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
-            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
         ");
     } else {
         $stmt = $pdo->prepare("
@@ -56,7 +56,7 @@ try {
 
     // Récupérer les véhicules de l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = ?");
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
     } else {
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
     }
@@ -278,7 +278,7 @@ try {
                                 <?php foreach ($vehicles as $vehicle): ?>
                                     <?php
                                         $vehicle_id = $vehicle['vehicule_id'] ?? $vehicle['voiture_id'];
-                                        $trip_vehicle_id = $trip['id_vehicule'] ?? $trip['voiture_id'];
+                                        $trip_vehicle_id = $trip['voiture_id'];
                                     ?>
                                     <option value="<?= $vehicle_id ?>"
                                             <?= ($vehicle_id == $trip_vehicle_id) ? 'selected' : '' ?>>

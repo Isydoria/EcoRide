@@ -56,7 +56,7 @@ try {
                    COALESCE(SUM(CASE WHEN p.statut_reservation != 'annulee' THEN (c.prix * p.places_reservees) ELSE 0 END), 0) as credits_to_refund
             FROM covoiturage c
             LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id
-            WHERE c.covoiturage_id = :trip_id AND c.id_conducteur = :user_id
+            WHERE c.covoiturage_id = :trip_id AND c.conducteur_id = :user_id
             GROUP BY c.covoiturage_id
         ");
     } else {

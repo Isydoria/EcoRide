@@ -18,7 +18,7 @@ try {
 
     // Récupérer les véhicules de l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = ?");
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
     } else {
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = ?");
     }

@@ -65,7 +65,7 @@ try {
         $sqlTrajet = "
             SELECT
                 c.covoiturage_id,
-                c.id_conducteur as conducteur_id,
+                c.conducteur_id,
                 c.places_disponibles,
                 c.prix as prix_par_place,
                 c.statut,

@@ -53,7 +53,7 @@ try {
         $sql = "
             SELECT
                 c.covoiturage_id as id_trajet,
-                c.id_conducteur as id_conducteur,
+                c.conducteur_id as id_conducteur,
                 c.ville_depart,
                 c.ville_arrivee,
                 c.adresse_depart,
@@ -76,16 +76,16 @@ try {
                 COALESCE(AVG(a.note), 0) as note_moyenne,
                 COUNT(DISTINCT a.avis_id) as nb_avis,
                 -- Nombre total de trajets du conducteur
-                (SELECT COUNT(*) FROM covoiturage WHERE id_conducteur = u.utilisateur_id) as total_trajets
+                (SELECT COUNT(*) FROM covoiturage WHERE conducteur_id = u.utilisateur_id) as total_trajets
             FROM
                 covoiturage c
-                INNER JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
-                LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+                INNER JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+                LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
                 LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
             WHERE
                 c.covoiturage_id = :trajet_id
             GROUP BY
-                c.covoiturage_id, c.id_conducteur, c.ville_depart, c.ville_arrivee,
+                c.covoiturage_id, c.conducteur_id, c.ville_depart, c.ville_arrivee,
                 c.adresse_depart, c.adresse_arrivee, c.date_depart, c.date_arrivee,
                 c.places_disponibles, c.prix, c.statut,
                 u.pseudo, u.date_inscription, u.utilisateur_id,

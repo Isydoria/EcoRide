@@ -45,7 +45,7 @@ try {
 
     // Récupérer les véhicules de l'utilisateur
     if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT * FROM vehicule WHERE id_conducteur = :user_id ORDER BY created_at DESC");
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :user_id ORDER BY created_at DESC");
     } else {
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :user_id ORDER BY created_at DESC");
     }
@@ -57,8 +57,8 @@ try {
         $stmt = $pdo->prepare("
             SELECT c.*, c.covoiturage_id AS trip_id, v.marque, v.modele
             FROM covoiturage c
-            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
-            WHERE c.id_conducteur = :user_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
+            WHERE c.conducteur_id = :user_id
             ORDER BY c.date_depart DESC
             LIMIT 10
         ");
@@ -83,7 +83,7 @@ try {
                    p.statut_reservation as statut
             FROM participation p
             JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-            JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
             WHERE p.passager_id = :user_id
             ORDER BY c.date_depart DESC
             LIMIT 10
@@ -110,9 +110,9 @@ try {
                 SELECT c.*, v.marque, v.modele, 'conducteur' as role,
                        COUNT(p.participation_id) as participants
                 FROM covoiturage c
-                LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+                LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
                 LEFT JOIN participation p ON c.covoiturage_id = p.covoiturage_id AND p.statut_reservation != 'annulee'
-                WHERE c.id_conducteur = :user_id
+                WHERE c.conducteur_id = :user_id
                 GROUP BY c.covoiturage_id, v.marque, v.modele
                 ORDER BY c.date_depart DESC
             ");
@@ -139,7 +139,7 @@ try {
                        c.statut as trip_status, p.statut_reservation as statut
                 FROM participation p
                 JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-                JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
+                JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
                 WHERE p.passager_id = :user_id
                 ORDER BY c.date_depart DESC
             ");

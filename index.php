@@ -26,8 +26,8 @@ try {
                    0 as reservations_count,
                    c.places_disponibles as places_libres
             FROM covoiturage c
-            JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
-            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
             WHERE c.statut IN ('planifie', 'en_cours')
             AND c.date_depart >= CURRENT_DATE
             AND c.places_disponibles > 0

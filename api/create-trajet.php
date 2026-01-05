@@ -112,12 +112,7 @@ if (!empty($errors)) {
 
 try {
     // Vérifier que le véhicule appartient bien à l'utilisateur
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("SELECT places FROM vehicule WHERE vehicule_id = :voiture_id AND id_conducteur = :user_id");
-    } else {
-        $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
-    }
-
+    $stmt = $pdo->prepare("SELECT places FROM voiture WHERE voiture_id = :voiture_id AND utilisateur_id = :user_id");
     $stmt->execute([
         'voiture_id' => $voiture_id,
         'user_id' => $user_id
@@ -146,13 +141,13 @@ try {
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
             INSERT INTO covoiturage (
-                id_conducteur, id_vehicule, ville_depart, ville_arrivee,
-                date_depart, date_arrivee, places_disponibles, prix,
-                statut, created_at
+                conducteur_id, voiture_id, ville_depart, ville_arrivee,
+                date_depart, date_arrivee, places_disponibles, prix_par_place,
+                statut
             ) VALUES (
                 :conducteur_id, :voiture_id, :ville_depart, :ville_arrivee,
                 :date_depart, :date_arrivee, :places_disponibles, :prix_par_place,
-                'planifie', CURRENT_TIMESTAMP
+                'planifie'
             )
             RETURNING covoiturage_id
         ");

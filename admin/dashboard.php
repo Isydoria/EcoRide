@@ -96,8 +96,8 @@ try {
         $stmt = $pdo->prepare("
             SELECT c.*, u.pseudo as conducteur, v.marque, v.modele
             FROM covoiturage c
-            LEFT JOIN utilisateur u ON c.id_conducteur = u.utilisateur_id
-            LEFT JOIN vehicule v ON c.id_vehicule = v.vehicule_id
+            LEFT JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
+            LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
             ORDER BY c.covoiturage_id DESC
             LIMIT 10
         ");

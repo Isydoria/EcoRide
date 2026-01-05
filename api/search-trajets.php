@@ -151,8 +151,8 @@ try {
                 COUNT(DISTINCT a.avis_id) as nb_avis
             FROM
                 covoiturage t
-                INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
-                INNER JOIN vehicule v ON t.id_vehicule = v.vehicule_id
+                INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
+                INNER JOIN voiture v ON t.voiture_id = v.voiture_id
                 LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
             WHERE
                 " . implode(' AND ', $whereConditions) . "
@@ -236,7 +236,7 @@ try {
             $sqlAlt = "
                 SELECT DISTINCT DATE(t.date_depart) as date_alternative
                 FROM covoiturage t
-                INNER JOIN utilisateur u ON t.id_conducteur = u.utilisateur_id
+                INNER JOIN utilisateur u ON t.conducteur_id = u.utilisateur_id
                 WHERE
                     LOWER(t.ville_depart) LIKE LOWER(:ville_depart)
                     AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
