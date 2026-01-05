@@ -47,6 +47,8 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 - **Jean Dupont** : `jean.dupont@ecoride.fr` / `Jean2025!` (100 crédits)
 - **Marie Martin** : `marie.martin@ecoride.fr` / `Marie2025!` (75 crédits)
 - **Paul Durand** : `paul.durand@ecoride.fr` / `Paul2025!` (60 crédits)
+- **Alice Bernard** : `alice.bernard@ecoride.fr` / `Alice2025!` (80 crédits)
+- **Thomas Petit** : `thomas.petit@ecoride.fr` / `Thomas2025!` (90 crédits)
 - **Nouveau compte** : Inscription avec 20 crédits offerts
 
 ---
@@ -58,21 +60,21 @@ EcoRide est une plateforme de covoiturage innovante qui encourage les déplaceme
 1. **🔗 Accéder à l'app** : https://ecoride-om7c.onrender.com
 
 2. **🚗 Initialiser les données** : `/init-demo-data.php`
-   - Crée 3 employés pour la modération
-   - Crée 8 véhicules variés (électrique, hybride, diesel, essence)
-   - Crée 34 trajets jusqu'à fin février 2026
+   - Crée 1 administrateur + 3 employés + 5 utilisateurs
+   - Crée 11 véhicules écologiques (4 électriques, 3 hybrides, 2 GPL, 1 essence, 1 diesel)
+   - Crée 33 trajets de janvier à février 2026
    - Trajets multiples aux mêmes dates pour tester les filtres
    - Ajoute des participations et des avis
 
 3. **🔍 Test recherche** :
-   - Rechercher `Paris` → `Lyon` le `15/10/2025`
+   - Rechercher `Paris` → `Lyon` le `15/01/2026`
    - Voir 3 résultats à différentes heures (8h, 14h, 19h)
    - Tester les filtres de date et destination
 
 4. **👨‍💼 Interface admin** : `/admin/dashboard.php`
    - Connexion : `admin@ecoride.fr` / `Ec0R1de!`
    - Voir les 3 employés créés
-   - Consulter statistiques et graphiques (34 trajets, 9 utilisateurs)
+   - Consulter statistiques et graphiques (33 trajets, 9 utilisateurs)
 
 ### 📋 **Test Complet (15 minutes)**
 
@@ -224,9 +226,9 @@ Le système détecte automatiquement l'environnement :
 
 ```bash
 # LOCAL (MySQL) - Initialiser les données de démonstration
-# - 3 employés (Sophie, Lucas, Emma)
-# - 8 véhicules variés
-# - 34 trajets jusqu'à fin février 2026
+# - 1 admin + 3 employés (Sophie, Lucas, Emma) + 5 utilisateurs
+# - 11 véhicules écologiques (4 électriques, 3 hybrides, 2 GPL, 1 essence, 1 diesel)
+# - 33 trajets de janvier à février 2026
 http://localhost/ecoride/init-demo-data-local.php
 
 # RENDER (PostgreSQL) - Initialiser les données de démonstration
