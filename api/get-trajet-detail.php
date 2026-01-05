@@ -73,7 +73,7 @@ try {
                 v.modele,
                 v.couleur,
                 v.places as nombre_places_vehicule,
-                v.type_carburant as type_carburant,
+                v.energie as type_carburant,
                 -- Note moyenne du conducteur
                 COALESCE(AVG(a.note), 0) as note_moyenne,
                 COUNT(DISTINCT a.avis_id) as nb_avis,
@@ -91,7 +91,7 @@ try {
                 c.adresse_depart, c.adresse_arrivee, c.date_depart, c.date_arrivee,
                 c.places_disponibles, c.prix_par_place, c.statut,
                 u.pseudo, u.{$dateInscriptionField}, u.utilisateur_id,
-                v.marque, v.modele, v.couleur, v.places, v.type_carburant
+                v.marque, v.modele, v.couleur, v.places, v.energie
         ";
     } else {
         $sql = "
