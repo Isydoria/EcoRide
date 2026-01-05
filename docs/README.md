@@ -235,8 +235,8 @@ http://localhost/ecoride/init-demo-data-local.php
 # Mêmes données que le script local
 https://ecoride-om7c.onrender.com/init-demo-data.php
 
-# RENDER - Initialiser uniquement la structure (8 tables)
-https://ecoride-om7c.onrender.com/init-complete.php
+# Note : La structure de la base (8 tables) est initialisée automatiquement
+# au démarrage du conteneur via docker/start.sh et docker/init_database.php
 ```
 
 ### **Compatibilité Multi-Environnements**
