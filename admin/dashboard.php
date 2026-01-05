@@ -57,8 +57,7 @@ try {
     // Liste des employés - Compatible MySQL/PostgreSQL
     if ($isPostgreSQL) {
         $stmt = $pdo->query("
-            SELECT utilisateur_id, pseudo, email, date_inscription as created_at,
-                   CASE WHEN is_active THEN 'actif' ELSE 'suspendu' END as statut
+            SELECT utilisateur_id, pseudo, email, date_inscription as created_at, statut
             FROM utilisateur
             WHERE role = 'employe'
             ORDER BY date_inscription DESC
@@ -76,8 +75,7 @@ try {
     // Derniers utilisateurs inscrits
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            SELECT utilisateur_id, pseudo, email, date_inscription as created_at,
-                   CASE WHEN is_active THEN 'actif' ELSE 'suspendu' END as statut, role
+            SELECT utilisateur_id, pseudo, email, date_inscription as created_at, statut, role
             FROM utilisateur
             ORDER BY date_inscription DESC
             LIMIT 10

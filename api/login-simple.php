@@ -73,8 +73,8 @@ try {
     // 🔄 REQUÊTE COMPATIBLE MySQL ET PostgreSQL
     // ==========================================
     if ($isPostgreSQL) {
-        // PostgreSQL : utilise is_active (boolean)
-        $query = "SELECT * FROM utilisateur WHERE email = :email AND is_active = true";
+        // PostgreSQL : utilise statut (varchar)
+        $query = "SELECT * FROM utilisateur WHERE email = :email AND statut = 'actif'";
     } else {
         // MySQL : utilise statut (enum)
         $query = "SELECT * FROM utilisateur WHERE email = :email AND statut = 'actif'";

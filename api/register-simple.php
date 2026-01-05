@@ -144,7 +144,7 @@ try {
                 password,
                 credits,
                 role,
-                is_active,
+                statut,
                 date_inscription
             ) VALUES (
                 :pseudo,
@@ -152,7 +152,7 @@ try {
                 :password,
                 20,
                 'utilisateur',
-                true,
+                'actif',
                 CURRENT_TIMESTAMP
             )
             RETURNING utilisateur_id

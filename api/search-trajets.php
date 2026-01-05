@@ -63,7 +63,7 @@ try {
             "DATE(t.date_depart) = :date_depart",
             "t.places_disponibles > 0",
             "t.statut = 'planifie'",
-            "u.is_active = true"
+            "u.statut = 'actif'"
         ];
     } else {
         $whereConditions = [
@@ -242,7 +242,7 @@ try {
                     AND LOWER(t.ville_arrivee) LIKE LOWER(:ville_arrivee)
                     AND t.places_disponibles > 0
                     AND t.statut = 'planifie'
-                    AND u.is_active = true
+                    AND u.statut = 'actif'
                     AND DATE(t.date_depart) > CURRENT_DATE
                 ORDER BY DATE(t.date_depart) ASC
                 LIMIT 5

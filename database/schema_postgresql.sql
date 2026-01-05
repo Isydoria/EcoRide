@@ -35,7 +35,8 @@ CREATE TABLE utilisateur (
     biographie TEXT,
     credits INT DEFAULT 0,
     role VARCHAR(50) DEFAULT 'utilisateur' CHECK (role IN ('utilisateur', 'employe', 'administrateur')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    statut VARCHAR(20) DEFAULT 'actif' CHECK (statut IN ('actif', 'suspendu')),
+    date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ========================================
