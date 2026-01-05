@@ -39,7 +39,7 @@ CREATE TABLE voiture (
     marque VARCHAR(100) NOT NULL,
     immatriculation VARCHAR(20) UNIQUE NOT NULL,
     couleur VARCHAR(50),
-    energie ENUM('essence', 'diesel', 'electrique', 'hybride') NOT NULL,
+    energie ENUM('essence', 'diesel', 'electrique', 'hybride', 'gpl') NOT NULL,
     places INT NOT NULL,
     date_premiere_immatriculation DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
