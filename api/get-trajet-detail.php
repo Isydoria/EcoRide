@@ -81,7 +81,7 @@ try {
                 covoiturage c
                 INNER JOIN utilisateur u ON c.conducteur_id = u.utilisateur_id
                 LEFT JOIN voiture v ON c.voiture_id = v.voiture_id
-                LEFT JOIN avis a ON u.utilisateur_id = a.evalue_id
+                LEFT JOIN avis a ON u.utilisateur_id = a.destinataire_id AND a.statut = 'valide'
             WHERE
                 c.covoiturage_id = :trajet_id
             GROUP BY
@@ -200,7 +200,7 @@ try {
                 avis a
                 INNER JOIN utilisateur u ON a.evaluateur_id = u.utilisateur_id
             WHERE
-                a.evalue_id = :conducteur_id
+                a.destinataire_id = :conducteur_id AND a.statut = 'valide'
             ORDER BY
                 a.created_at DESC
             LIMIT 10

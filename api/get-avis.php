@@ -35,49 +35,29 @@ if ($limit < 1 || $limit > 50) {
 }
 
 try {
-    // Récupérer les avis reçus par l'utilisateur
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            SELECT
-                a.avis_id,
-                a.note,
-                a.commentaire,
-                a.created_at,
-                a.covoiturage_id,
-                u_evaluateur.utilisateur_id as evaluateur_id,
-                u_evaluateur.pseudo as evaluateur_pseudo,
-                c.ville_depart,
-                c.ville_arrivee,
-                c.date_depart
-            FROM avis a
-            JOIN utilisateur u_evaluateur ON a.evaluateur_id = u_evaluateur.utilisateur_id
-            JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
-            WHERE a.evalue_id = :user_id
-            ORDER BY a.created_at DESC
-            LIMIT :limit OFFSET :offset
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT
-                a.avis_id,
-                a.note,
-                a.commentaire,
-                a.date_creation as created_at,
-                a.covoiturage_id,
-                u_auteur.utilisateur_id as evaluateur_id,
-                u_auteur.pseudo as evaluateur_pseudo,
-                c.ville_depart,
-                c.ville_arrivee,
-                c.date_depart
-            FROM avis a
-            JOIN utilisateur u_auteur ON a.auteur_id = u_auteur.utilisateur_id
-            JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
-            WHERE a.destinataire_id = :user_id
-            AND a.statut = 'publie'
-            ORDER BY a.date_creation DESC
-            LIMIT :limit OFFSET :offset
-        ");
-    }
+    // Récupérer les avis reçus par l'utilisateur - Unifié MySQL/PostgreSQL après migration
+    $dateField = $isPostgreSQL ? 'created_at' : 'date_creation';
+
+    $stmt = $pdo->prepare("
+        SELECT
+            a.avis_id,
+            a.note,
+            a.commentaire,
+            a.{$dateField} as created_at,
+            a.covoiturage_id,
+            u_auteur.utilisateur_id as evaluateur_id,
+            u_auteur.pseudo as evaluateur_pseudo,
+            c.ville_depart,
+            c.ville_arrivee,
+            c.date_depart
+        FROM avis a
+        JOIN utilisateur u_auteur ON a.auteur_id = u_auteur.utilisateur_id
+        JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
+        WHERE a.destinataire_id = :user_id
+        AND a.statut = 'valide'
+        ORDER BY a.{$dateField} DESC
+        LIMIT :limit OFFSET :offset
+    ");
 
     $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -86,25 +66,15 @@ try {
 
     $avis = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calculer la note moyenne
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            SELECT
-                COUNT(*) as total_avis,
-                AVG(note) as note_moyenne
-            FROM avis
-            WHERE evalue_id = :user_id
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT
-                COUNT(*) as total_avis,
-                AVG(note) as note_moyenne
-            FROM avis
-            WHERE destinataire_id = :user_id
-            AND statut = 'publie'
-        ");
-    }
+    // Calculer la note moyenne - Unifié MySQL/PostgreSQL après migration
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as total_avis,
+            AVG(note) as note_moyenne
+        FROM avis
+        WHERE destinataire_id = :user_id
+        AND statut = 'valide'
+    ");
     $stmt->execute(['user_id' => $user_id]);
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 

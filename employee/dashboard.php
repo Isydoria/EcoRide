@@ -23,46 +23,24 @@ try {
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     $isPostgreSQL = ($driver === 'pgsql');
 
-    // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL (après migration)
-    if ($isPostgreSQL) {
-        // PostgreSQL : evaluateur_id, evalue_id (après migration, colonnes statut ajoutées)
-        $stmt = $pdo->prepare("
-            SELECT a.*,
-                   u1.pseudo as auteur_pseudo,
-                   u1.email as auteur_email,
-                   u2.pseudo as destinataire_pseudo,
-                   u2.email as destinataire_email,
-                   c.ville_depart,
-                   c.ville_arrivee,
-                   c.date_depart,
-                   c.covoiturage_id as trajet_id
-            FROM avis a
-            JOIN utilisateur u1 ON a.evaluateur_id = u1.utilisateur_id
-            JOIN utilisateur u2 ON a.evalue_id = u2.utilisateur_id
-            LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
-            WHERE a.statut = 'en_attente'
-            ORDER BY a.created_at DESC
-        ");
-    } else {
-        // MySQL : auteur_id, destinataire_id
-        $stmt = $pdo->prepare("
-            SELECT a.*,
-                   u1.pseudo as auteur_pseudo,
-                   u1.email as auteur_email,
-                   u2.pseudo as destinataire_pseudo,
-                   u2.email as destinataire_email,
-                   c.ville_depart,
-                   c.ville_arrivee,
-                   c.date_depart,
-                   c.covoiturage_id as trajet_id
-            FROM avis a
-            JOIN utilisateur u1 ON a.auteur_id = u1.utilisateur_id
-            JOIN utilisateur u2 ON a.destinataire_id = u2.utilisateur_id
-            LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
-            WHERE a.statut = 'en_attente'
-            ORDER BY a.created_at DESC
-        ");
-    }
+    // Récupérer les avis en attente de validation - Compatible MySQL/PostgreSQL (après migration: mêmes colonnes)
+    $stmt = $pdo->prepare("
+        SELECT a.*,
+               u1.pseudo as auteur_pseudo,
+               u1.email as auteur_email,
+               u2.pseudo as destinataire_pseudo,
+               u2.email as destinataire_email,
+               c.ville_depart,
+               c.ville_arrivee,
+               c.date_depart,
+               c.covoiturage_id as trajet_id
+        FROM avis a
+        JOIN utilisateur u1 ON a.auteur_id = u1.utilisateur_id
+        JOIN utilisateur u2 ON a.destinataire_id = u2.utilisateur_id
+        LEFT JOIN covoiturage c ON a.covoiturage_id = c.covoiturage_id
+        WHERE a.statut = 'en_attente'
+        ORDER BY a.created_at DESC
+    ");
     $stmt->execute();
     $pending_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

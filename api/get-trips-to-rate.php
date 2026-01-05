@@ -52,8 +52,8 @@ try {
             AND p.statut_reservation = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
-                WHERE a.evaluateur_id = :user_id
-                AND a.evalue_id = p.passager_id
+                WHERE a.auteur_id = :user_id
+                AND a.destinataire_id = p.passager_id
                 AND a.covoiturage_id = c.covoiturage_id
             )
             ORDER BY c.date_depart DESC
@@ -81,8 +81,8 @@ try {
             AND p.statut_reservation = 'terminee'
             AND NOT EXISTS (
                 SELECT 1 FROM avis a
-                WHERE a.evaluateur_id = :user_id
-                AND a.evalue_id = c.conducteur_id
+                WHERE a.auteur_id = :user_id
+                AND a.destinataire_id = c.conducteur_id
                 AND a.covoiturage_id = c.covoiturage_id
             )
             ORDER BY c.date_depart DESC

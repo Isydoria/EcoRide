@@ -84,28 +84,17 @@ if (!empty($errors)) {
 }
 
 try {
-    // Vérifier que l'utilisateur a bien participé à ce trajet
-    if ($isPostgreSQL) {
-        // Vérifier si l'utilisateur était passager
-        $stmt = $pdo->prepare("
-            SELECT p.*, c.conducteur_id, c.statut as trip_statut
-            FROM participation p
-            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-            WHERE p.covoiturage_id = :trip_id
-            AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
-            AND p.statut_reservation = 'terminee'
-        ");
-    } else {
-        // Vérifier si l'utilisateur était passager
-        $stmt = $pdo->prepare("
-            SELECT p.*, c.conducteur_id, c.statut as trip_statut
-            FROM participation p
-            JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
-            WHERE p.covoiturage_id = :trip_id
-            AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
-            AND p.statut = 'terminee'
-        ");
-    }
+    // Vérifier que l'utilisateur a bien participé à ce trajet - Unifié après migration
+    $statutField = $isPostgreSQL ? 'statut_reservation' : 'statut';
+
+    $stmt = $pdo->prepare("
+        SELECT p.*, c.conducteur_id, c.statut as trip_statut
+        FROM participation p
+        JOIN covoiturage c ON p.covoiturage_id = c.covoiturage_id
+        WHERE p.covoiturage_id = :trip_id
+        AND (p.passager_id = :user_id OR c.conducteur_id = :user_id)
+        AND p.{$statutField} = 'terminee'
+    ");
     $stmt->execute([
         'trip_id' => $covoiturage_id,
         'user_id' => $evaluateur_id
@@ -156,22 +145,13 @@ try {
         ]));
     }
 
-    // Vérifier qu'un avis n'a pas déjà été laissé
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            SELECT avis_id FROM avis
-            WHERE evaluateur_id = :evaluateur_id
-            AND evalue_id = :evalue_id
-            AND covoiturage_id = :trip_id
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT avis_id FROM avis
-            WHERE auteur_id = :evaluateur_id
-            AND destinataire_id = :evalue_id
-            AND covoiturage_id = :trip_id
-        ");
-    }
+    // Vérifier qu'un avis n'a pas déjà été laissé - Unifié après migration
+    $stmt = $pdo->prepare("
+        SELECT avis_id FROM avis
+        WHERE auteur_id = :evaluateur_id
+        AND destinataire_id = :evalue_id
+        AND covoiturage_id = :trip_id
+    ");
     $stmt->execute([
         'evaluateur_id' => $evaluateur_id,
         'evalue_id' => $evalue_id,
@@ -185,11 +165,14 @@ try {
         ]));
     }
 
-    // Insérer l'avis
+    // Insérer l'avis - Unifié après migration
+    $dateField = $isPostgreSQL ? 'created_at' : 'date_creation';
+    $statutDefault = $isPostgreSQL ? 'en_attente' : 'publie';
+
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
-            INSERT INTO avis (evaluateur_id, evalue_id, covoiturage_id, note, commentaire, created_at)
-            VALUES (:evaluateur_id, :evalue_id, :trip_id, :note, :commentaire, CURRENT_TIMESTAMP)
+            INSERT INTO avis (auteur_id, destinataire_id, covoiturage_id, note, commentaire, {$dateField}, statut)
+            VALUES (:evaluateur_id, :evalue_id, :trip_id, :note, :commentaire, CURRENT_TIMESTAMP, :statut)
             RETURNING avis_id
         ");
 
@@ -198,15 +181,16 @@ try {
             'evalue_id' => $evalue_id,
             'trip_id' => $covoiturage_id,
             'note' => $note,
-            'commentaire' => $commentaire
+            'commentaire' => $commentaire,
+            'statut' => $statutDefault
         ]);
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $avis_id = $result['avis_id'];
     } else {
         $stmt = $pdo->prepare("
-            INSERT INTO avis (auteur_id, destinataire_id, covoiturage_id, note, commentaire, date_creation, statut)
-            VALUES (:evaluateur_id, :evalue_id, :trip_id, :note, :commentaire, NOW(), 'publie')
+            INSERT INTO avis (auteur_id, destinataire_id, covoiturage_id, note, commentaire, {$dateField}, statut)
+            VALUES (:evaluateur_id, :evalue_id, :trip_id, :note, :commentaire, NOW(), :statut)
         ");
 
         $stmt->execute([
@@ -214,7 +198,8 @@ try {
             'evalue_id' => $evalue_id,
             'trip_id' => $covoiturage_id,
             'note' => $note,
-            'commentaire' => $commentaire
+            'commentaire' => $commentaire,
+            'statut' => $statutDefault
         ]);
 
         $avis_id = $pdo->lastInsertId();
