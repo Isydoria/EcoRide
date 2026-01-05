@@ -31,20 +31,32 @@ try {
     // ==================================================
     echo "<h2>📦 Étape 1: Modification table voiture</h2>";
 
-    // Renommer places_disponibles en places
-    try {
+    // Vérifier si places_disponibles existe avant de renommer
+    $checkPlaces = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'voiture' AND column_name = 'places_disponibles'
+    ")->fetch();
+
+    if ($checkPlaces) {
         $pdo->exec("ALTER TABLE voiture RENAME COLUMN places_disponibles TO places");
         echo "<p class='success'>✅ Colonne 'places_disponibles' renommée en 'places'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'places' déjà existante ou erreur: " . htmlspecialchars($e->getMessage()) . "</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'places' déjà à jour</p>";
     }
 
-    // Renommer type_vehicule en energie
-    try {
+    // Vérifier si type_vehicule existe avant de renommer
+    $checkEnergie = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'voiture' AND column_name = 'type_vehicule'
+    ")->fetch();
+
+    if ($checkEnergie) {
         $pdo->exec("ALTER TABLE voiture RENAME COLUMN type_vehicule TO energie");
         echo "<p class='success'>✅ Colonne 'type_vehicule' renommée en 'energie'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'energie' déjà existante ou erreur: " . htmlspecialchars($e->getMessage()) . "</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'energie' déjà à jour</p>";
     }
 
     // Ajouter colonnes manquantes à voiture
@@ -147,20 +159,32 @@ try {
     // ==================================================
     echo "<h2>👤 Étape 3: Modification table utilisateur</h2>";
 
-    // Renommer photo_profil en photo si nécessaire
-    try {
+    // Vérifier si photo_profil existe avant de renommer
+    $checkPhoto = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'utilisateur' AND column_name = 'photo_profil'
+    ")->fetch();
+
+    if ($checkPhoto) {
         $pdo->exec("ALTER TABLE utilisateur RENAME COLUMN photo_profil TO photo");
         echo "<p class='success'>✅ Colonne 'photo_profil' renommée en 'photo'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'photo' déjà existante</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'photo' déjà à jour</p>";
     }
 
-    // Renommer credits en credit (singulier)
-    try {
+    // Vérifier si credits existe avant de renommer
+    $checkCredits = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'utilisateur' AND column_name = 'credits'
+    ")->fetch();
+
+    if ($checkCredits) {
         $pdo->exec("ALTER TABLE utilisateur RENAME COLUMN credits TO credit");
         echo "<p class='success'>✅ Colonne 'credits' renommée en 'credit'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'credit' déjà existante</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'credit' déjà à jour</p>";
     }
 
     // Renommer date_inscription en created_at (pour uniformité)
@@ -176,20 +200,32 @@ try {
     // ==================================================
     echo "<h2>🎫 Étape 4: Modification table participation</h2>";
 
-    // Renommer statut_reservation en statut
-    try {
+    // Vérifier si statut_reservation existe avant de renommer
+    $checkStatutRes = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'participation' AND column_name = 'statut_reservation'
+    ")->fetch();
+
+    if ($checkStatutRes) {
         $pdo->exec("ALTER TABLE participation RENAME COLUMN statut_reservation TO statut");
         echo "<p class='success'>✅ Colonne 'statut_reservation' renommée en 'statut'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'statut' déjà existante</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'statut' déjà à jour</p>";
     }
 
-    // Renommer places_reservees en nombre_places
-    try {
+    // Vérifier si places_reservees existe avant de renommer
+    $checkPlacesRes = $pdo->query("
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'participation' AND column_name = 'places_reservees'
+    ")->fetch();
+
+    if ($checkPlacesRes) {
         $pdo->exec("ALTER TABLE participation RENAME COLUMN places_reservees TO nombre_places");
         echo "<p class='success'>✅ Colonne 'places_reservees' renommée en 'nombre_places'</p>";
-    } catch (PDOException $e) {
-        echo "<p>ℹ️ Colonne 'nombre_places' déjà existante</p>";
+    } else {
+        echo "<p>ℹ️ Colonne 'nombre_places' déjà à jour</p>";
     }
 
     // Ajouter credit_utilise si manquant
