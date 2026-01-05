@@ -52,6 +52,9 @@ try {
     $stmt->execute(['user_id' => $user_id]);
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // DEBUG
+    error_log("DEBUG vehicles count: " . count($vehicles));
+
     // Récupérer les trajets créés par l'utilisateur (conducteur)
     if ($isPostgreSQL) {
         $stmt = $pdo->prepare("
@@ -74,6 +77,13 @@ try {
     }
     $stmt->execute(['user_id' => $user_id]);
     $my_trips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // DEBUG
+    error_log("DEBUG user_id: $user_id");
+    error_log("DEBUG my_trips count: " . count($my_trips));
+    if (count($my_trips) > 0) {
+        error_log("DEBUG my_trips[0]: " . json_encode($my_trips[0]));
+    }
 
     // Récupérer les participations (passager)
     if ($isPostgreSQL) {
@@ -101,6 +111,12 @@ try {
     }
     $stmt->execute(['user_id' => $user_id]);
     $my_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // DEBUG
+    error_log("DEBUG my_bookings count: " . count($my_bookings));
+    if (count($my_bookings) > 0) {
+        error_log("DEBUG my_bookings[0]: " . json_encode($my_bookings[0]));
+    }
 
     // Charger l'historique complet si on est dans la section historique
     if (isset($_GET['section']) && $_GET['section'] === 'history') {
@@ -161,7 +177,7 @@ try {
 
     // Statistiques
     $stats = [
-        'credits' => $isPostgreSQL ? ($user_data['credits'] ?? 0) : ($user_data['credit'] ?? 0),
+        'credits' => ($user_data['credit'] ?? 0),
         'trips_created' => count($my_trips),
         'trips_taken' => count($my_bookings),
         'vehicles' => count($vehicles)
@@ -1521,7 +1537,7 @@ $active_section = $_GET['section'] ?? 'overview';
                     <div class="form-row">
                         <div class="form-group">
                             <label>Crédits</label>
-                            <input type="text" value="<?= $user_data['credit'] ?? $user_data['credits'] ?? 0 ?>" readonly>
+                            <input type="text" value="<?= $user_data['credit'] ?? 0 ?>" readonly>
                         </div>
                         <div class="form-group">
                             <label>Membre depuis</label>
