@@ -269,6 +269,7 @@ try {
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             height: 300px;
+            position: relative;
         }
 
         .charts-grid {
@@ -276,6 +277,12 @@ try {
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin: 20px 0;
+        }
+
+        /* Correction pour le canvas Chart.js */
+        .chart-container canvas {
+            max-width: 100% !important;
+            height: auto !important;
         }
 
         /* Liste employés dans action-section */
@@ -329,18 +336,22 @@ try {
             }
 
             .admin-nav div {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                justify-content: center;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                width: 100%;
             }
 
             .admin-nav a {
-                padding: 8px 10px;
-                font-size: 12px;
-                flex: 1 1 auto;
+                padding: 10px 8px;
+                font-size: 11px;
                 text-align: center;
-                white-space: nowrap;
+                white-space: normal;
+                line-height: 1.3;
+                min-height: 45px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .stats-grid {
@@ -366,29 +377,44 @@ try {
             }
 
             .chart-container {
-                height: 250px;
-                padding: 15px;
+                height: 280px;
+                padding: 15px 10px;
+                overflow: hidden;
             }
 
             .chart-container h3 {
-                font-size: 16px;
-                margin-top: 0;
+                font-size: 15px;
+                margin: 0 0 10px 0;
+            }
+
+            .chart-container > div {
+                position: relative;
+                height: calc(100% - 35px) !important;
+                width: 100% !important;
             }
 
             /* Tableau responsive avec wrapper */
             .table-wrapper {
                 margin: 15px -10px;
+                -webkit-overflow-scrolling: touch;
             }
 
             .users-table {
-                font-size: 11px;
-                min-width: 600px;
+                font-size: 12px;
+                min-width: 650px;
             }
 
             .users-table th,
             .users-table td {
-                padding: 8px 4px;
+                padding: 10px 6px;
                 white-space: nowrap;
+            }
+
+            .users-table th {
+                font-size: 11px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
 
             .action-section {
@@ -423,6 +449,36 @@ try {
             h2 {
                 font-size: 20px;
                 margin: 15px 0 10px 0;
+            }
+        }
+
+        /* ========== TRÈS PETITS ÉCRANS ========== */
+        @media (max-width: 400px) {
+            .admin-nav h1 {
+                font-size: 16px;
+            }
+
+            .admin-nav a {
+                font-size: 10px;
+                padding: 8px 6px;
+                min-height: 40px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .chart-container {
+                height: 250px;
+                padding: 12px 8px;
+            }
+
+            .chart-container h3 {
+                font-size: 14px;
             }
         }
 
@@ -519,13 +575,13 @@ try {
         <div class="charts-grid">
             <div class="chart-container">
                 <h3>📊 Répartition des trajets</h3>
-                <div style="position: relative; height: 200px;">
+                <div style="position: relative; height: calc(100% - 45px); width: 100%;">
                     <canvas id="tripsChart"></canvas>
                 </div>
             </div>
             <div class="chart-container">
                 <h3>📈 Évolution des inscriptions</h3>
-                <div style="position: relative; height: 200px;">
+                <div style="position: relative; height: calc(100% - 45px); width: 100%;">
                     <canvas id="usersChart"></canvas>
                 </div>
             </div>
