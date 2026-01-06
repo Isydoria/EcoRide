@@ -35,8 +35,8 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM covoiturage");
     $stats['total_trips'] = $stmt->fetchColumn();
 
-    $creditColumn = $isPostgreSQL ? 'credits' : 'credit';
-    $stmt = $pdo->query("SELECT SUM($creditColumn) FROM utilisateur");
+    // La colonne s'appelle 'credit' (singulier) dans PostgreSQL et MySQL
+    $stmt = $pdo->query("SELECT SUM(credit) FROM utilisateur");
     $stats['total_credits'] = $stmt->fetchColumn() ?? 0;
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM participation");
@@ -55,39 +55,21 @@ try {
     ];
 
     // Liste des employés - Compatible MySQL/PostgreSQL
-    if ($isPostgreSQL) {
-        $stmt = $pdo->query("
-            SELECT utilisateur_id, pseudo, email, date_inscription as created_at, statut
-            FROM utilisateur
-            WHERE role = 'employe'
-            ORDER BY date_inscription DESC
-        ");
-    } else {
-        $stmt = $pdo->query("
-            SELECT utilisateur_id, pseudo, email, created_at, statut
-            FROM utilisateur
-            WHERE role = 'employe'
-            ORDER BY created_at DESC
-        ");
-    }
+    $stmt = $pdo->query("
+        SELECT utilisateur_id, pseudo, email, created_at, statut
+        FROM utilisateur
+        WHERE role = 'employe'
+        ORDER BY created_at DESC
+    ");
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Derniers utilisateurs inscrits
-    if ($isPostgreSQL) {
-        $stmt = $pdo->prepare("
-            SELECT utilisateur_id, pseudo, email, date_inscription as created_at, statut, role
-            FROM utilisateur
-            ORDER BY date_inscription DESC
-            LIMIT 10
-        ");
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT utilisateur_id, pseudo, email, created_at, statut, role
-            FROM utilisateur
-            ORDER BY created_at DESC
-            LIMIT 10
-        ");
-    }
+    $stmt = $pdo->prepare("
+        SELECT utilisateur_id, pseudo, email, created_at, statut, role
+        FROM utilisateur
+        ORDER BY created_at DESC
+        LIMIT 10
+    ");
     $stmt->execute();
     $recent_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
