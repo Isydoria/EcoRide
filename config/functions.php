@@ -164,8 +164,8 @@ function jsonResponse($success, $message, $data = null, $debug = null) {
     if ($data !== null) {
         $response['data'] = $data;
     }
-    // Ajouter debug en développement
-    if ($debug !== null && getenv('APP_ENV') !== 'production') {
+    // Ajouter debug (temporairement activé en production pour diagnostique)
+    if ($debug !== null) {
         $response['debug'] = $debug;
     }
     echo json_encode($response);
