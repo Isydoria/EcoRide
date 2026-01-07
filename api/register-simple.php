@@ -9,16 +9,18 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ob_start();
 
-// Headers JSON
-header('Content-Type: application/json; charset=utf-8');
-
-// Démarrer session
-session_start();
-
 // ✅ ÉTAPE 1 : Connexion à la base de données
 try {
+    // Démarrer session si pas déjà démarrée
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
     require_once __DIR__ . '/../config/init.php';
     require_once __DIR__ . '/../config/rate-limiter.php';
+
+    // Header JSON (doit être après init.php pour pas être écrasé)
+    header('Content-Type: application/json; charset=utf-8');
 
     // Vérifier méthode POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

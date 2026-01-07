@@ -150,7 +150,12 @@ function isAjax() {
 /**
  * Envoyer une réponse JSON
  */
-function jsonResponse($success, $message, $data = null) {
+function jsonResponse($success, $message, $data = null, $debug = null) {
+    // Nettoyer tout buffer de sortie précédent
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
     header('Content-Type: application/json; charset=utf-8');
     $response = [
         'success' => $success,
@@ -158,6 +163,10 @@ function jsonResponse($success, $message, $data = null) {
     ];
     if ($data !== null) {
         $response['data'] = $data;
+    }
+    // Ajouter debug en développement
+    if ($debug !== null && getenv('APP_ENV') !== 'production') {
+        $response['debug'] = $debug;
     }
     echo json_encode($response);
     exit();
