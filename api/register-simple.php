@@ -138,13 +138,13 @@ $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 // ✅ ÉTAPE 7 : Insérer l'utilisateur dans la base
 try {
     if ($isPostgreSQL) {
-        // PostgreSQL (Render - colonnes: credits, created_at)
+        // PostgreSQL (Render - colonnes: credit (singulier), created_at)
         $stmt = $pdo->prepare("
             INSERT INTO utilisateur (
                 pseudo,
                 email,
                 password,
-                credits,
+                credit,
                 role,
                 statut,
                 created_at
@@ -233,8 +233,9 @@ try {
 
 // ✅ ÉTAPE 9 : Réponse de succès
 // Détection de l'environnement pour adapter les chemins
+$isRender = getenv('RENDER') === 'true' || getenv('RENDER_SERVICE_NAME') !== false;
 $isDocker = getenv('DOCKER_ENV') === 'true';
-$baseUrl = $isDocker ? '' : '/ecoride';
+$baseUrl = ($isRender || $isDocker) ? '' : '/ecoride';
 
 jsonResponse(true, 'Inscription réussie ! Bienvenue sur EcoRide 🎉', [
     'user_id' => $user_id,
