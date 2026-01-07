@@ -129,25 +129,58 @@ try {
             margin-bottom: 20px;
         }
         
-        .admin-nav { 
-            display: flex; 
-            gap: 20px; 
-            align-items: center; 
+        .admin-nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
             justify-content: space-between;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            position: relative;
         }
-        
-        .admin-nav a { 
-            color: white; 
-            text-decoration: none; 
-            padding: 10px 15px; 
-            border-radius: 5px; 
+
+        .admin-nav .nav-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        
-        .admin-nav a:hover { 
-            background: rgba(255,255,255,0.1); 
+
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+
+        .hamburger-btn.active {
+            transform: rotate(90deg);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .admin-nav a:hover {
+            background: rgba(255,255,255,0.1);
         }
         
         .stats-grid { 
@@ -323,35 +356,69 @@ try {
             }
 
             .admin-nav {
-                flex-direction: column;
-                gap: 10px;
-                padding: 0 10px;
-                align-items: stretch;
+                flex-wrap: wrap;
+                padding: 10px 15px;
+            }
+
+            .admin-nav .nav-title {
+                flex: 1;
+                justify-content: space-between;
+                width: 100%;
             }
 
             .admin-nav h1 {
                 font-size: 18px;
                 margin: 0;
-                text-align: center;
             }
 
-            .admin-nav div {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
+            .hamburger-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                gap: 0;
                 width: 100%;
+                background: #34495e;
+                border-radius: 8px;
+                overflow: hidden;
+                margin-top: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+
+            .nav-menu.active {
+                display: flex;
+                animation: slideDown 0.3s ease-out;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             .admin-nav a {
-                padding: 10px 8px;
-                font-size: 11px;
-                text-align: center;
-                white-space: normal;
-                line-height: 1.3;
-                min-height: 45px;
+                padding: 15px 20px;
+                font-size: 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                border-radius: 0;
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                gap: 10px;
+            }
+
+            .admin-nav a:last-child {
+                border-bottom: none;
+            }
+
+            .admin-nav a:hover {
+                background: rgba(255,255,255,0.15);
             }
 
             .stats-grid {
@@ -506,10 +573,15 @@ try {
 <body>
     <div class="admin-header">
         <div class="admin-nav">
-            <h1>🛠️ Administration EcoRide</h1>
-            <div>
+            <div class="nav-title">
+                <h1>🛠️ Administration EcoRide</h1>
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+                    ☰
+                </button>
+            </div>
+            <div class="nav-menu" id="navMenu">
                 <a href="dashboard.php">📊 Tableau de bord</a>
-                <a href="mongodb-stats.php">🗄️ MongoDB Stats</a> <!-- 🆕 NOUVEAU -->
+                <a href="mongodb-stats.php">🗄️ MongoDB Stats</a>
                 <a href="../user/dashboard.php">👤 Mode utilisateur</a>
                 <a href="../index.php">🏠 Accueil</a>
                 <a href="../logout.php">🚪 Déconnexion</a>
@@ -792,6 +864,37 @@ try {
                 }
             }
         });
+
+        // ========== MENU HAMBURGER ==========
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        if (hamburgerBtn && navMenu) {
+            hamburgerBtn.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                hamburgerBtn.classList.toggle('active');
+            });
+
+            // Fermer le menu si on clique en dehors
+            document.addEventListener('click', function(event) {
+                const isClickInsideNav = event.target.closest('.admin-nav');
+                if (!isClickInsideNav && navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    hamburgerBtn.classList.remove('active');
+                }
+            });
+
+            // Fermer le menu quand on clique sur un lien (pour la navigation mobile)
+            const navLinks = navMenu.querySelectorAll('a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navMenu.classList.remove('active');
+                        hamburgerBtn.classList.remove('active');
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>

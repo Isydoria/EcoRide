@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoRide - Présentation Orale RNCP37674</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .slide {
+            width: 960px;
+            height: 540px;
+            margin: 30px auto;
+            background: white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            padding: 35px 45px;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .slide-number {
+            display: none;
+        }
+
+        /* Slide de titre */
+        .title-slide {
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 64px;
+            margin-bottom: 18px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #2ECC71;
+        }
+
+        .title-slide h2 {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 35px;
+            opacity: 1;
+            color: #2c3e50;
+        }
+
+        .title-slide .subtitle {
+            font-size: 20px;
+            margin-top: 25px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .title-slide .author {
+            font-size: 24px;
+            margin-top: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .title-slide .date {
+            font-size: 18px;
+            margin-top: 18px;
+            opacity: 0.9;
+        }
+
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Titres des slides */
+        h1 {
+            font-size: 34px;
+            margin-bottom: 20px;
+            color: #2ECC71;
+            border-bottom: 3px solid #2ECC71;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-bottom: 15px;
+            color: #27AE60;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Listes */
+        ul {
+            margin-left: 20px;
+            line-height: 1.7;
+        }
+
+        li {
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        /* Grilles */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 15px;
+        }
+
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        /* Box */
+        .box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2ECC71;
+        }
+
+        .box h3 {
+            color: #2ECC71;
+            margin-bottom: 8px;
+            font-size: 17px;
+        }
+
+        .box ul {
+            font-size: 14px;
+            margin-left: 18px;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: #e8f8f5;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2ECC71;
+            margin: 15px 0;
+        }
+
+        /* Code */
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            color: #c7254e;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 11px;
+            line-height: 1.5;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 10px 0;
+        }
+
+        /* Checkmark */
+        .checkmark {
+            color: #2ECC71;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        /* Media placeholder */
+        .media-placeholder {
+            background: #ecf0f1;
+            border: 2px dashed #95a5a6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            color: #7f8c8d;
+        }
+
+        .media-placeholder h3 {
+            color: #34495e;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .media-placeholder p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Video placeholder */
+        .video-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .video-placeholder h2 {
+            color: white;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        /* Tag */
+        .tag {
+            display: inline-block;
+            background: #2ECC71;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        /* Print */
+        @media print {
+            .slide {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+        }
+
+        /* Strong */
+        strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ======================== -->
+<!-- SLIDE 1 - PAGE DE TITRE -->
+<!-- ======================== -->
+<div class="slide title-slide">
+    <div class="logo-container" style="margin-bottom: 15px; width: 100px; height: 100px;">
+        <img src="Capture d'écran 2026-01-06 134706.png" alt="Logo EcoRide - Covoiturage Écologique">
+    </div>
+    <h1 style="font-size: 56px; margin-bottom: 15px;">EcoRide</h1>
+    <h2 style="font-size: 28px; margin-bottom: 30px;">Plateforme de Covoiturage Écologique</h2>
+    <div class="subtitle" style="font-size: 18px; margin-top: 20px;">
+        Titre Professionnel RNCP37674<br>
+        Développeur Web et Web Mobile - Niveau 5
+    </div>
+    <div class="author" style="font-size: 22px; margin-top: 20px;">Nathanaëlle Debaque</div>
+    <div class="date" style="font-size: 17px; margin-top: 15px;">20 janvier 2026</div>
+    <div style="margin-top: 18px; font-size: 17px; opacity: 0.9; font-weight: 500;">
+        🌐 https://ecoride-om7c.onrender.com
+    </div>
+</div>
+
+<!-- ======================== -->
+<!-- SLIDE 2 - PRÉSENTATION -->
+<!-- ======================== -->
+<div class="slide">
+    <h1>Présentation</h1>
+
+    <div style="margin-top: 25px;">
+        <h3>Mon Parcours</h3>
+        <ul>
+            <li>Formation : Développeur Web et Web Mobile</li>
+            <li>Compétences : Développement Full-Stack</li>
+            <li>Objectif : Obtention du Titre Professionnel RNCP Niveau 5</li>
+        </ul>
+
+        <h3 style="margin-top: 15px;">Le Projet EcoRide</h3>
+        <ul>
+            <li>Application de covoiturage écologique complète</li>
+            <li>Développée en autonomie de A à Z</li>
+            <li>Mise en pratique des deux blocs de compétences RNCP</li>
+            <li>Déployée en production sur Render.com</li>
+        </ul>
+    </div>
+
+    <div class="slide-number">2</div>
+</div>
+
+<!-- ============================= -->
+<!-- SLIDE 3 - VUE D'ENSEMBLE -->
+<!-- ============================= -->
+<div class="slide">
+    <h1>Vue d'Ensemble d'EcoRide</h1>
+
+    <div class="highlight" style="padding: 12px;">
+        <h2 style="color: #2ECC71; font-size: 22px; margin-bottom: 0;">Réduire l'empreinte carbone des déplacements quotidiens</h2>
+    </div>
+
+    <div class="two-column" style="margin-top: 12px;">
+        <div class="box" style="padding: 12px;">
+            <h3>Fonctionnalités Utilisateur</h3>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li>Inscription/Connexion sécurisée</li>
+                <li>Proposition de trajets</li>
+                <li>Recherche de covoiturages</li>
+                <li>Gestion de profil et véhicules</li>
+                <li>Système de notation</li>
+                <li>Crédits internes</li>
+            </ul>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3>Interface Administrateur</h3>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li>Dashboard analytique</li>
+                <li>Graphiques Chart.js</li>
+                <li>Gestion utilisateurs</li>
+                <li>Statistiques en temps réel</li>
+                <li>Modération de contenus</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="slide-number">3</div>
+</div>
+
+<!-- ============================================ -->
+<!-- SLIDE 3bis - CAPTURE PAGE D'ACCUEIL -->
+<!-- ============================================ -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 15px;">Interface EcoRide - Page d'Accueil</h1>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 40px; height: 350px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📸 Capture d'écran de la page d'accueil EcoRide</h3>
+        <p style="font-size: 14px; line-height: 1.6;">
+            Montrant :<br>
+            • Le logo et la navigation principale<br>
+            • L'interface utilisateur<br>
+            • Les fonctionnalités accessibles
+        </p>
+    </div>
+
+    <div class="slide-number">3bis</div>
+</div>
+
+<!-- ================================ -->
+<!-- SLIDE 4 - CONTEXTE ET PROBLÉMATIQUE -->
+<!-- ================================ -->
+<div class="slide">
+    <h1>Contexte et Problématique</h1>
+
+    <div class="three-column" style="margin-top: 15px;">
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">🌍 Environnement</h3>
+            <p style="font-size: 13px; line-height: 1.5;">Les déplacements individuels représentent une part importante des émissions de CO2</p>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">💰 Économie</h3>
+            <p style="font-size: 13px; line-height: 1.5;">Coûts élevés du carburant et de l'entretien des véhicules</p>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">👥 Social</h3>
+            <p style="font-size: 13px; line-height: 1.5;">Isolement des conducteurs, sièges vides inutilisés</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; padding: 18px; background: #e8f8f5; border-radius: 8px; border-left: 4px solid #2ECC71;">
+        <h3 style="color: #27AE60; margin-bottom: 10px; font-size: 17px;">Solution : Le Covoiturage</h3>
+        <p style="font-size: 15px; line-height: 1.6;">Une solution concrète pour réduire l'impact environnemental, diminuer les coûts pour les utilisateurs, et créer du lien social entre personnes effectuant des trajets similaires.</p>
+    </div>
+
+    <div class="slide-number">4</div>
+</div>
+
+<!-- ============================= -->
+<!-- SLIDE 5 - OBJECTIFS DU PROJET -->
+<!-- ============================= -->
+<div class="slide">
+    <h1>Objectifs du Projet</h1>
+
+    <div class="two-column" style="margin-top: 12px; font-size: 14px;">
+        <div>
+            <div class="box" style="margin-bottom: 12px; padding: 12px;">
+                <h3 style="font-size: 16px;">Pour les Utilisateurs</h3>
+                <ul style="font-size: 13px; line-height: 1.5;">
+                    <li><span class="checkmark">✓</span>Proposer des trajets facilement</li>
+                    <li><span class="checkmark">✓</span>Rechercher et réserver des places</li>
+                    <li><span class="checkmark">✓</span>Gérer profil et véhicules</li>
+                    <li><span class="checkmark">✓</span>Consulter l'historique</li>
+                    <li><span class="checkmark">✓</span>Système de notation</li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 12px;">
+                <h3 style="font-size: 16px;">Pour les Administrateurs</h3>
+                <ul style="font-size: 13px; line-height: 1.5;">
+                    <li><span class="checkmark">✓</span>Superviser l'activité</li>
+                    <li><span class="checkmark">✓</span>Gérer les utilisateurs</li>
+                    <li><span class="checkmark">✓</span>Analyser les statistiques</li>
+                    <li><span class="checkmark">✓</span>Modérer les contenus</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">Aspects Techniques</h3>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li><span class="checkmark">✓</span>Sécurité renforcée (OWASP Top 10)</li>
+                <li><span class="checkmark">✓</span>Architecture professionnelle (MVC)</li>
+                <li><span class="checkmark">✓</span>API REST complète (18+ endpoints)</li>
+                <li><span class="checkmark">✓</span>Bases de données multiples</li>
+                <li><span class="checkmark">✓</span>Déploiement en production</li>
+                <li><span class="checkmark">✓</span>Design responsive</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="slide-number">5</div>
+</div>
+
+<!-- ============================= -->
+<!-- SLIDE 6 - PUBLIC CIBLE -->
+<!-- ============================= -->
+<div class="slide">
+    <h1>Public Cible</h1>
+
+    <div class="two-column" style="margin-top: 15px;">
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">👤 Utilisateur / Covoitureur</h3>
+            <p style="margin: 8px 0; font-size: 14px;"><strong>Profil :</strong> Actifs, étudiants, trajets réguliers ou ponctuels</p>
+
+            <p style="margin-top: 12px; font-size: 14px;"><strong>Besoins :</strong></p>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li>Interface simple et intuitive</li>
+                <li>Inscription/connexion sécurisée</li>
+                <li>Proposition de trajets avec détails</li>
+                <li>Recherche de trajets avec filtres</li>
+                <li>Gestion de profil et véhicules</li>
+                <li>Système de paiement par crédits</li>
+            </ul>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">👨‍💼 Administrateur</h3>
+            <p style="margin: 8px 0; font-size: 14px;"><strong>Profil :</strong> Gestionnaire de la plateforme</p>
+
+            <p style="margin-top: 12px; font-size: 14px;"><strong>Besoins :</strong></p>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li>Vue d'ensemble de l'activité</li>
+                <li>Statistiques visuelles (graphiques)</li>
+                <li>Gestion des utilisateurs</li>
+                <li>Modération des trajets</li>
+                <li>Accès sécurisé avec rôle admin</li>
+                <li>Logs et historiques</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="slide-number">6</div>
+</div>
+
+<!-- ===================================== -->
+<!-- SLIDE 7 - RESSOURCES HUMAINES -->
+<!-- ===================================== -->
+<div class="slide">
+    <h1>Ressources Humaines</h1>
+
+    <div style="margin-top: 20px;">
+        <div class="box" style="margin-bottom: 18px; padding: 12px;">
+            <h3 style="font-size: 16px;">Développeur Full-Stack en Autonomie</h3>
+            <p style="font-size: 15px; margin: 10px 0;">Nathanaëlle Debaque - Gestion complète du projet</p>
+        </div>
+
+        <div class="two-column">
+            <div class="box" style="padding: 12px;">
+                <h3 style="font-size: 16px;">Responsabilités</h3>
+                <ul style="font-size: 13px; line-height: 1.5;">
+                    <li><span class="checkmark">✓</span>Analyse des besoins</li>
+                    <li><span class="checkmark">✓</span>Conception (maquettes, BDD)</li>
+                    <li><span class="checkmark">✓</span>Développement Front-end</li>
+                    <li><span class="checkmark">✓</span>Développement Back-end</li>
+                    <li><span class="checkmark">✓</span>Tests et sécurité</li>
+                    <li><span class="checkmark">✓</span>Déploiement et maintenance</li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 12px;">
+                <h3 style="font-size: 16px;">Méthodologie</h3>
+                <ul style="font-size: 13px; line-height: 1.5;">
+                    <li>Gestion de projet agile</li>
+                    <li>Versioning avec Git/GitHub</li>
+                    <li>Documentation technique continue</li>
+                    <li>Tests réguliers</li>
+                    <li>Itérations et améliorations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">7</div>
+</div>
+
+<!-- ===================================== -->
+<!-- SLIDE 8 - TECHNOLOGIES FRONT-END -->
+<!-- ===================================== -->
+<div class="slide">
+    <h1>Technologies Front-end</h1>
+
+    <div class="two-column" style="margin-top: 25px;">
+        <div>
+            <div class="box" style="margin-bottom: 18px;">
+                <h3>Langages</h3>
+                <ul style="font-size: 15px;">
+                    <li><strong>HTML5</strong> : Structure sémantique</li>
+                    <li><strong>CSS3</strong> : Styles, responsive design</li>
+                    <li><strong>JavaScript ES6+</strong> : Interactivité, DOM</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h3>Bibliothèques</h3>
+                <ul style="font-size: 15px;">
+                    <li><strong>Chart.js</strong> : Visualisations graphiques</li>
+                    <li>Graphiques en barres, camemberts, lignes</li>
+                    <li>Données dynamiques depuis l'API</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box">
+            <h3>Responsive Design</h3>
+            <ul style="font-size: 15px; margin-bottom: 18px;">
+                <li>Media queries (mobile, tablette, desktop)</li>
+                <li>Flexbox et CSS Grid</li>
+                <li>Interface adaptative</li>
+            </ul>
+
+            <div style="background: white; padding: 15px; border-radius: 5px; margin-top: 18px; border-left: 3px solid #3498db;">
+                <p style="font-size: 14px;"><strong>Approche :</strong></p>
+                <p style="font-size: 14px; margin-top: 10px; line-height: 1.6;">Mobile-first avec adaptation progressive pour tablettes et desktop. Tous les composants sont entièrement responsives.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">8</div>
+</div>
+
+<!-- ===================================== -->
+<!-- SLIDE 9 - TECHNOLOGIES BACK-END -->
+<!-- ===================================== -->
+<div class="slide">
+    <h1>Technologies Back-end</h1>
+
+    <div class="two-column" style="margin-top: 18px;">
+        <div>
+            <div class="box" style="margin-bottom: 15px;">
+                <h3>Back-end</h3>
+                <ul style="font-size: 15px;">
+                    <li><strong>PHP 8.1+</strong> : Langage serveur</li>
+                    <li><strong>PDO</strong> : Accès sécurisé aux BDD</li>
+                    <li><strong>MVC</strong> : Architecture structurée</li>
+                </ul>
+            </div>
+
+            <div class="box" style="margin-bottom: 15px;">
+                <h3>API REST</h3>
+                <ul style="font-size: 15px;">
+                    <li><strong>18+ endpoints</strong></li>
+                    <li>Format JSON</li>
+                    <li>Authentification sécurisée</li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div class="box" style="margin-bottom: 15px;">
+                <h3>Bases de Données</h3>
+                <ul style="font-size: 15px;">
+                    <li><strong>MySQL 8.0</strong> : Développement (WAMP)</li>
+                    <li><strong>PostgreSQL 15</strong> : Production (Render)</li>
+                    <li><strong>MongoDB</strong> : Simulation NoSQL</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h3>Outils</h3>
+                <ul style="font-size: 15px;">
+                    <li>WAMP : Environnement local</li>
+                    <li>Render.com : Hébergement cloud</li>
+                    <li>Git/GitHub : Versioning</li>
+                    <li>Visual Studio Code : IDE</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">9</div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 10 - RÉALISATION 1 INTRO FRONT-END -->
+<!-- ============================================= -->
+<div class="slide">
+    <h1 style="font-size: 30px; margin-bottom: 15px;">Réalisation 1 - Front-end</h1>
+    <h2 style="color: #2ECC71; margin-top: 12px; font-size: 22px; margin-bottom: 12px;">Dashboard Administrateur avec Chart.js</h2>
+
+    <div class="highlight" style="margin-top: 15px; padding: 12px;">
+        <h3 style="font-size: 16px; margin-bottom: 6px;">Bloc de compétences RNCP37674BC01</h3>
+        <p style="font-size: 14px; margin-top: 6px;">Développer la partie front-end d'une application web ou web mobile sécurisée</p>
+    </div>
+
+    <div style="margin-top: 15px; text-align: center;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #2ECC71;">
+            <p style="font-size: 17px; color: #2ECC71; font-weight: 600;">Interface d'administration complète</p>
+            <p style="font-size: 14px; margin-top: 8px; color: #555;">Graphiques interactifs • Statistiques en temps réel • Design responsive</p>
+        </div>
+    </div>
+
+    <div class="slide-number">10</div>
+</div>
+
+<!-- ========================================================= -->
+<!-- SLIDE 10bis - CAPTURE DASHBOARD ADMINISTRATEUR -->
+<!-- ========================================================= -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 15px;">Dashboard Administrateur</h1>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 40px; height: 370px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📸 Screenshot du dashboard administrateur</h3>
+        <p style="font-size: 14px; line-height: 1.6;">
+            Vue d'ensemble complète montrant :<br>
+            • Les graphiques Chart.js (Pie, Bar, Line)<br>
+            • Les statistiques en temps réel<br>
+            • L'interface de gestion utilisateurs<br>
+            • Le design responsive
+        </p>
+        <p style="font-size: 12px; margin-top: 15px; color: #666;">
+            Fichier suggéré : <code>dashboard-admin-overview.png</code>
+        </p>
+    </div>
+
+    <div class="slide-number">10bis</div>
+</div>
+
+<!-- ================================================= -->
+<!-- SLIDE 11 - COMPÉTENCES FRONT-END DÉMONTRÉES -->
+<!-- ================================================= -->
+<div class="slide">
+    <h1>Compétences Front-end Démontrées</h1>
+
+    <div class="highlight" style="margin-top: 12px; padding: 10px;">
+        <h3 style="font-size: 16px;">RNCP37674BC01 - Bloc Front-end</h3>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Installer et configurer son environnement de travail</h3>
+            <p style="font-size: 13px;">Configuration complète : WAMP, Git, VS Code, Chart.js</p>
+        </div>
+
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Maquetter des interfaces utilisateur</h3>
+            <p style="font-size: 13px;">Conception UX/UI du dashboard administrateur et des pages utilisateur</p>
+        </div>
+
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Réaliser des interfaces utilisateur statiques</h3>
+            <p style="font-size: 13px;">HTML5 sémantique, CSS3 avec Flexbox/Grid, design responsive</p>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Développer la partie dynamique des interfaces</h3>
+            <p style="font-size: 13px;">JavaScript ES6+, fetch API, manipulation du DOM, Chart.js interactif</p>
+        </div>
+    </div>
+
+    <div class="slide-number">11</div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 12 - MAQUETTAGE ET CONCEPTION UX/UI -->
+<!-- ============================================= -->
+<div class="slide">
+    <h1>Maquettage et Conception UX/UI</h1>
+
+    <div class="two-column" style="margin-top: 15px;">
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">Démarche de Conception</h3>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li>Analyse des besoins administrateur</li>
+                <li>Navigation intuitive</li>
+                <li>Hiérarchisation de l'information</li>
+                <li>Choix des visualisations pertinentes</li>
+                <li>Design responsive mobile-first</li>
+            </ul>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 16px;">Types de Graphiques</h3>
+            <ul style="font-size: 13px; line-height: 1.5;">
+                <li><strong>Camemberts</strong> : Répartitions (utilisateurs actifs/inactifs)</li>
+                <li><strong>Courbes</strong> : Évolutions temporelles (inscriptions)</li>
+                <li><strong>Barres</strong> : Comparaisons (trajets par mois)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="slide-number">12</div>
+</div>
+
+<!-- ========================================================= -->
+<!-- SLIDE 12bis - WIREFRAMES ET MAQUETTES -->
+<!-- ========================================================= -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 15px;">Méthodologie de Conception : Dashboard Utilisateur</h1>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 40px; height: 370px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📸 Évolution du Dashboard Utilisateur : Wireframe → Mockup → Réalisation</h3>
+        <p style="font-size: 14px; line-height: 1.6;">
+            Afficher 3 images côte à côte :<br><br>
+            <strong>1. Wireframe (AVANT)</strong><br>
+            <code>design/wireframes/desktop/dashboard-desktop.png</code><br><br>
+            <strong>2. Mockup (INTERMÉDIAIRE)</strong><br>
+            <code>design/mockups/desktop/dashboard-desktop.png</code><br><br>
+            <strong>3. Screenshot final (APRÈS)</strong><br>
+            Capture d'écran du dashboard utilisateur en production
+        </p>
+        <p style="font-size: 12px; margin-top: 12px; color: #666; font-style: italic;">
+            Note : Démontre la méthodologie de conception appliquée à toute l'application
+        </p>
+    </div>
+
+    <div class="slide-number">12bis</div>
+</div>
+
+<!-- ============================================ -->
+<!-- SLIDE 13 - INTERFACES STATIQUES HTML/CSS -->
+<!-- ============================================ -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 12px;">Interfaces Statiques HTML/CSS</h1>
+    <h2 style="font-size: 18px; color: #2ECC71; margin-bottom: 15px;">Dashboard Administrateur</h2>
+
+    <div class="two-column" style="margin-top: 10px; gap: 15px;">
+        <div>
+            <h3 style="font-size: 16px; margin-bottom: 8px;">Structure HTML5 Sémantique</h3>
+            <pre style="font-size: 10px; padding: 12px; line-height: 1.4;">&lt;section class="dashboard-stats"&gt;
+  &lt;div class="stat-card"&gt;
+    &lt;h3&gt;Utilisateurs&lt;/h3&gt;
+    &lt;canvas id="usersChart"&gt;&lt;/canvas&gt;
+  &lt;/div&gt;
+  &lt;div class="stat-card"&gt;
+    &lt;h3&gt;Trajets&lt;/h3&gt;
+    &lt;canvas id="tripsChart"&gt;&lt;/canvas&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+            <div class="box" style="padding: 10px; margin-top: 10px;">
+                <p style="font-size: 12px; line-height: 1.5;">
+                    <strong>Balises sémantiques :</strong><br>
+                    &lt;section&gt;, &lt;article&gt;, &lt;header&gt;, &lt;nav&gt;<br>
+                    Accessibilité ARIA et SEO
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <h3 style="font-size: 16px; margin-bottom: 8px;">Techniques CSS Modernes</h3>
+            <ul style="font-size: 13px; line-height: 1.5; margin-bottom: 12px;">
+                <li><strong>Flexbox/Grid</strong> : Layout responsive</li>
+                <li><strong>Variables CSS</strong> : Thème cohérent</li>
+                <li><strong>Media queries</strong> : Multi-écrans</li>
+                <li><strong>Animations</strong> : Transitions fluides</li>
+            </ul>
+
+            <div class="box" style="padding: 10px;">
+                <h3 style="font-size: 14px; margin-bottom: 6px;">Exemple CSS Grid</h3>
+                <pre style="font-size: 9px; padding: 8px; margin: 0; line-height: 1.3;">.dashboard-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit,
+    minmax(300px, 1fr));
+  gap: 20px;
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">13</div>
+</div>
+
+<!-- ========================================================= -->
+<!-- SLIDE 13bis - CODE HTML/CSS ANNOTÉ -->
+<!-- ========================================================= -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 12px;">Dashboard Admin : Analyse du Code</h1>
+    <h2 style="font-size: 16px; color: #666; margin-bottom: 15px;">Démonstration technique avec DevTools</h2>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 35px; height: 360px;">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">📸 Screenshot technique à insérer</h3>
+        <p style="font-size: 14px; line-height: 1.7;">
+            <strong>Option 1 : Code source annoté</strong><br>
+            • Capture d'écran de votre fichier <code>admin/dashboard.php</code><br>
+            • Ajoutez des annotations/flèches expliquant les sections importantes<br><br>
+
+            <strong>Option 2 : Inspecteur navigateur (DevTools)</strong><br>
+            • Ouvrez le dashboard admin dans Chrome/Firefox<br>
+            • Ouvrez les DevTools (F12)<br>
+            • Montrez l'onglet "Elements" avec le HTML et CSS appliqué<br>
+            • Capture d'écran montrant la structure et les styles<br><br>
+
+            <strong>Option 3 : Les deux côte à côte</strong><br>
+            Code source à gauche + Rendu DevTools à droite
+        </p>
+    </div>
+
+    <div class="slide-number">13bis</div>
+</div>
+
+<!-- =============================================== -->
+<!-- SLIDE 14 - PARTIE DYNAMIQUE AVEC JAVASCRIPT -->
+<!-- =============================================== -->
+<div class="slide">
+    <h1 style="font-size: 26px; margin-bottom: 15px;">Partie Dynamique avec JavaScript</h1>
+
+    <div style="margin-top: 12px;">
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Flux de Données</h3>
+        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 10px 0;">
+            <p style="font-size: 14px;">Chargement page → Appel API (fetch) → Traitement JS → Génération Chart.js → Affichage</p>
+        </div>
+
+        <h3 style="font-size: 16px; margin-top: 15px; margin-bottom: 8px;">Code JavaScript ES6+</h3>
+        <pre style="font-size: 10px; padding: 12px;">async function loadDashboardStats() {
+  try {
+    const response = await fetch('/api/admin/stats');
+    const data = await response.json();
+
+    // Génération des graphiques
+    createUsersChart(data.users);
+    createTripsChart(data.trips);
+
+  } catch (error) {
+    console.error('Erreur chargement stats:', error);
+  }
+}</pre>
+
+        <p style="margin-top: 12px; font-size: 14px;"><strong>Technologies utilisées :</strong> Fetch API, Async/Await, Promises, JSON</p>
+    </div>
+
+    <div class="slide-number">14</div>
+</div>
+
+<!-- ================================== -->
+<!-- SLIDE 15 - INTÉGRATION CHART.JS -->
+<!-- ================================== -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 12px;">Intégration Chart.js</h1>
+
+    <div style="margin-top: 10px;">
+        <div class="two-column" style="gap: 12px;">
+            <div>
+                <h3 style="font-size: 15px; margin-bottom: 6px;">Code Chart.js</h3>
+                <pre style="font-size: 9px; padding: 10px;">function createUsersChart(userData) {
+  const ctx = document
+    .getElementById('usersChart')
+    .getContext('2d');
+
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Actifs', 'Inactifs'],
+      datasets: [{
+        data: [
+          userData.active,
+          userData.inactive
+        ],
+        backgroundColor: [
+          '#4CAF50',
+          '#FF9800'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}</pre>
+            </div>
+
+            <div>
+                <h3 style="font-size: 15px; margin-bottom: 6px;">Graphiques Implémentés</h3>
+                <ul style="font-size: 13px; line-height: 1.5;">
+                    <li><strong>Pie/Doughnut</strong> : Répartitions</li>
+                    <li><strong>Bar</strong> : Comparaisons</li>
+                    <li><strong>Line</strong> : Évolutions</li>
+                </ul>
+
+                <div class="box" style="margin-top: 12px; padding: 10px;">
+                    <h3 style="font-size: 14px; margin-bottom: 6px;">Avantages</h3>
+                    <ul style="font-size: 12px; line-height: 1.4;">
+                        <li>Visualisations professionnelles</li>
+                        <li>Interactivité (hover, légendes)</li>
+                        <li>Responsive automatique</li>
+                        <li>Données dynamiques API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">15</div>
+</div>
+
+<!-- ============================= -->
+<!-- SLIDE 16 - RESPONSIVE DESIGN -->
+<!-- ============================= -->
+<div class="slide">
+    <h1 style="margin-bottom: 10px; font-size: 26px;">Responsive Design</h1>
+
+    <div style="margin-top: 8px;">
+        <h3 style="font-size: 15px; margin-bottom: 6px;">Approche Mobile-First</h3>
+        <pre style="font-size: 9px; padding: 10px; line-height: 1.3;">/* Mobile (par défaut) */
+.dashboard-stats {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tablette */
+@media (min-width: 768px) {
+  .dashboard-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}</pre>
+    </div>
+
+    <div class="slide-number">16</div>
+</div>
+
+<!-- ========================================================= -->
+<!-- SLIDE 16bis - RESPONSIVE DESIGN DÉMONSTRATION -->
+<!-- ========================================================= -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 15px;">Responsive Design : Multi-écrans</h1>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 40px; height: 370px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📸 3 screenshots côte à côte</h3>
+        <p style="font-size: 14px; line-height: 1.6;">
+            Démonstration responsive sur différents formats :<br><br>
+            • <strong>Mobile (portrait)</strong> : Écran 375px<br>
+            • <strong>Tablette (paysage)</strong> : Écran 768px<br>
+            • <strong>Desktop (plein écran)</strong> : Écran 1920px<br><br>
+            Chart.js gère automatiquement le redimensionnement des graphiques
+        </p>
+    </div>
+
+    <div class="slide-number">16bis</div>
+</div>
+
+<!-- ====================================== -->
+<!-- SLIDE 17 - DÉMONSTRATION FRONT-END -->
+<!-- ====================================== -->
+<div class="slide">
+    <h1 style="margin-bottom: 15px;">Démonstration Front-end</h1>
+
+    <div class="highlight" style="margin-top: 15px; padding: 12px;">
+        <h2 style="color: #2ECC71; font-size: 20px;">Jeu d'Essai : Dashboard Administrateur</h2>
+    </div>
+
+    <div style="margin-top: 18px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">Scénario de Démonstration</h3>
+        <ol style="font-size: 14px; line-height: 1.6; margin-left: 25px;">
+            <li>Connexion en tant qu'administrateur</li>
+            <li>Accès au dashboard</li>
+            <li>Consultation des statistiques générales</li>
+            <li>Interaction avec les graphiques (hover, légendes)</li>
+            <li>Test du responsive (redimensionnement)</li>
+        </ol>
+    </div>
+
+    <div class="video-placeholder" style="margin-top: 18px; padding: 25px;">
+        <h2 style="color: white; font-size: 22px;">🎥 VIDÉO DE DÉMONSTRATION</h2>
+        <p style="margin-top: 12px; font-size: 14px;">[Insérer la vidéo : dashboard-demo.mp4]</p>
+        <p style="font-size: 12px; margin-top: 8px; opacity: 0.9;">IMPORTANT : Prévoir vidéo backup sur clé USB</p>
+    </div>
+
+    <div class="slide-number">17</div>
+</div>
+
+<!-- ============================================ -->
+<!-- SLIDE 18 - RÉALISATION 2 INTRO BACK-END -->
+<!-- ============================================ -->
+<div class="slide">
+    <h1 style="font-size: 26px; margin-bottom: 12px;">Réalisation 2 - Back-end</h1>
+    <h2 style="color: #764ba2; margin-top: 10px; font-size: 20px;">Authentification Sécurisée et API REST</h2>
+
+    <div class="highlight" style="margin-top: 15px; padding: 12px;">
+        <h3 style="font-size: 15px; margin-bottom: 6px;">Bloc de compétences RNCP37674BC02</h3>
+        <p style="font-size: 14px;">Développer la partie back-end d'une application web ou web mobile sécurisée</p>
+    </div>
+
+    <div style="margin-top: 18px; text-align: center;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+            <p style="font-size: 17px; color: #764ba2; font-weight: bold;">Architecture MVC Professionnelle</p>
+            <p style="font-size: 14px; margin-top: 10px;">Sécurité OWASP Top 10 • API REST 18+ endpoints • Multi-bases de données</p>
+        </div>
+    </div>
+
+    <div class="slide-number">18</div>
+</div>
+
+<!-- ========================================================= -->
+<!-- SLIDE 18bis - SCHÉMA ARCHITECTURE -->
+<!-- ========================================================= -->
+<div class="slide">
+    <h1 style="font-size: 28px; margin-bottom: 15px;">Architecture Client-Serveur-BDD</h1>
+
+    <div class="media-placeholder" style="margin-top: 20px; padding: 40px; height: 370px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📊 Schéma architecture client-serveur-BDD</h3>
+        <p style="font-size: 14px; line-height: 1.6;">
+            Schéma illustrant l'architecture complète :<br><br>
+            <strong>Client (Browser)</strong><br>
+            ↓ HTTP Requests<br>
+            <strong>Serveur PHP/MVC</strong><br>
+            (Contrôleurs, Modèles, Vues)<br>
+            ↓ SQL Queries<br>
+            <strong>PostgreSQL</strong><br>
+            (Base de données relationnelle)
+        </p>
+    </div>
+
+    <div class="slide-number">18bis</div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 19 - COMPÉTENCES BACK-END DÉMONTRÉES -->
+<!-- ================================================ -->
+<div class="slide">
+    <h1 style="margin-bottom: 12px;">Compétences Back-end Démontrées</h1>
+
+    <div class="highlight" style="margin-top: 12px; padding: 10px;">
+        <h3 style="font-size: 16px;">RNCP37674BC02 - Bloc Back-end</h3>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Mettre en place une base de données relationnelle</h3>
+            <p style="font-size: 13px;">Conception et déploiement : 8 tables, relations, migrations MySQL → PostgreSQL</p>
+        </div>
+
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Développer des composants d'accès aux données</h3>
+            <p style="font-size: 13px;">PDO avec requêtes préparées (SQL), simulation MongoDB (NoSQL)</p>
+        </div>
+
+        <div class="box" style="margin-bottom: 10px; padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Développer des composants métier côté serveur</h3>
+            <p style="font-size: 13px;">Architecture MVC, API REST 18+ endpoints, gestion rôles, sécurité OWASP</p>
+        </div>
+
+        <div class="box" style="padding: 12px;">
+            <h3 style="font-size: 15px;"><span class="checkmark">✓</span>Documenter le déploiement</h3>
+            <p style="font-size: 13px;">Documentation complète, scripts de migration, déploiement Render.com</p>
+        </div>
+    </div>
+
+    <div class="slide-number">19</div>
+</div>
+
+<!-- ============================ -->
+<!-- SLIDE 20 - ARCHITECTURE MVC -->
+<!-- ============================ -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 8px;">Architecture MVC</h1>
+
+    <div style="margin-top: 8px;">
+        <pre style="font-size: 9px; background: #f8f9fa; color: #333; padding: 10px; line-height: 1.2;">
+┌─────────────┐
+│   CLIENT    │  HTTP Request
+│  (Browser)  │ ─────────────┐
+└─────────────┘              │
+                             ▼
+                   ┌──────────────────┐
+                   │   CONTRÔLEUR     │
+                   │ UserController   │
+                   │ TripController   │
+                   │ AdminController  │
+                   └────────┬─────────┘
+                            │
+              ┌─────────────┴──────────────┐
+              ▼                            ▼
+      ┌─────────────┐              ┌─────────────┐
+      │   MODÈLE    │              │     VUE     │
+      │   User      │              │  index.php  │
+      │   Trip      │              │  login.php  │
+      │   Vehicle   │              │  admin.php  │
+      └──────┬──────┘              └─────────────┘
+             │
+             ▼
+      ┌──────────────┐
+      │  PostgreSQL  │
+      └──────────────┘</pre>
+
+        <div class="two-column" style="margin-top: 8px; gap: 10px;">
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 14px; margin-bottom: 4px;">Avantages</h3>
+                <ul style="font-size: 11px; line-height: 1.4; margin: 0;">
+                    <li>Séparation des responsabilités</li>
+                    <li>Code maintenable et évolutif</li>
+                </ul>
+            </div>
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 14px; margin-bottom: 4px;">Structure</h3>
+                <ul style="font-size: 11px; line-height: 1.4; margin: 0;">
+                    <li>Réutilisabilité des composants</li>
+                    <li>Tests facilités</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">20</div>
+</div>
+
+<!-- =============================================== -->
+<!-- SLIDE 21 - BASE DE DONNÉES RELATIONNELLE -->
+<!-- =============================================== -->
+<div class="slide">
+    <h1 style="font-size: 26px; margin-bottom: 12px;">Base de Données Relationnelle</h1>
+
+    <div style="margin-top: 12px;">
+        <h3 style="font-size: 16px; margin-bottom: 8px;">8 Tables Principales</h3>
+        <div class="two-column" style="font-size: 12px; margin-top: 10px; gap: 12px;">
+            <div>
+                <ul style="line-height: 1.5;">
+                    <li><strong>utilisateur</strong> : id, nom, prenom, email, mot_de_passe, role</li>
+                    <li><strong>voiture</strong> : id, utilisateur_id, marque, modele, immatriculation</li>
+                    <li><strong>trajet</strong> : id, conducteur_id, depart, arrivee, date, places, prix</li>
+                    <li><strong>reservation</strong> : id, trajet_id, passager_id, statut</li>
+                </ul>
+            </div>
+            <div>
+                <ul style="line-height: 1.5;">
+                    <li><strong>credit</strong> : Système de paiement interne</li>
+                    <li><strong>notation</strong> : Évaluations utilisateurs</li>
+                    <li><strong>admin_logs</strong> : Logs administration</li>
+                    <li><strong>sessions</strong> : Gestion des sessions</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 15px; font-size: 16px; margin-bottom: 8px;">Relations Clés</h3>
+        <ul style="font-size: 13px; margin-left: 25px; line-height: 1.6;">
+            <li>utilisateur (1) ─── (N) voiture</li>
+            <li>utilisateur (1) ─── (N) trajet (conducteur)</li>
+            <li>trajet (1) ─── (N) reservation</li>
+            <li>utilisateur (1) ─── (N) reservation (passager)</li>
+        </ul>
+
+        <div class="two-column" style="margin-top: 15px;">
+            <div class="box" style="padding: 10px;">
+                <p style="font-size: 13px;"><strong>Développement :</strong> MySQL 8.0 (WAMP)</p>
+            </div>
+            <div class="box" style="padding: 10px;">
+                <p style="font-size: 13px;"><strong>Production :</strong> PostgreSQL 15 (Render.com)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">21</div>
+</div>
+
+<!-- ===================================== -->
+<!-- SLIDE 22 - API REST 18+ ENDPOINTS -->
+<!-- ===================================== -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 8px;">API REST : 18+ Endpoints</h1>
+
+    <div class="two-column" style="margin-top: 8px; font-size: 11px; gap: 10px;">
+        <div>
+            <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Authentification</h3>
+                <ul style="font-size: 10px; line-height: 1.3; margin: 0;">
+                    <li><code>POST /api/auth/register</code></li>
+                    <li><code>POST /api/auth/login</code></li>
+                    <li><code>POST /api/auth/logout</code></li>
+                </ul>
+            </div>
+
+            <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Utilisateurs</h3>
+                <ul style="font-size: 10px; line-height: 1.3; margin: 0;">
+                    <li><code>GET /api/users</code></li>
+                    <li><code>GET /api/users/{id}</code></li>
+                    <li><code>PUT /api/users/{id}</code></li>
+                    <li><code>DELETE /api/users/{id}</code></li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Trajets</h3>
+                <ul style="font-size: 10px; line-height: 1.3; margin: 0;">
+                    <li><code>GET /api/trips</code></li>
+                    <li><code>GET /api/trips/{id}</code></li>
+                    <li><code>POST /api/trips</code></li>
+                    <li><code>PUT /api/trips/{id}</code></li>
+                    <li><code>DELETE /api/trips/{id}</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Véhicules</h3>
+                <ul style="font-size: 10px; line-height: 1.3; margin: 0;">
+                    <li><code>GET /api/vehicles</code></li>
+                    <li><code>POST /api/vehicles</code></li>
+                    <li><code>PUT /api/vehicles/{id}</code></li>
+                    <li><code>DELETE /api/vehicles/{id}</code></li>
+                </ul>
+            </div>
+
+            <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Administration</h3>
+                <ul style="font-size: 10px; line-height: 1.3; margin: 0;">
+                    <li><code>GET /api/admin/stats</code></li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 13px; margin-bottom: 4px;">Format JSON</h3>
+                <pre style="font-size: 9px; padding: 6px; line-height: 1.2; margin: 0;">{
+  "success": true,
+  "data": {...},
+  "message": "OK"
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">22</div>
+</div>
+
+<!-- ================================== -->
+<!-- SLIDE 23 - SÉCURITÉ OWASP TOP 10 -->
+<!-- ================================== -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 8px;">Sécurité OWASP Top 10</h1>
+
+    <div style="margin-top: 8px;">
+        <div class="two-column" style="font-size: 11px; gap: 10px;">
+            <div>
+                <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                    <h3 style="font-size: 13px; margin-bottom: 4px;">🔒 Hachage Bcrypt</h3>
+                    <pre style="font-size: 9px; padding: 6px; line-height: 1.2; margin: 0;">// Inscription
+$hash = password_hash(
+  $password,
+  PASSWORD_BCRYPT
+);
+
+// Connexion
+password_verify(
+  $input,
+  $hashFromDB
+);</pre>
+                </div>
+
+                <div class="box" style="padding: 8px;">
+                    <h3 style="font-size: 13px; margin-bottom: 4px;">🛡️ Protection SQL Injection</h3>
+                    <pre style="font-size: 9px; padding: 6px; line-height: 1.2; margin: 0;">// Requête préparée PDO
+$stmt = $pdo->prepare(
+  "SELECT * FROM utilisateur
+   WHERE email = :email"
+);
+$stmt->execute([
+  'email' => $email
+]);</pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="box" style="margin-bottom: 6px; padding: 8px;">
+                    <h3 style="font-size: 13px; margin-bottom: 4px;">🔐 Protection XSS</h3>
+                    <pre style="font-size: 9px; padding: 6px; line-height: 1.2; margin: 0;">// Échappement HTML
+echo htmlspecialchars(
+  $user_input,
+  ENT_QUOTES,
+  'UTF-8'
+);</pre>
+                </div>
+
+                <div class="box" style="padding: 8px;">
+                    <h3 style="font-size: 13px; margin-bottom: 4px;">🔑 Protection CSRF</h3>
+                    <pre style="font-size: 9px; padding: 6px; line-height: 1.2; margin: 0;">// Token CSRF
+$_SESSION['csrf_token'] =
+  bin2hex(random_bytes(32));
+
+// Vérification
+if (!hash_equals(
+  $_SESSION['csrf_token'],
+  $_POST['csrf_token']
+)) {
+  die('Erreur CSRF');
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight" style="margin-top: 8px; padding: 8px;">
+            <p style="font-size: 11px; margin: 0;"><strong>Autres mesures :</strong> Gestion sécurisée des sessions • Validation des données • RBAC • Headers de sécurité HTTP</p>
+        </div>
+
+        <p style="margin-top: 6px; font-size: 10px; color: #666;"><em>Source : api/login-simple.php, inscription.php</em></p>
+    </div>
+
+    <div class="slide-number">23</div>
+</div>
+
+<!-- ================================= -->
+<!-- SLIDE 24 - GESTION DES RÔLES -->
+<!-- ================================= -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 8px;">Gestion des Rôles (RBAC)</h1>
+
+    <div style="margin-top: 8px;">
+        <div class="two-column" style="gap: 10px;">
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 14px; margin-bottom: 4px;">👤 Utilisateur (role: user)</h3>
+                <p style="margin: 4px 0; font-size: 11px;"><strong>Permissions :</strong></p>
+                <ul style="font-size: 11px; line-height: 1.4; margin: 0;">
+                    <li>Créer/modifier son profil</li>
+                    <li>Gérer ses véhicules</li>
+                    <li>Proposer des trajets</li>
+                    <li>Réserver des places</li>
+                    <li>Noter les covoiturages</li>
+                    <li>Gérer ses crédits</li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 8px;">
+                <h3 style="font-size: 14px; margin-bottom: 4px;">👨‍💼 Administrateur (role: admin)</h3>
+                <p style="margin: 4px 0; font-size: 11px;"><strong>Permissions supplémentaires :</strong></p>
+                <ul style="font-size: 11px; line-height: 1.4; margin: 0;">
+                    <li>Accéder au dashboard</li>
+                    <li>Gérer tous les utilisateurs</li>
+                    <li>Modérer les trajets</li>
+                    <li>Consulter les statistiques</li>
+                    <li>Voir les logs système</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top: 8px;">
+            <h3 style="font-size: 14px; margin-bottom: 5px;">Vérification des Permissions</h3>
+            <pre style="font-size: 9px; padding: 8px; line-height: 1.2;">function requireAdmin() {
+    if (!isset($_SESSION['user_role']) ||
+        $_SESSION['user_role'] !== 'administrateur') {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Accès refusé'
+        ]);
+        exit;
+    }
+}</pre>
+            <p style="margin-top: 5px; font-size: 10px; color: #666;"><em>Source : admin/dashboard.php lignes 4-8</em></p>
+        </div>
+    </div>
+
+    <div class="slide-number">24</div>
+</div>
+
+<!-- ======================================= -->
+<!-- SLIDE 25 - MIGRATION ET DÉPLOIEMENT -->
+<!-- ======================================= -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 10px;">Migration et Déploiement</h1>
+
+    <div style="margin-top: 10px;">
+        <h3 style="font-size: 15px; margin-bottom: 6px;">Processus de Déploiement</h3>
+        <pre style="font-size: 10px; background: #f8f9fa; color: #333; padding: 10px; line-height: 1.3;">
+┌────────────────────┐         ┌──────────────────────┐
+│  DÉVELOPPEMENT     │         │     PRODUCTION       │
+│                    │  Git    │                      │
+│  WAMP (Windows)    │ ─────▶  │   Render.com        │
+│  MySQL 8.0         │  Push   │   PostgreSQL 15      │
+│  localhost         │         │   Cloud hébergé      │
+└────────────────────┘         └──────────────────────┘</pre>
+
+        <div class="two-column" style="margin-top: 12px; gap: 12px;">
+            <div class="box" style="padding: 10px;">
+                <h3 style="font-size: 14px;">Défis de Migration</h3>
+                <ul style="font-size: 12px; line-height: 1.4;">
+                    <li>Syntaxe MySQL ≠ PostgreSQL</li>
+                    <li>AUTO_INCREMENT → SERIAL</li>
+                    <li>Fonctions spécifiques</li>
+                    <li>Configuration PDO adaptée</li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 10px;">
+                <h3 style="font-size: 14px;">Documentation</h3>
+                <ul style="font-size: 12px; line-height: 1.4;">
+                    <li>Scripts SQL de création</li>
+                    <li>Configuration connexion</li>
+                    <li>Variables d'environnement</li>
+                    <li>Guide de déploiement</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top: 12px; text-align: center;">
+            <p style="font-size: 13px;"><strong>🌐 Production :</strong> https://ecoride-om7c.onrender.com</p>
+            <p style="font-size: 13px; margin-top: 4px;"><strong>💻 GitHub :</strong> https://github.com/Isydoria/EcoRide</p>
+        </div>
+    </div>
+
+    <div class="slide-number">25</div>
+</div>
+
+<!-- ==================================== -->
+<!-- SLIDE 26 - DÉMONSTRATION BACK-END -->
+<!-- ==================================== -->
+<div class="slide">
+    <h1 style="margin-bottom: 12px;">Démonstration Back-end</h1>
+
+    <div class="highlight" style="margin-top: 12px; padding: 12px;">
+        <h2 style="color: #764ba2; font-size: 20px;">Jeu d'Essai : Authentification et API REST</h2>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Scénario de Démonstration</h3>
+        <ol style="font-size: 14px; line-height: 1.5; margin-left: 25px;">
+            <li><strong>Inscription</strong> : Nouveau compte, validation, hachage bcrypt</li>
+            <li><strong>Connexion</strong> : Vérification, création session, redirection selon rôle</li>
+            <li><strong>API REST</strong> : Création trajet (POST), récupération (GET)</li>
+            <li><strong>Sécurité</strong> : Tentative accès admin sans autorisation → 403</li>
+        </ol>
+    </div>
+
+    <div class="video-placeholder" style="margin-top: 18px; padding: 20px;">
+        <h2 style="color: white; font-size: 20px;">🎥 VIDÉO DE DÉMONSTRATION</h2>
+        <p style="margin-top: 10px; font-size: 13px;">[Insérer la vidéo : auth-api-demo.mp4]</p>
+        <p style="font-size: 12px; margin-top: 8px; opacity: 0.9;">Alternative : Screenshots avec Postman des appels API</p>
+    </div>
+
+    <div class="slide-number">26</div>
+</div>
+
+<!-- ==================================== -->
+<!-- SLIDE 27 - RÉSUMÉ DES POINTS CLÉS -->
+<!-- ==================================== -->
+<div class="slide">
+    <h1>Résumé des Points Clés</h1>
+
+    <div class="three-column" style="margin-top: 15px;">
+        <div class="box">
+            <h3>Projet Complet</h3>
+            <ul style="font-size: 14px;">
+                <li><span class="checkmark">✓</span>Full-stack fonctionnel</li>
+                <li><span class="checkmark">✓</span>Front-end moderne</li>
+                <li><span class="checkmark">✓</span>Back-end robuste</li>
+                <li><span class="checkmark">✓</span>API REST complète</li>
+                <li><span class="checkmark">✓</span>Production en ligne</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h3>Compétences RNCP</h3>
+            <ul style="font-size: 14px;">
+                <li><span class="checkmark">✓</span>BC01 : Front-end</li>
+                <li><span class="checkmark">✓</span>BC02 : Back-end</li>
+                <li><span class="checkmark">✓</span>Sécurité OWASP</li>
+                <li><span class="checkmark">✓</span>Architecture MVC</li>
+                <li><span class="checkmark">✓</span>Déploiement cloud</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h3>Méthodologie</h3>
+            <ul style="font-size: 14px;">
+                <li><span class="checkmark">✓</span>Analyse des besoins</li>
+                <li><span class="checkmark">✓</span>Conception UX/BDD</li>
+                <li><span class="checkmark">✓</span>Développement itératif</li>
+                <li><span class="checkmark">✓</span>Tests et sécurité</li>
+                <li><span class="checkmark">✓</span>Documentation</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="highlight" style="margin-top: 18px;">
+        <h2 style="text-align: center;">Application de covoiturage complète démontrant la maîtrise des compétences front-end et back-end</h2>
+    </div>
+
+    <div class="slide-number">27</div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 28 - DIFFICULTÉS ET APPRENTISSAGES -->
+<!-- ============================================= -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 12px;">Difficultés et Apprentissages</h1>
+
+    <div style="margin-top: 12px; font-size: 11px;">
+        <div class="box" style="margin-bottom: 8px; padding: 10px;">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">Migration MySQL → PostgreSQL</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <div><strong>Problème :</strong> Différences syntaxe, types de données</div>
+                <div><strong>Solution :</strong> Documentation, adaptation requêtes, tests</div>
+                <div><strong>Acquis :</strong> Compréhension SGBD relationnels</div>
+            </div>
+        </div>
+
+        <div class="box" style="margin-bottom: 8px; padding: 10px;">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">Intégration Chart.js avec Données Dynamiques</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <div><strong>Problème :</strong> Synchronisation API et graphiques</div>
+                <div><strong>Solution :</strong> Fetch API, promesses, gestion erreurs</div>
+                <div><strong>Acquis :</strong> Maîtrise async/await, Chart.js</div>
+            </div>
+        </div>
+
+        <div class="box" style="margin-bottom: 8px; padding: 10px;">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">Sécurisation OWASP Top 10</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <div><strong>Problème :</strong> Comprendre et implémenter les vulnérabilités</div>
+                <div><strong>Solution :</strong> Recherche bonnes pratiques, tests sécurité</div>
+                <div><strong>Acquis :</strong> Importance sécurité dès conception</div>
+            </div>
+        </div>
+
+        <div class="box" style="padding: 10px;">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">Gestion Sessions et Authentification</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <div><strong>Problème :</strong> Sessions sécurisées, gestion rôles</div>
+                <div><strong>Solution :</strong> Tokens, bcrypt, contrôle d'accès</div>
+                <div><strong>Acquis :</strong> Mécanismes auth/autorisation</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">28</div>
+</div>
+
+<!-- ====================================== -->
+<!-- SLIDE 29 - PERSPECTIVES D'ÉVOLUTION -->
+<!-- ====================================== -->
+<div class="slide">
+    <h1 style="font-size: 30px;">Perspectives d'Évolution</h1>
+
+    <div style="margin-top: 20px; font-size: 15px;">
+        <div class="box" style="margin-bottom: 15px;">
+            <h3>Court terme</h3>
+            <ul>
+                <li>💬 <strong>Messagerie en temps réel</strong> : WebSocket pour chat entre covoitureurs</li>
+                <li>🔔 <strong>Notifications par email</strong> : Alertes réservations, rappels trajets</li>
+            </ul>
+        </div>
+
+        <div class="box" style="margin-bottom: 15px;">
+            <h3>Moyen terme</h3>
+            <ul>
+                <li>🗺️ <strong>Intégration cartographique</strong> : Google Maps/OpenStreetMap, visualisation itinéraires</li>
+                <li>📊 <strong>Dashboard utilisateur avancé</strong> : Statistiques personnelles, économies CO2, badges écologiques</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h3>Long terme</h3>
+            <ul>
+                <li>📱 <strong>Application mobile native</strong> : React Native/Flutter, notifications push, géolocalisation</li>
+                <li>🤖 <strong>Intelligence artificielle</strong> : Recommandation trajets, prédiction prix, matching intelligent</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; background: #e8f8f5; padding: 15px; border-radius: 8px; border-left: 4px solid #2ECC71;">
+        <p style="font-size: 14px;"><strong>✓ Déjà implémenté :</strong> Système de notation et avis • Système de crédit interne</p>
+    </div>
+
+    <div class="slide-number">29</div>
+</div>
+
+<!-- ==================================== -->
+<!-- SLIDE 30 - COMPÉTENCES ACQUISES -->
+<!-- ==================================== -->
+<div class="slide">
+    <h1 style="font-size: 24px; margin-bottom: 10px;">Compétences Acquises</h1>
+
+    <div class="two-column" style="margin-top: 10px; font-size: 12px; gap: 12px;">
+        <div>
+            <div class="box" style="margin-bottom: 8px; padding: 10px;">
+                <h3 style="font-size: 14px; margin-bottom: 6px;">Compétences Techniques</h3>
+                <ul style="line-height: 1.5; margin: 0;">
+                    <li>Front : HTML5, CSS3, JS ES6+, Chart.js</li>
+                    <li>Back : PHP, MVC, API REST</li>
+                    <li>BDD : SQL, NoSQL, migrations</li>
+                    <li>Sécurité : OWASP Top 10</li>
+                    <li>Déploiement : Git, Render.com</li>
+                </ul>
+            </div>
+
+            <div class="box" style="padding: 10px;">
+                <h3 style="font-size: 14px; margin-bottom: 6px;">Compétences Transversales</h3>
+                <ul style="line-height: 1.5; margin: 0;">
+                    <li>Gestion de projet autonome</li>
+                    <li>Résolution de problèmes</li>
+                    <li>Documentation technique</li>
+                    <li>Apprentissage continu</li>
+                    <li>Rigueur et méthodologie</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box" style="padding: 10px;">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">Motivation Professionnelle</h3>
+            <p style="margin: 8px 0 0 0; line-height: 1.5; font-size: 12px;">
+                <strong>Passion pour le développement web</strong><br>
+                Engagement dans des projets à impact environnemental<br><br>
+
+                <strong>Volonté de continuer à apprendre</strong><br>
+                Intérêt pour les nouvelles technologies<br><br>
+
+                <strong>Objectif professionnel</strong><br>
+                Devenir Développeur Full-Stack confirmé<br>
+                Contribuer à des projets innovants et durables
+            </p>
+        </div>
+    </div>
+
+    <div class="slide-number">30</div>
+</div>
+
+<!-- =========================== -->
+<!-- SLIDE 31 - REMERCIEMENTS -->
+<!-- =========================== -->
+<div class="slide title-slide">
+    <div class="logo-container" style="margin-bottom: 15px; width: 100px; height: 100px;">
+        <img src="Capture d'écran 2026-01-06 134706.png" alt="Logo EcoRide - Covoiturage Écologique">
+    </div>
+
+    <h1 style="font-size: 44px; margin-bottom: 15px; color: #2ECC71;">Merci de votre attention</h1>
+    <h2 style="margin-top: 0; font-weight: 400; font-size: 24px; color: #2c3e50; margin-bottom: 30px;">Je reste à votre disposition pour vos questions</h2>
+
+    <div style="margin-top: 30px; font-size: 17px; line-height: 1.7;">
+        <p style="margin: 6px 0;"><strong>🌐 Application :</strong> https://ecoride-om7c.onrender.com</p>
+        <p style="margin: 6px 0;"><strong>💻 GitHub :</strong> https://github.com/Isydoria/EcoRide</p>
+        <p style="margin: 6px 0;"><strong>📧 Email :</strong> debaquenathanaelle@gmail.com</p>
+        <p style="margin: 6px 0;"><strong>💼 LinkedIn :</strong> www.linkedin.com/in/ndebaque</p>
+    </div>
+
+    <div style="margin-top: 20px; font-size: 15px; opacity: 0.85;">
+        <p style="margin: 4px 0; font-weight: 500;">EcoRide - Plateforme de Covoiturage Écologique</p>
+        <p style="margin: 4px 0;">Titre Professionnel RNCP37674 - Développeur Web et Web Mobile</p>
+    </div>
+</div>
+
+<script>
+// Script pour impression ou export PDF
+window.onload = function() {
+    console.log("Présentation EcoRide - 31 slides chargées");
+    console.log("Pour exporter en PDF : Fichier → Imprimer → Enregistrer en PDF");
+    console.log("Durée totale : 35 minutes");
+};
+</script>
+
+</body>
+</html>
