@@ -138,7 +138,7 @@ $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 // ✅ ÉTAPE 7 : Insérer l'utilisateur dans la base
 try {
     if ($isPostgreSQL) {
-        // PostgreSQL
+        // PostgreSQL (Render - colonnes: credits, created_at)
         $stmt = $pdo->prepare("
             INSERT INTO utilisateur (
                 pseudo,
@@ -147,7 +147,7 @@ try {
                 credits,
                 role,
                 statut,
-                date_inscription
+                created_at
             ) VALUES (
                 :pseudo,
                 :email,
